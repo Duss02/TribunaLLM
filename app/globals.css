@@ -1,1 +1,199 @@
 @import "tailwindcss";
+
+:root {
+  --bg: #f8f7f3;
+  --fg: #1b1b18;
+  --muted: #6d6c64;
+  --line: #deddd5;
+  --accent: #1d4ed8;
+  --supported: #15803d;
+  --contradicted: #c62828;
+  --unsupported: #b45309;
+  --v-anthropic: #2a78d6;
+  --v-openai: #eb6834;
+  --v-google: #1baf7a;
+  --v-deepseek: #eda100;
+  --v-moonshot: #e87ba4;
+  --v-alibaba: #008300;
+  --v-mistral: #4a3aa7;
+  --v-meta: #e34948;
+  --v-other: #8a897f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131311;
+    --fg: #ecebe4;
+    --muted: #9b9a90;
+    --line: #2d2d29;
+    --accent: #6c93ff;
+    --supported: #4ade80;
+    --contradicted: #ff6b66;
+    --unsupported: #f0b24a;
+    --v-anthropic: #3987e5;
+    --v-openai: #d95926;
+    --v-google: #199e70;
+    --v-deepseek: #c98500;
+    --v-moonshot: #d55181;
+    --v-alibaba: #008300;
+    --v-mistral: #9085e9;
+    --v-meta: #e66767;
+    --v-other: #7b7a72;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-supported: var(--supported);
+  --color-contradicted: var(--contradicted);
+  --color-unsupported: var(--unsupported);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+select,
+button,
+input {
+  font: inherit;
+}
+
+/* A sentence is restyled in place when its verdict arrives, so it stays one element. */
+.sentence {
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: 0 60%;
+  background-size: 0% 1.5px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-size 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.sentence[data-status="pending"] {
+  animation: pending 1.4s ease-in-out infinite;
+}
+
+.sentence[data-status="supported"] {
+  text-decoration: underline solid var(--supported);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.sentence[data-status="uncertain"] {
+  text-decoration: underline dotted var(--muted);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.sentence[data-status="opinion"] {
+  font-style: italic;
+}
+
+.sentence[data-status="contradicted"],
+.sentence[data-status="unsupported"] {
+  color: var(--muted);
+  background-size: 100% 1.5px;
+}
+
+.sentence[data-status="contradicted"] {
+  background-image: linear-gradient(var(--contradicted), var(--contradicted));
+}
+
+.sentence[data-status="unsupported"] {
+  background-image: linear-gradient(var(--unsupported), var(--unsupported));
+}
+
+/* Fixed so the column's scroll area cannot clip it; Sentence sets left and top. */
+.passage {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  width: min(22rem, 80vw);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.8125rem;
+  font-style: normal;
+  line-height: 1.45;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+}
+
+.sentence:hover > .passage,
+.sentence:focus > .passage {
+  display: block;
+}
+
+[data-demo="true"] .passage {
+  display: none !important;
+}
+
+.tip {
+  display: none;
+}
+
+.group:hover > .tip,
+.group:focus > .tip {
+  display: block;
+}
+
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--fg);
+  animation: blink 1s steps(2, start) infinite;
+}
+
+.flash {
+  animation: flash 1100ms ease-out;
+}
+
+@keyframes pending {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@keyframes flash {
+  from {
+    box-shadow: 0 0 0 3px var(--contradicted);
+  }
+  to {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sentence {
+    transition: none;
+  }
+  .sentence[data-status="pending"],
+  .caret::after,
+  .flash {
+    animation: none;
+  }
+}
