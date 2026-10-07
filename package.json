@@ -1,0 +1,43 @@
+{
+  "name": "retracted",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "models": "tsx --env-file-if-exists=.env.local scripts/models.ts",
+    "debate:cli": "tsx --env-file-if-exists=.env.local scripts/debate-cli.ts",
+    "tournament": "tsx --env-file-if-exists=.env.local scripts/tournament.ts",
+    "leaderboard:build": "tsx scripts/leaderboard-build.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.74",
+    "@ai-sdk/google": "^4.0.90",
+    "@ai-sdk/openai": "^4.0.86",
+    "@ai-sdk/openai-compatible": "^3.0.65",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "ai": "^7.0.130",
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
