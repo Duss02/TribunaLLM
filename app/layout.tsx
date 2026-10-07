@@ -14,9 +14,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" className="font-semibold tracking-wide">
             retracted
           </Link>
-          <Link href="/leaderboard" className="text-muted hover:text-fg">
-            Leaderboard
-          </Link>
+          <span className="flex gap-5">
+            <Link href="/leaderboard" className="text-muted hover:text-fg">
+              Leaderboard
+            </Link>
+            <Link href="/settings" className="text-muted hover:text-fg">
+              Settings
+            </Link>
+          </span>
         </nav>
         {children}
       </body>

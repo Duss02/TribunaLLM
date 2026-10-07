@@ -54,6 +54,17 @@ Choices the brief left open, and why. Where this repository departs from the bri
 - On narrow screens the judge panel comes first and the debaters stack below it.
 - The only query parameters are `auto`, `pack`, `pro` and `con`, as the brief lists. Demo mode is a checkbox.
 
+## Settings page
+
+The brief said keys are read on the server only and never written to disk. A page that remembers a user's keys has to put them somewhere, so this is a deliberate change, made at the author's request. The options were: write them to `.env.local` from the page, hold them in the server's memory, or keep them in the browser.
+
+- Keys are kept in the browser's `localStorage` under one entry and sent in the body of each `/api/debate` and `/api/setup` request, never in a URL. This keeps the "nothing secret on the server's disk" property, works for a hosted instance where every visitor brings their own keys, and survives a restart of the server. Writing `.env.local` from a web page would make any request to the app able to overwrite credentials on disk, and server memory would be shared by everyone who reaches the server and lost on restart.
+- On the server a request's keys travel in an `AsyncLocalStorage` scope (`lib/credentials.ts`). `getKey` returns the request's key first and the environment's second, per variable. Nothing is assigned to `process.env`, so concurrent requests cannot see each other's keys; tests run 40 interleaved calls and two simultaneous debates to check it.
+- Model lists that sit behind a key (the direct providers) are cached per key, so one visitor's accepted key cannot vouch for another's rejected one. Gateway and OpenRouter lists are public and cached once.
+- The Settings page shows only the last four characters of a saved key, never the whole value, and `/api/setup` returns availability, never keys.
+- The command-line tools do not read the browser, so they still need `.env.local`.
+- If the browser blocks storage the page says so and the app works from `.env.local`.
+
 ## Evidence packs
 
 The ten packs were written by research agents that were told to verify each figure against a primary or reputable source on the web and to leave out anything they could not confirm. They are summaries released as CC0-1.0, and their `source` field lists what was used. No domain expert has reviewed them. What the agents reported, so a reviewer knows where to look first:

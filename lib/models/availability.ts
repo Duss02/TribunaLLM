@@ -1,4 +1,6 @@
+import { getKey } from "@/lib/credentials";
 import { isMockMode } from "@/lib/mock-mode";
+import { hashString } from "@/lib/random";
 import { REGISTRY, type RegistryEntry } from "./registry";
 import { ListError, type RouteName, type Target, targetsFor } from "./routes";
 
@@ -16,17 +18,19 @@ const LIST_TTL_MS = 10 * 60 * 1000;
 const lists = new Map<string, { at: number; ids: Promise<Set<string>> }>();
 
 function modelList(target: Target, apiKey: string): Promise<Set<string>> {
-  const cached = lists.get(target.listName);
+  // A list behind a key is cached per key, so one visitor's key never vouches for another's.
+  const cacheKey = target.route === "direct" ? `${target.listName}:${hashString(apiKey)}` : target.listName;
+  const cached = lists.get(cacheKey);
   if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.ids;
   const ids = target.listIds(apiKey);
-  lists.set(target.listName, { at: Date.now(), ids });
+  lists.set(cacheKey, { at: Date.now(), ids });
   // A failed fetch must not be served from the cache.
-  ids.catch(() => lists.delete(target.listName));
+  ids.catch(() => lists.delete(cacheKey));
   return ids;
 }
 
 export function keyFor(target: Target): string | undefined {
-  return process.env[target.keyVariable]?.trim() || undefined;
+  return getKey(target.keyVariable);
 }
 
 export async function modelStatus(entry: RegistryEntry): Promise<ModelStatus> {

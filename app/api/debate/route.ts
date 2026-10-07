@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { encodeEvent } from "@/lib/debate/sse";
+import { withKeys } from "@/lib/credentials";
 import { runDebate } from "@/lib/debate/orchestrator";
 import { loadPack } from "@/lib/debate/packs";
+import { encodeEvent } from "@/lib/debate/sse";
 import { judgeSetupProblem } from "@/lib/jev/judge";
+import { keysSchema } from "@/lib/keys";
 import { resolveDebater } from "@/lib/models/debater";
 
 export const runtime = "nodejs";
@@ -16,6 +18,8 @@ const request = z.object({
   rounds: z.number().int().min(1).max(5),
   maxWords: z.number().int().min(30).max(250),
   strictMode: z.boolean(),
+  /** Keys saved in the visitor's browser. They are used for this debate only. */
+  keys: keysSchema.optional(),
 });
 
 const refuse = (message: string, status = 400) => Response.json({ error: message }, { status });
@@ -23,7 +27,15 @@ const refuse = (message: string, status = 400) => Response.json({ error: message
 export async function POST(incoming: Request): Promise<Response> {
   const parsed = request.safeParse(await incoming.json().catch(() => null));
   if (!parsed.success) return refuse("The request body is not a valid debate configuration.");
-  const { pack: slug, pro: proKey, con: conKey, rounds, maxWords, strictMode } = parsed.data;
+  const { keys, ...settings } = parsed.data;
+  return withKeys(keys ?? {}, () => startDebate(settings, incoming.signal));
+}
+
+async function startDebate(
+  settings: Omit<z.infer<typeof request>, "keys">,
+  clientGone: AbortSignal,
+): Promise<Response> {
+  const { pack: slug, pro: proKey, con: conKey, rounds, maxWords, strictMode } = settings;
 
   const problem = judgeSetupProblem();
   if (problem) return refuse(problem, 412);
@@ -41,7 +53,7 @@ export async function POST(incoming: Request): Promise<Response> {
   }
 
   const stop = new AbortController();
-  incoming.signal.addEventListener("abort", () => stop.abort());
+  clientGone.addEventListener("abort", () => stop.abort());
   const encoder = new TextEncoder();
 
   const body = new ReadableStream<Uint8Array>({

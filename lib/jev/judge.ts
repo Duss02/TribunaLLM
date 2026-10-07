@@ -1,4 +1,5 @@
 import { APIError, type EntryType, type Questions, TypeSafeClient } from "@typesafe-ai/sdk";
+import { getKey } from "@/lib/credentials";
 import { MissingKeyError } from "@/lib/errors";
 import { isMockMode } from "@/lib/mock-mode";
 import { createLimiter } from "./limiter";
@@ -30,8 +31,8 @@ export function judgeModelId(): string {
 
 /** Why the judge cannot run, or null when it can. Says which variable to set. */
 export function judgeSetupProblem(): string | null {
-  if (isMockMode() || process.env.TYPESAFE_API_KEY) return null;
-  return "TYPESAFE_API_KEY is not set. Get a key at https://api.typesafe.ai and put it in .env.local, or run with JEV_MOCK=1.";
+  if (isMockMode() || getKey("TYPESAFE_API_KEY")) return null;
+  return "TYPESAFE_API_KEY is not set. Get a key at https://api.typesafe.ai and add it on the Settings page or in .env.local, or run with JEV_MOCK=1.";
 }
 
 /** A rejected or missing key will fail every call, so it ends the debate instead of leaving sentences unjudged. */
@@ -43,7 +44,7 @@ export function isFatalJudgeError(error: unknown): boolean {
 }
 
 function createClient(): TypeSafeClient {
-  const apiKey = process.env.TYPESAFE_API_KEY;
+  const apiKey = getKey("TYPESAFE_API_KEY");
   if (!apiKey) {
     throw new MissingKeyError(
       "TYPESAFE_API_KEY",

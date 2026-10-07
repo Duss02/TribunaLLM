@@ -15,7 +15,7 @@ pnpm install
 cp .env.example .env.local
 ```
 
-Put these in `.env.local`:
+Put these in `.env.local`, or paste them on the Settings page (`/settings`) once the app is running:
 
 - `TYPESAFE_API_KEY` for the judge, from https://api.typesafe.ai.
 - One route to the debaters: `AI_GATEWAY_API_KEY` (one key covers the roster), or `OPENROUTER_API_KEY`, or any of the direct provider keys listed in `.env.example`.
@@ -27,7 +27,9 @@ pnpm dev      # http://localhost:3000
 
 With no keys at all, `JEV_MOCK=1 pnpm dev` runs a complete debate. The judge is then a deterministic fake and the debaters are scripts that quote the evidence pack, so the verdicts show how the app behaves, not how any model performs. The page and the CLI say which variable is missing when something is not configured.
 
-Keys are read on the server only. They are not sent to the browser, logged or written to disk, and the app has no telemetry. There is no authentication or rate limit on `/api/debate`, so do not expose a running instance to people you do not trust with your keys.
+Where keys live. Keys in `.env.local` are read on the server and never sent to the browser. Keys saved on the Settings page stay in your browser's `localStorage` and are sent with each request over the same origin; the server uses them for that request only and does not store, log or share them, and one visitor's keys are never used for another's requests. A saved key wins over `.env.local` for the same variable, and the command-line tools (`pnpm models`, `pnpm debate:cli`, `pnpm tournament`) read only `.env.local`. Anything that can run script on the page, and anyone with access to your browser profile, can read saved keys, so use keys you can revoke. The app has no telemetry.
+
+There is no authentication or rate limit on `/api/debate`. If you host the app, leave the provider keys out of the server's environment so that visitors bring their own through the Settings page; a server that has keys in its environment lets anyone who can reach it spend them.
 
 To record a debate, open `/?auto=1&pack=<slug>&pro=<key>&con=<key>`. It starts on load, and the Demo mode checkbox enlarges the counters and hides the log.
 

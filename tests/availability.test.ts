@@ -113,4 +113,22 @@ describe("modelStatus", () => {
     vi.resetModules();
     expect(await statusOf("kimi-k3")).toMatchObject({ status: "available", route: "scripted" });
   });
+
+  it("does not let one visitor's accepted key vouch for another's rejected one", async () => {
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) =>
+      new Headers(init.headers).get("x-api-key") === "good"
+        ? listOf("claude-opus-5-5")
+        : new Response("no", { status: 401 }),
+    );
+    const { modelStatus } = await import("@/lib/models/availability");
+    const { findEntry } = await import("@/lib/models/registry");
+    const { withKeys } = await import("@/lib/credentials");
+    const entry = findEntry("claude-opus-5.5")!;
+
+    const accepted = await withKeys({ ANTHROPIC_API_KEY: "good" }, () => modelStatus(entry));
+    const rejected = await withKeys({ ANTHROPIC_API_KEY: "bad" }, () => modelStatus(entry));
+    expect(accepted.status).toBe("available");
+    expect(rejected.status).toBe("missing-key");
+    expect(rejected.detail).toContain("ANTHROPIC_API_KEY was rejected");
+  });
 });

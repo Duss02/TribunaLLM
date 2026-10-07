@@ -1,24 +1,34 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { streamDebate } from "@/lib/debate/client";
+import { fetchSetup, streamDebate } from "@/lib/debate/client";
 import { initialState, reduceArena } from "@/lib/debate/view";
+import { readKeys } from "@/lib/keys-store";
+import type { SetupStatus } from "@/lib/setup-status";
 import { Column } from "./column";
-import { type ControlValues, Controls, type ModelOption, type PackOption } from "./controls";
+import { type ControlValues, Controls, type PackOption } from "./controls";
 import { FinalCard } from "./final-card";
 import { JudgePanel } from "./judge-panel";
 
 interface Props {
   packs: PackOption[];
-  models: ModelOption[];
-  problems: string[];
+  /** What the server's own environment makes possible. Saved keys are added on top after load. */
+  setup: SetupStatus;
   judge: { label: string; mock: boolean };
-  initial: { auto: boolean; pack: string; pro: string; con: string };
+  initial: {
+    auto: boolean;
+    pack: string;
+    pro: string;
+    con: string;
+    /** The models the address asked for, which only the saved keys may make available. */
+    wanted: { pro?: string; con?: string };
+  };
 }
 
 const MAX_WORDS = 110;
 
-export function Arena({ packs, models, problems, judge, initial }: Props) {
+export function Arena({ packs, setup: serverSetup, judge, initial }: Props) {
   const [values, setValues] = useState<ControlValues>({
     pack: initial.pack,
     pro: initial.pro,
@@ -28,13 +38,51 @@ export function Arena({ packs, models, problems, judge, initial }: Props) {
     demoMode: false,
   });
   const [state, dispatch] = useReducer(reduceArena, initialState);
+  const [setup, setSetup] = useState(serverSetup);
+  const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
   const stop = useRef<AbortController | null>(null);
   const autostarted = useRef(false);
+  const wanted = useRef(initial.wanted);
 
   const running = state.status === "running";
   const pack = packs.find((candidate) => candidate.slug === values.pack);
+  const models = setup.models.filter((model) => model.status === "available");
+  const problems = checkError ? [...setup.problems, checkError] : setup.problems;
   const label = (key: string) => models.find((model) => model.key === key)?.label ?? key;
   const judgeLabel = judge.mock ? "Jev (mock)" : judge.label;
+  const chosen = models.some((m) => m.key === values.pro) && models.some((m) => m.key === values.con);
+
+  useEffect(() => {
+    const keys = readKeys();
+    if (Object.keys(keys).length === 0) return;
+    const controller = new AbortController();
+    setChecking(true);
+    fetchSetup(keys, controller.signal)
+      .then(setSetup)
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setCheckError(error instanceof Error ? error.message : "The saved keys could not be checked.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setChecking(false);
+      });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const available = setup.models.filter((model) => model.status === "available");
+    const choose = (current: string, asked: string | undefined, fallback: number) =>
+      [asked, current].find((key) => available.some((model) => model.key === key)) ??
+      available[fallback]?.key ??
+      "";
+    setValues((v) => {
+      const pro = choose(v.pro, wanted.current.pro, 0);
+      const con = choose(v.con, wanted.current.con, 1);
+      return pro === v.pro && con === v.con ? v : { ...v, pro, con };
+    });
+  }, [setup]);
 
   const start = useCallback(async () => {
     stop.current?.abort();
@@ -49,6 +97,7 @@ export function Arena({ packs, models, problems, judge, initial }: Props) {
         rounds: values.rounds,
         maxWords: MAX_WORDS,
         strictMode: values.strictMode,
+        keys: readKeys(),
       };
       for await (const event of streamDebate(request, controller.signal)) dispatch(event);
     } catch (error) {
@@ -66,12 +115,13 @@ export function Arena({ packs, models, problems, judge, initial }: Props) {
     dispatch({ type: "error", message: "Stopped." });
   }, []);
 
+  const ready = !checking && problems.length === 0 && chosen;
   useEffect(() => {
-    if (initial.auto && problems.length === 0 && !autostarted.current) {
+    if (initial.auto && ready && !autostarted.current) {
       autostarted.current = true;
       void start();
     }
-  }, [initial.auto, problems.length, start]);
+  }, [initial.auto, ready, start]);
 
   const turnsOf = (side: "PRO" | "CON") => state.turns.filter((turn) => turn.side === side);
 
@@ -87,19 +137,30 @@ export function Arena({ packs, models, problems, judge, initial }: Props) {
           models={models}
           values={values}
           running={running}
-          blocked={problems.length > 0 || !pack}
-          onChange={setValues}
+          blocked={problems.length > 0 || !pack || checking || !chosen}
+          onChange={(next) => {
+            wanted.current = {};
+            setValues(next);
+          }}
           onStart={() => void start()}
           onStop={halt}
         />
       </div>
 
+      {checking && <p className="mt-5 text-sm text-muted">Checking the keys saved in this browser...</p>}
       {problems.length > 0 && (
-        <ul role="alert" className="mt-5 space-y-1 border-l-2 border-unsupported pl-3 text-sm">
-          {problems.map((problem) => (
-            <li key={problem}>{problem}</li>
-          ))}
-        </ul>
+        <div role="alert" className="mt-5 border-l-2 border-unsupported pl-3 text-sm">
+          <ul className="space-y-1">
+            {problems.map((problem) => (
+              <li key={problem}>{problem}</li>
+            ))}
+          </ul>
+          <p className="mt-2">
+            <Link href="/settings" className="underline underline-offset-2">
+              Open settings
+            </Link>
+          </p>
+        </div>
       )}
       {state.error && (
         <p role="alert" className="mt-5 border-l-2 border-contradicted pl-3 text-sm">

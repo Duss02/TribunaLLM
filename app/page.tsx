@@ -1,8 +1,8 @@
 import { Arena } from "@/components/arena/arena";
 import { listPacks } from "@/lib/debate/packs";
-import { DEFAULT_JUDGE_MODEL, judgeModelId, judgeSetupProblem } from "@/lib/jev/judge";
+import { DEFAULT_JUDGE_MODEL, judgeModelId } from "@/lib/jev/judge";
 import { isMockMode } from "@/lib/mock-mode";
-import { NO_MODELS_HINT, availableModels } from "@/lib/models/pick";
+import { describeSetup } from "@/lib/setup";
 
 export const dynamic = "force-dynamic";
 
@@ -18,13 +18,8 @@ function judgeLabel(model: string): string {
 
 export default async function Page({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
-  const [packs, available] = await Promise.all([listPacks(), availableModels()]);
-
-  const models = available.map(({ entry }) => ({ key: entry.key, label: entry.label }));
-  const problems = [
-    judgeSetupProblem(),
-    models.length < 2 ? `Need two available models, found ${models.length}. ${NO_MODELS_HINT}` : null,
-  ].filter((problem): problem is string => problem !== null);
+  const [packs, setup] = await Promise.all([listPacks(), describeSetup()]);
+  const available = setup.models.filter((model) => model.status === "available");
 
   const pick = (wanted: string | undefined, options: { key: string }[], fallback: number) =>
     options.find((option) => option.key === wanted)?.key ?? options[fallback]?.key ?? options[0]?.key ?? "";
@@ -33,14 +28,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Par
   return (
     <Arena
       packs={packs.map(({ slug, title, motion }) => ({ slug, title, motion }))}
-      models={models}
-      problems={problems}
+      setup={setup}
       judge={{ label: judgeLabel(judgeModelId()), mock: isMockMode() }}
       initial={{
         auto: first(params.auto) === "1",
         pack: pick(first(params.pack), packOptions, 0),
-        pro: pick(first(params.pro), models, 0),
-        con: pick(first(params.con), models, 1),
+        pro: pick(first(params.pro), available, 0),
+        con: pick(first(params.con), available, 1),
+        wanted: { pro: first(params.pro), con: first(params.con) },
       }}
     />
   );

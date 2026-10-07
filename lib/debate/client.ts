@@ -1,3 +1,5 @@
+import type { SavedKeys } from "@/lib/keys";
+import { type SetupStatus, setupStatus } from "@/lib/setup-status";
 import type { DebateEvent } from "./events";
 import { createEventParser } from "./sse";
 
@@ -8,6 +10,8 @@ export interface DebateRequest {
   rounds: number;
   maxWords: number;
   strictMode: boolean;
+  /** Keys saved in this browser. The server uses them for this debate only. */
+  keys?: SavedKeys;
 }
 
 /** Posts the request and yields events as the server sends them. Throws the server's message on a refusal. */
@@ -33,4 +37,16 @@ export async function* streamDebate(
     if (done) return;
     yield* parse(value);
   }
+}
+
+/** Asks the server what the given keys, on top of its own environment, make possible. */
+export async function fetchSetup(keys: SavedKeys, signal: AbortSignal): Promise<SetupStatus> {
+  const response = await fetch("/api/setup", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ keys }),
+    signal,
+  });
+  if (!response.ok) throw new Error(`The server could not check the saved keys (HTTP ${response.status}).`);
+  return setupStatus.parse(await response.json());
 }
