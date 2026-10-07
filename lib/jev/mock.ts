@@ -11,7 +11,7 @@ import type {
 const CITATION = /\[P\d+\]/g;
 const NUMBER = /\d[\d,]*(?:\.\d+)?/g;
 
-export function numbersIn(text: string): string[] {
+function numbersIn(text: string): string[] {
   return (text.replace(CITATION, "").match(NUMBER) ?? []).map((n) => n.replaceAll(",", ""));
 }
 
@@ -41,7 +41,7 @@ function fakeLatency(random: () => number): number {
   return 90 + Math.floor(random() * 180);
 }
 
-export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(signal.reason);
     const timer = setTimeout(resolve, ms);
@@ -112,7 +112,10 @@ export async function mockFinalAnswers(input: FinalInput): Promise<RawFinalAnswe
   const latencyMs = fakeLatency(random);
   await sleep(latencyMs, input.signal);
   const cited = (text: string) => text.match(CITATION)?.length ?? 0;
-  const lean = Math.max(-0.4, Math.min(0.4, (cited(input.transcriptPro) - cited(input.transcriptCon)) * 0.05));
+  const lean = Math.max(
+    -0.4,
+    Math.min(0.4, (cited(input.transcriptPro) - cited(input.transcriptCon)) * 0.05),
+  );
   const tie = 0.08 + 0.1 * random();
   const pro = (1 - tie) * (0.5 + lean + 0.2 * (random() - 0.5));
   return {

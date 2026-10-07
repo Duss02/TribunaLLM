@@ -36,9 +36,7 @@ export function turnQuestions(withRebuts: boolean) {
   };
   if (!withRebuts) return questions;
   return {
-    rebuts: noul(
-      "Does `turn` directly answer or undermine a specific point made in `opponentTurn`?",
-    ),
+    rebuts: noul("Does `turn` directly answer or undermine a specific point made in `opponentTurn`?"),
     ...questions,
   };
 }

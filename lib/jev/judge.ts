@@ -1,5 +1,6 @@
-import { type EntryType, type Questions, TypeSafeClient } from "@typesafe-ai/sdk";
+import { APIError, type EntryType, type Questions, TypeSafeClient } from "@typesafe-ai/sdk";
 import { MissingKeyError } from "@/lib/errors";
+import { isMockMode } from "@/lib/mock-mode";
 import { createLimiter } from "./limiter";
 import { mockFinalAnswers, mockSentenceAnswers, mockTurnAnswers } from "./mock";
 import { finalQuestions, sentenceQuestions, turnQuestions } from "./questions";
@@ -23,12 +24,22 @@ const INPUT_USD_PER_TOKEN = 0.042 / 1_000_000;
 // Jev allows 80 req/s; eight in flight keeps a long debate well under it.
 const limit = createLimiter(8);
 
-export function isMock(): boolean {
-  return process.env.JEV_MOCK === "1";
+export function judgeModelId(): string {
+  return isMockMode() ? "jev-mock" : process.env.TYPESAFE_MODEL || DEFAULT_JUDGE_MODEL;
 }
 
-export function judgeModelId(): string {
-  return isMock() ? "jev-mock" : process.env.TYPESAFE_MODEL || DEFAULT_JUDGE_MODEL;
+/** Why the judge cannot run, or null when it can. Says which variable to set. */
+export function judgeSetupProblem(): string | null {
+  if (isMockMode() || process.env.TYPESAFE_API_KEY) return null;
+  return "TYPESAFE_API_KEY is not set. Get a key at https://api.typesafe.ai and put it in .env.local, or run with JEV_MOCK=1.";
+}
+
+/** A rejected or missing key will fail every call, so it ends the debate instead of leaving sentences unjudged. */
+export function isFatalJudgeError(error: unknown): boolean {
+  return (
+    error instanceof MissingKeyError ||
+    (error instanceof APIError && (error.status === 401 || error.status === 403))
+  );
 }
 
 function createClient(): TypeSafeClient {
@@ -72,7 +83,7 @@ function stats(raw: { latencyMs: number; inputTokens: number }): CallStats {
 }
 
 async function sentenceAnswers(input: SentenceInput): Promise<RawSentenceAnswers> {
-  if (isMock()) return mockSentenceAnswers(input);
+  if (isMockMode()) return mockSentenceAnswers(input);
   const state = {
     motion: input.motion,
     side: input.side,
@@ -109,7 +120,7 @@ export async function judgeSentence(input: SentenceInput): Promise<SentenceJudgm
 }
 
 async function turnAnswers(input: TurnInput): Promise<RawTurnAnswers> {
-  if (isMock()) return mockTurnAnswers(input);
+  if (isMockMode()) return mockTurnAnswers(input);
   const state = {
     motion: input.motion,
     side: input.side,
@@ -118,11 +129,7 @@ async function turnAnswers(input: TurnInput): Promise<RawTurnAnswers> {
     evidence: input.evidence.text,
   };
   const withRebuts = input.opponentTurn !== null;
-  const { answers, latencyMs, inputTokens } = await ask(
-    state,
-    turnQuestions(withRebuts),
-    input.signal,
-  );
+  const { answers, latencyMs, inputTokens } = await ask(state, turnQuestions(withRebuts), input.signal);
   return {
     rebuts: withRebuts && "rebuts" in answers ? answers.rebuts.noul : null,
     onMotion: answers.on_motion.noul,
@@ -143,7 +150,7 @@ export async function judgeTurn(input: TurnInput): Promise<TurnJudgment> {
 }
 
 async function finalAnswers(input: FinalInput): Promise<RawFinalAnswers> {
-  if (isMock()) return mockFinalAnswers(input);
+  if (isMockMode()) return mockFinalAnswers(input);
   const state = {
     motion: input.motion,
     transcriptPro: input.transcriptPro,

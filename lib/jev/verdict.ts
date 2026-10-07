@@ -2,6 +2,9 @@ import { THRESHOLDS } from "@/lib/scoring/rules";
 
 export type Verdict = "opinion" | "contradicted" | "supported" | "unsupported" | "uncertain";
 
+/** A verdict, or `unjudged` when the Jev call for that sentence failed. */
+export type JudgedVerdict = Verdict | "unjudged";
+
 export interface SentenceProbabilities {
   isClaim: number;
   supported: number;
@@ -16,6 +19,6 @@ export function verdictFor({ isClaim, supported, contradicts }: SentenceProbabil
   return "uncertain";
 }
 
-export function isRetracted(verdict: Verdict): boolean {
+export function isRetracted(verdict: JudgedVerdict): boolean {
   return verdict === "contradicted" || verdict === "unsupported";
 }

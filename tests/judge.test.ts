@@ -31,7 +31,11 @@ function stubJev(answers: Record<string, unknown>, inputTokens = 1000): Captured
       body: JSON.parse(String(init.body)),
     });
     return new Response(
-      JSON.stringify({ model: "jev-1.13.0", answers, usage: { input_tokens: inputTokens, output_tokens: 0 } }),
+      JSON.stringify({
+        model: "jev-1.13.0",
+        answers,
+        usage: { input_tokens: inputTokens, output_tokens: 0 },
+      }),
       { status: 200, headers: { "content-type": "application/json" } },
     );
   });
@@ -182,7 +186,12 @@ describe("JEV_MOCK", () => {
   });
 
   it("gives the same verdict for the same sentence every time", async () => {
-    const input = { motion: "m", side: "PRO", sentence: "Fares rose 8 percent in 2024 [P01].", evidence } as const;
+    const input = {
+      motion: "m",
+      side: "PRO",
+      sentence: "Fares rose 8 percent in 2024 [P01].",
+      evidence,
+    } as const;
     const first = await judgeSentence(input);
     const second = await judgeSentence(input);
     expect(second).toEqual(first);
