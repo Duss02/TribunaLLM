@@ -1,0 +1,6 @@
+.next
+node_modules
+.scratch
+packs
+bench
+pnpm-lock.yaml

@@ -16,7 +16,8 @@
     "models": "tsx --env-file-if-exists=.env.local scripts/models.ts",
     "debate:cli": "tsx --env-file-if-exists=.env.local scripts/debate-cli.ts",
     "tournament": "tsx --env-file-if-exists=.env.local scripts/tournament.ts",
-    "leaderboard:build": "tsx scripts/leaderboard-build.ts"
+    "leaderboard:build": "tsx scripts/leaderboard-build.ts",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.74",
@@ -35,6 +36,7 @@
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
