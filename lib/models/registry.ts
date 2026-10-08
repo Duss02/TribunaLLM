@@ -17,7 +17,8 @@ export type DirectProvider = "anthropic" | "openai" | "google" | "deepseek" | "m
 export interface RegistryEntry {
   key: string;
   label: string;
-  vendor: Vendor;
+  /** `unknown` for a model picked from a provider's full list rather than the roster. */
+  vendor: Vendor | "unknown";
   family: string;
   openWeights: boolean;
   /** The model rejects a temperature parameter, so it samples at its own default. */

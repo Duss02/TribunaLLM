@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createEventParser } from "@/lib/debate/sse";
 import type { DebateEvent } from "@/lib/debate/events";
 import { KEY_FIELDS } from "@/lib/keys";
+import { OPENROUTER, openRouterList, serve } from "./fakes";
 
 const post = (body: unknown) =>
   new Request("http://localhost/api", {
@@ -134,6 +135,30 @@ describe("POST /api/setup", () => {
     const { setup } = await routes();
     const response = await setup(post({ keys: { OPENROUTER_API_KEY: "or", TYPESAFE_API_KEY: "jev" } }));
     expect(((await response.json()) as { problems: string[] }).problems).toEqual([]);
+  });
+
+  it("lists the models a key unlocks beyond the roster, and counts them toward the two a debate needs", async () => {
+    const text = { architecture: { output_modalities: ["text"] } };
+    serve({
+      [OPENROUTER]: openRouterList(
+        { id: "meta-llama/llama-3.1-8b-instruct", name: "Llama 3.1 8B", ...text },
+        { id: "qwen/qwen3-14b", name: "Qwen3 14B", ...text },
+      ),
+    });
+    const { setup } = await routes();
+    const response = await setup(post({ keys: { OPENROUTER_API_KEY: "or", TYPESAFE_API_KEY: "jev" } }));
+    const status = (await response.json()) as {
+      problems: string[];
+      models: { status: string }[];
+      catalogue: { key: string; via: string }[];
+    };
+
+    expect(status.models.every((model) => model.status !== "available")).toBe(true);
+    expect(status.catalogue.map((model) => model.key).sort()).toEqual([
+      "openrouter:meta-llama/llama-3.1-8b-instruct",
+      "openrouter:qwen/qwen3-14b",
+    ]);
+    expect(status.problems).toEqual([]);
   });
 
   it("refuses a variable that is not a key and an empty body", async () => {

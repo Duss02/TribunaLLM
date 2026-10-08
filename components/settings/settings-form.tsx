@@ -187,13 +187,15 @@ function CheckResult({ check }: { check: Check }) {
     );
   }
 
-  const { problems, models } = check.status;
+  const { problems, models, catalogue, notes } = check.status;
   const available = models.filter((model) => model.status === "available");
   const unavailable = models.filter((model) => model.status !== "available");
   return (
     <div className="mt-3 space-y-2 text-sm" role="status">
       {problems.length === 0 ? (
-        <p className="text-supported">Ready: the judge and {available.length} models are available.</p>
+        <p className="text-supported">
+          Ready: the judge and {available.length + catalogue.length} models are available.
+        </p>
       ) : (
         <ul className="space-y-1 border-l-2 border-unsupported pl-3">
           {problems.map((problem) => (
@@ -202,9 +204,18 @@ function CheckResult({ check }: { check: Check }) {
         </ul>
       )}
       <p className="text-muted">
-        {available.length} of {models.length} models available with the saved keys and the server's
+        {available.length} of {models.length} roster models available with the saved keys and the server's
         environment.
+        {catalogue.length > 0 &&
+          ` ${catalogue.length} more models from your keys can be found by searching the PRO and CON menus.`}
       </p>
+      {notes.length > 0 && (
+        <ul className="space-y-1 border-l-2 border-unsupported pl-3">
+          {notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      )}
       {unavailable.length > 0 && (
         <details>
           <summary className="cursor-pointer text-muted">Why {unavailable.length} are not available</summary>

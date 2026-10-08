@@ -60,7 +60,10 @@ const wanted = values.models
 const chosen = wanted ?? statuses.filter((s) => s.status === "available").map((s) => s.entry.key);
 for (const key of chosen) {
   const status = statuses.find((s) => s.entry.key === key);
-  if (!status) stop(`Unknown model "${key}". Run pnpm models to list the registry keys.`);
+  if (!status)
+    stop(
+      `Unknown model "${key}". The tournament runs registry models only; run pnpm models to list their keys.`,
+    );
   if (status.status !== "available") stop(`${key} is ${status.status}: ${status.detail}.`);
 }
 if (chosen.length < 2)

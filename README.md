@@ -25,6 +25,8 @@ pnpm models   # which of the 16 registry models your keys can reach
 pnpm dev      # http://localhost:3000
 ```
 
+`pnpm models` lists the 16-model roster. The PRO and CON menus in the app reach more than that: every other chat model your keys unlock, which is a few hundred through an AI Gateway or OpenRouter key and a provider's whole list through its own key. The menu shows the roster and a count of the rest until you type; then it searches names, makers and routes (`haiku`, `llama 3`, `gpt5`). A model outside the roster is named `channel:id`, such as `gateway:anthropic/claude-3-haiku`, `openrouter:meta-llama/llama-3.1-8b-instruct` or `anthropic:claude-3-haiku-20240307`. The same names work for `pnpm debate:cli --pro` and `--con` and for `?pro=` and `?con=` in the address. The tournament runs roster models only, because the leaderboard relies on what the roster records and checks about each model.
+
 With no keys at all, `JEV_MOCK=1 pnpm dev` runs a complete debate. The judge is then a deterministic fake and the debaters are scripts that quote the evidence pack, so the verdicts show how the app behaves, not how any model performs. The page and the CLI say which variable is missing when something is not configured.
 
 Where keys live. Keys in `.env.local` are read on the server and never sent to the browser. Keys saved on the Settings page stay in your browser's `localStorage` and are sent with each request over the same origin; the server uses them for that request only and does not store, log or share them, and one visitor's keys are never used for another's requests. A saved key wins over `.env.local` for the same variable, and the command-line tools (`pnpm models`, `pnpm debate:cli`, `pnpm tournament`) read only `.env.local`. Anything that can run script on the page, and anyone with access to your browser profile, can read saved keys, so use keys you can revoke. The app has no telemetry.
@@ -101,7 +103,7 @@ Opinions are never struck. The project makes a claim about unsupported facts, an
 
 The band from 0.35 to 0.7 is left alone on purpose. A sentence there is one the judge cannot place, and a retraction needs confidence, so it is neither struck nor scored. This is the accept-when-confident, escalate-when-unsure idea from the JEV-as-a-Judge paper, with "escalate" meaning "do not punish".
 
-Strict mode (on in the arena, always off in the tournament): when a retraction arrives for the turn that is still streaming, the generation is aborted, everything after the retracted sentence is dropped, and the turn restarts with a note quoting the retracted sentence. At most two restarts per turn, and each shows as a rewind in the judge panel.
+Strict mode (on in the arena, always off in the tournament, where a model that can correct itself mid-turn would be measured on its repairs and not on what it wrote first): when a retraction arrives for the turn that is still streaming, the generation is aborted, everything after the retracted sentence is dropped, and the turn restarts with a note quoting the retracted sentence. At most two restarts per turn, and each shows as a rewind in the judge panel.
 
 ## Scoring
 

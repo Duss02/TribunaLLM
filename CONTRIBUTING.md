@@ -54,6 +54,8 @@ Check it with `pnpm test packs`, then `pnpm debate:cli --pack <slug>`.
 
 ## Add a model
 
+You do not need to for trying one: the PRO and CON menus search every chat model your keys unlock. Add a model to the roster when the tournament should run it, or when it needs recorded facts such as open weights or a rejected temperature setting.
+
 Add one object to `REGISTRY` in `lib/models/registry.ts`:
 
 ```ts

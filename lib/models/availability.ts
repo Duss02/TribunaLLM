@@ -2,7 +2,7 @@ import { getKey } from "@/lib/credentials";
 import { isMockMode } from "@/lib/mock-mode";
 import { hashString } from "@/lib/random";
 import { REGISTRY, type RegistryEntry } from "./registry";
-import { ListError, type RouteName, type Target, targetsFor } from "./routes";
+import { type ListSource, type ListedModel, ListError, type RouteName, targetsFor } from "./routes";
 
 export type Status = "available" | "missing-key" | "unknown-id";
 
@@ -15,22 +15,29 @@ export interface ModelStatus {
 }
 
 const LIST_TTL_MS = 10 * 60 * 1000;
-const lists = new Map<string, { at: number; ids: Promise<Set<string>> }>();
 
-function modelList(target: Target, apiKey: string): Promise<Set<string>> {
-  // A list behind a key is cached per key, so one visitor's key never vouches for another's.
-  const cacheKey = target.route === "direct" ? `${target.listName}:${hashString(apiKey)}` : target.listName;
-  const cached = lists.get(cacheKey);
-  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.ids;
-  const ids = target.listIds(apiKey);
-  lists.set(cacheKey, { at: Date.now(), ids });
-  // A failed fetch must not be served from the cache.
-  ids.catch(() => lists.delete(cacheKey));
-  return ids;
+export interface ModelList {
+  models: ListedModel[];
+  ids: Set<string>;
 }
 
-export function keyFor(target: Target): string | undefined {
-  return getKey(target.keyVariable);
+const lists = new Map<string, { at: number; list: Promise<ModelList> }>();
+
+/** What a source lists, cached for ten minutes. Lists behind a key are cached per key. */
+export function modelList(source: ListSource, apiKey: string): Promise<ModelList> {
+  // One visitor's accepted key must never vouch for another's.
+  const cacheKey = source.route === "direct" ? `${source.listName}:${hashString(apiKey)}` : source.listName;
+  const cached = lists.get(cacheKey);
+  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.list;
+  const list = source.list(apiKey).then((models) => ({ models, ids: new Set(models.map((m) => m.id)) }));
+  lists.set(cacheKey, { at: Date.now(), list });
+  // A failed fetch must not be served from the cache.
+  list.catch(() => lists.delete(cacheKey));
+  return list;
+}
+
+export function keyFor(source: ListSource): string | undefined {
+  return getKey(source.keyVariable);
 }
 
 export async function modelStatus(entry: RegistryEntry): Promise<ModelStatus> {
@@ -46,7 +53,7 @@ export async function modelStatus(entry: RegistryEntry): Promise<ModelStatus> {
       continue;
     }
     try {
-      const ids = await modelList(target, apiKey);
+      const { ids } = await modelList(target, apiKey);
       if (ids.has(target.id)) return { entry, status: "available", route: target.route, detail: target.id };
       unknown.push(`${target.id} is not in the ${target.route} model list`);
     } catch (error) {

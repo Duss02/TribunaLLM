@@ -1,5 +1,6 @@
 import { Arena } from "@/components/arena/arena";
 import { listPacks } from "@/lib/debate/packs";
+import { pickerOptions } from "@/lib/model-search";
 import { DEFAULT_JUDGE_MODEL, judgeModelId } from "@/lib/jev/judge";
 import { isMockMode } from "@/lib/mock-mode";
 import { describeSetup } from "@/lib/setup";
@@ -19,7 +20,7 @@ function judgeLabel(model: string): string {
 export default async function Page({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
   const [packs, setup] = await Promise.all([listPacks(), describeSetup()]);
-  const available = setup.models.filter((model) => model.status === "available");
+  const available = pickerOptions(setup);
 
   const pick = (wanted: string | undefined, options: { key: string }[], fallback: number) =>
     options.find((option) => option.key === wanted)?.key ?? options[fallback]?.key ?? options[0]?.key ?? "";

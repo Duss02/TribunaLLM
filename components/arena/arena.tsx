@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { fetchSetup, streamDebate } from "@/lib/debate/client";
 import { initialState, reduceArena } from "@/lib/debate/view";
 import { readKeys } from "@/lib/keys-store";
 import type { SetupStatus } from "@/lib/setup-status";
 import { Column } from "./column";
+import { pickerOptions } from "@/lib/model-search";
 import { type ControlValues, Controls, type PackOption } from "./controls";
 import { FinalCard } from "./final-card";
 import { JudgePanel } from "./judge-panel";
@@ -47,7 +48,7 @@ export function Arena({ packs, setup: serverSetup, judge, initial }: Props) {
 
   const running = state.status === "running";
   const pack = packs.find((candidate) => candidate.slug === values.pack);
-  const models = setup.models.filter((model) => model.status === "available");
+  const models = useMemo(() => pickerOptions(setup), [setup]);
   const problems = checkError ? [...setup.problems, checkError] : setup.problems;
   const label = (key: string) => models.find((model) => model.key === key)?.label ?? key;
   const judgeLabel = judge.mock ? "Jev (mock)" : judge.label;
@@ -72,7 +73,7 @@ export function Arena({ packs, setup: serverSetup, judge, initial }: Props) {
   }, []);
 
   useEffect(() => {
-    const available = setup.models.filter((model) => model.status === "available");
+    const available = pickerOptions(setup);
     const choose = (current: string, asked: string | undefined, fallback: number) =>
       [asked, current].find((key) => available.some((model) => model.key === key)) ??
       available[fallback]?.key ??

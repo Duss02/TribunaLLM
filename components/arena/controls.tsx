@@ -1,14 +1,12 @@
 "use client";
 
+import type { PickerOption } from "@/lib/model-search";
+import { ModelPicker } from "./model-picker";
+
 export interface PackOption {
   slug: string;
   title: string;
   motion: string;
-}
-
-export interface ModelOption {
-  key: string;
-  label: string;
 }
 
 export interface ControlValues {
@@ -22,7 +20,7 @@ export interface ControlValues {
 
 interface Props {
   packs: PackOption[];
-  models: ModelOption[];
+  models: PickerOption[];
   values: ControlValues;
   running: boolean;
   blocked: boolean;
@@ -56,36 +54,20 @@ export function Controls({ packs, models, values, running, blocked, onChange, on
           ))}
         </select>
       </label>
-      <label className={`${field} min-w-40 flex-1`}>
-        PRO
-        <select
-          className={input}
-          value={values.pro}
-          disabled={running}
-          onChange={(e) => set("pro", e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.key} value={model.key}>
-              {model.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className={`${field} min-w-40 flex-1`}>
-        CON
-        <select
-          className={input}
-          value={values.con}
-          disabled={running}
-          onChange={(e) => set("con", e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.key} value={model.key}>
-              {model.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <ModelPicker
+        label="PRO"
+        options={models}
+        value={values.pro}
+        disabled={running}
+        onChange={(key) => set("pro", key)}
+      />
+      <ModelPicker
+        label="CON"
+        options={models}
+        value={values.con}
+        disabled={running}
+        onChange={(key) => set("con", key)}
+      />
       <label className={field}>
         Rounds
         <select
@@ -101,7 +83,10 @@ export function Controls({ packs, models, values, running, blocked, onChange, on
           ))}
         </select>
       </label>
-      <label className="flex items-center gap-2 pb-2 text-sm">
+      <label
+        className="flex items-center gap-2 pb-2 text-sm"
+        title="When Jev retracts a sentence while a turn is still being written, the turn is cut there and restarted, at most twice. Off, the turn runs to its end."
+      >
         <input
           type="checkbox"
           checked={values.strictMode}

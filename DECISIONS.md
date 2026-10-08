@@ -54,6 +54,19 @@ Choices the brief left open, and why. Where this repository departs from the bri
 - On narrow screens the judge panel comes first and the debaters stack below it.
 - The only query parameters are `auto`, `pack`, `pro` and `con`, as the brief lists. Demo mode is a checkbox.
 
+## Models beyond the roster
+
+The roster is the 16 models whose ids, open-weights status and quirks were checked by hand. It used to be the only choice in the menus. The menus now also reach every chat model the keys in scope unlock, found by searching.
+
+- The catalogue is built from the model lists the availability check already fetches, so it costs no extra request: the gateway's list, OpenRouter's, and each direct provider's. A source is read only when its key is in scope.
+- Models are left out when the list says they are not chat models (the gateway's `type`, OpenRouter's output modalities, Google's generation methods), when they are OpenRouter `:batch` endpoints, and when the roster already covers that route and id. OpenAI, DeepSeek, Moonshot, Mistral and xAI lists carry no type, so ids that name another job (`embed`, `whisper`, `tts`, `dall-e`, `image` and a few more) are filtered by a pattern. It is a heuristic and can hide a chat model whose id happens to match.
+- The same model reached by two routes appears twice, once per route, with the route shown. The roster entry is chosen by route priority, but in the catalogue the route changes price and behaviour, so the choice is the reader's.
+- A catalogue model is named `channel:id`, where the channel is `gateway`, `openrouter` or a provider. The key splits at the first colon, so OpenRouter ids such as `...:free` survive. These entries are made on the spot (`lib/models/dynamic.ts`): `vendor` is `unknown` and `openWeights` is false, which is a placeholder, not a claim, and is never shown.
+- Temperature: a catalogue model is sent 0.7 only when its list says it accepts a temperature (the gateway's `temperature` flag, OpenRouter's `supported_parameters`). Otherwise the parameter is omitted and the provider's default is used, because a request a model rejects is worse than a different temperature. The direct providers' lists say nothing, so those models always run at the provider's default.
+- The tournament accepts roster keys only. A leaderboard row needs the maker, open-weights status and temperature handling to be known and true, and a model picked from a list has none of those verified.
+- The menu shows only the roster until something is typed, then at most 40 results, roster first and then names that start with the query. Matching ignores punctuation, so `gpt5` finds `GPT-5`.
+- The "Ready" message and the two-model minimum count catalogue models, so a visitor with one provider key is not told they lack models.
+
 ## Settings page
 
 The brief said keys are read on the server only and never written to disk. A page that remembers a user's keys has to put them somewhere, so this is a deliberate change, made at the author's request. The options were: write them to `.env.local` from the page, hold them in the server's memory, or keep them in the browser.

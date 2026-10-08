@@ -1,6 +1,7 @@
 import { type LanguageModel, streamText } from "ai";
 import { type ModelStatus, keyFor, modelStatus } from "./availability";
-import { type RegistryEntry, findEntry } from "./registry";
+import { resolveEntry } from "./dynamic";
+import type { RegistryEntry } from "./registry";
 import { scriptedModel } from "./scripted";
 import { targetsFor } from "./routes";
 
@@ -27,8 +28,12 @@ export interface TurnStream {
 }
 
 export async function resolveDebater(key: string, { paced }: { paced: boolean }): Promise<Debater> {
-  const entry = findEntry(key);
-  if (!entry) throw new Error(`Unknown model "${key}". Run pnpm models to list the registry keys.`);
+  const entry = await resolveEntry(key);
+  if (!entry) {
+    throw new Error(
+      `Unknown model "${key}". Use a registry key from pnpm models, or gateway:<id>, openrouter:<id> or <provider>:<id>.`,
+    );
+  }
 
   const status = await modelStatus(entry);
   if (status.route === "scripted")
