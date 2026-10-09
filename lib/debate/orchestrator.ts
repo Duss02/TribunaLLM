@@ -12,7 +12,11 @@ import {
 import { SIDES, type Side } from "@/lib/side";
 import { median, sum } from "@/lib/stats";
 import type { DebateEvent } from "./events";
-import { type EvidencePack, evidenceForDebaters, evidenceForJudge } from "./packs";
+import { hashString, seededRandom, shuffled } from "@/lib/random";
+import { type Library, libraryPassages } from "./library";
+import type { DebateMode } from "./mode";
+import { type EvidencePack, type Passage, evidenceForDebaters, evidenceForJudge } from "./packs";
+import { indexPassages, type PassageIndex } from "./retrieve";
 import { debaterSystemPrompt, retractionNote, turnPrompt } from "./prompts";
 import { createQueue } from "./queue";
 import { splitSentences } from "./sentences";
@@ -24,12 +28,19 @@ export interface DebateConfig {
   rounds: number;
   maxWords: number;
   strictMode: boolean;
+  /** Evidence mode when absent. The app, the CLI and the tournament pass `DEFAULT_MODE`, which is blind. */
+  mode?: DebateMode;
+  /** The judge's reference library for this motion, used in blind mode alongside the pack. */
+  library?: Library | null;
   /** Fixes the order the judge reads the evidence in. */
   seed: number;
   signal?: AbortSignal;
 }
 
 const MAX_RESTARTS_PER_TURN = 2;
+// In blind mode the library is far too large to send whole, so each call gets the passages that best match it.
+const PASSAGES_PER_SENTENCE = 20;
+const PASSAGES_PER_TURN = 30;
 // A model that ignores the word cap is cut off here so one turn cannot run away with the judge bill.
 const HARD_WORD_LIMIT_FACTOR = 2;
 
@@ -60,8 +71,11 @@ const wordCount = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
 class DebateRun {
   private readonly started = performance.now();
+  private readonly mode: DebateMode;
   private readonly judgeEvidence: Evidence;
-  private readonly debaterEvidence: string;
+  private readonly debaterEvidence: string | null;
+  private readonly passages = new Map<string, Passage>();
+  private readonly index: PassageIndex | null;
   private readonly turns: TurnState[] = [];
   private readonly turnJudgments: JudgedTurn[] = [];
   private final: FinalProbabilities | null = null;
@@ -77,11 +91,26 @@ class DebateRun {
     private readonly config: DebateConfig,
     private readonly emit: (event: DebateEvent) => void,
   ) {
+    this.mode = config.mode ?? "evidence";
     this.judgeEvidence = evidenceForJudge(config.pack, config.seed);
-    this.debaterEvidence = evidenceForDebaters(config.pack);
+    this.debaterEvidence = this.mode === "blind" ? null : evidenceForDebaters(config.pack);
+    const corpus = [
+      ...config.pack.passages,
+      ...(this.mode === "blind" ? libraryPassages(config.library ?? null) : []),
+    ];
+    for (const passage of corpus) this.passages.set(passage.id, passage);
+    this.index = this.mode === "blind" ? indexPassages(corpus) : null;
     this.signal = config.signal
       ? AbortSignal.any([config.signal, this.controller.signal])
       : this.controller.signal;
+  }
+
+  /** What the judge reads for one call: the whole pack in evidence mode, the best matches in blind mode. */
+  private evidenceFor(query: string, limit: number): Evidence {
+    if (!this.index) return this.judgeEvidence;
+    const found = this.index.search(query, limit);
+    const order = shuffled(found, seededRandom(this.config.seed ^ hashString(query)));
+    return { text: order.map((p) => `${p.id}| ${p.text}`).join("\n"), ids: order.map((p) => p.id) };
   }
 
   cancel(): void {
@@ -99,6 +128,7 @@ class DebateRun {
       motion: this.config.pack.motion,
       transcriptPro: this.transcript("PRO"),
       transcriptCon: this.transcript("CON"),
+      mode: this.mode,
       signal: this.signal,
     });
     this.calls.push(final);
@@ -108,6 +138,7 @@ class DebateRun {
       type: "final",
       verdict: { ...this.final, latencyMs: final.latencyMs, costUsd: final.costUsd },
       score: this.score(),
+      mode: this.mode,
       stats: this.stats(),
     });
   }
@@ -159,7 +190,7 @@ class DebateRun {
       });
       this.emitScore();
       kept = this.standingText(turn, retracted.index);
-      note = retractionNote(retracted.text);
+      note = retractionNote(retracted.text, this.mode);
     }
 
     const delivered = turn.sentences.map((sentence) => sentence.text).join(" ");
@@ -275,7 +306,8 @@ class DebateRun {
       motion: this.config.pack.motion,
       side: turn.side,
       sentence: text,
-      evidence: this.judgeEvidence,
+      evidence: this.evidenceFor(text, PASSAGES_PER_SENTENCE),
+      mode: this.mode,
       signal: this.signal,
     }).then(
       (judgment) => this.onJudgment(turn, sentence, judgment),
@@ -294,9 +326,7 @@ class DebateRun {
       supported: judgment.supported,
       contradicts: judgment.contradicts,
     };
-    const passage = judgment.passage
-      ? this.config.pack.passages.find((candidate) => candidate.id === judgment.passage)
-      : undefined;
+    const passage = judgment.passage ? this.passages.get(judgment.passage) : undefined;
     this.emit({
       type: "verdict",
       id: sentence.id,
@@ -367,7 +397,8 @@ class DebateRun {
         side: turn.side,
         turn: text,
         opponentTurn,
-        evidence: this.judgeEvidence,
+        evidence: this.evidenceFor(text, PASSAGES_PER_TURN),
+        mode: this.mode,
         signal: this.signal,
       });
       this.calls.push(judgment);
@@ -423,7 +454,12 @@ class DebateRun {
   }
 
   private score() {
-    return scoreDebate({ sentences: this.judgedSentences(), turns: this.turnJudgments, final: this.final });
+    return scoreDebate({
+      sentences: this.judgedSentences(),
+      turns: this.turnJudgments,
+      final: this.final,
+      mode: this.mode,
+    });
   }
 
   private emitScore(): void {

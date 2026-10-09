@@ -164,7 +164,25 @@ describe("countVerdicts", () => {
       contradicted: 1,
       uncertain: 1,
       opinions: 1,
+      unverified: 0,
       unjudged: 1,
     });
+  });
+
+  it("counts an unverified claim as a claim", () => {
+    const counts = countVerdicts([sentence("PRO", "unverified"), sentence("PRO", "supported")], "PRO");
+    expect(counts).toMatchObject({ claims: 2, unverified: 1, supported: 1 });
+  });
+});
+
+describe("blind mode scoring", () => {
+  it("gives an unverified claim no points, where evidence mode would dock an unsupported one", () => {
+    const blind = scoreDebate({
+      sentences: [sentence("PRO", "unverified"), sentence("PRO", "supported")],
+      turns: [],
+      final: null,
+      mode: "blind",
+    });
+    expect(blind.PRO.E).toBe(1);
   });
 });

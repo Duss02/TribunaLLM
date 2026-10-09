@@ -140,7 +140,15 @@ describe("a full debate", () => {
 
   it("scores exactly as a reader recounts it from the verdicts", () => {
     const final = events.at(-1) as FinalEvent;
-    const points = { supported: 1, unsupported: -1, contradicted: -2, uncertain: 0, opinion: 0, unjudged: 0 };
+    const points = {
+      supported: 1,
+      unsupported: -1,
+      contradicted: -2,
+      uncertain: 0,
+      unverified: 0,
+      opinion: 0,
+      unjudged: 0,
+    };
     for (const side of ["PRO", "CON"] as const) {
       const evidence = of(events, "verdict")
         .filter((v) => v.id.startsWith(side))
@@ -333,5 +341,59 @@ describe("when the judge fails", () => {
     const verdicts = of(events, "verdict");
     expect(verdicts.length).toBeGreaterThan(0);
     expect(verdicts.every((v) => v.verdict === "unjudged")).toBe(true);
+  });
+});
+
+describe("blind mode", () => {
+  const library = {
+    slug: "ferries",
+    license: "CC0-1.0",
+    builtAt: "2026-10-08T00:00:00.000Z",
+    sources: [{ title: "Harbour ferry", url: "https://example.org/ferry", revision: 1 }],
+    passages: [
+      {
+        id: "W0001",
+        source: "Harbour ferry",
+        text: "The old ferry was launched in 1987 and carries 300 people.",
+      },
+      { id: "W0002", source: "Harbour ferry", text: "A crossing takes 14 minutes in calm weather." },
+    ],
+  };
+
+  it("gives debaters no evidence, never strikes a claim for silence and records the mode", async () => {
+    const prompts: string[] = [];
+    const recording = (key: string): Debater => {
+      const debater = speaks(key, {
+        first:
+          "The old ferry was launched in 1987. It carries 777 people at once. A crossing takes 14 minutes.",
+        restart: "",
+        delayMs: 0,
+      });
+      const model = debater.model as MockLanguageModelV4;
+      const stream = model.doStream.bind(model);
+      model.doStream = async (options) => {
+        prompts.push(JSON.stringify(options.prompt));
+        return stream(options);
+      };
+      return debater;
+    };
+    const events = await collect(
+      baseConfig(
+        { pro: recording("claude-opus-5.5"), con: recording("gpt-6.1-sol") },
+        { mode: "blind", library, rounds: 1 },
+      ),
+    );
+
+    expect(prompts.length).toBeGreaterThan(0);
+    for (const prompt of prompts) {
+      expect(prompt).not.toContain("Evidence pack");
+      expect(prompt).not.toContain("4,200 passengers");
+    }
+    expect(of(events, "verdict").some((e) => e.verdict === "unsupported" || e.verdict === "uncertain")).toBe(
+      false,
+    );
+    const final = events.at(-1) as FinalEvent;
+    expect(final.type).toBe("final");
+    expect(final.mode).toBe("blind");
   });
 });

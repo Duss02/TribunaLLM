@@ -1,4 +1,5 @@
 import type { Side } from "@/lib/side";
+import type { DebateMode } from "./mode";
 
 export interface PriorTurn {
   side: Side;
@@ -10,9 +11,23 @@ export function debaterSystemPrompt(options: {
   side: Side;
   motion: string;
   maxWords: number;
-  evidence: string;
+  /** The evidence pack, in evidence mode. Blind mode gives the debater none. */
+  evidence: string | null;
 }): string {
   const stance = options.side === "PRO" ? "You argue FOR the motion." : "You argue AGAINST the motion.";
+  if (options.evidence === null) {
+    return [
+      `You are a debater. Your side: ${options.side}. The motion: "${options.motion}"`,
+      stance,
+      "",
+      "Rules:",
+      "- Argue from what you know. Use specific facts: numbers, dates, places, studies, named policies.",
+      "- A fact-checker with a large reference library reads every sentence. A claim it can show is false is struck from the record and costs you; a claim it confirms earns credit; a claim it cannot check counts for nothing.",
+      "- Opinions and value judgments are allowed. Do not invent or round up facts you are unsure of.",
+      `- Write at most ${options.maxWords} words per turn, in plain prose: no lists, no headers, no markdown.`,
+      "- From round 2 on, answer your opponent's last argument directly.",
+    ].join("\n");
+  }
   return [
     `You are a debater. Your side: ${options.side}. The motion: "${options.motion}"`,
     stance,
@@ -57,6 +72,8 @@ export function turnPrompt(options: {
   return lines.join("\n");
 }
 
-export function retractionNote(sentence: string): string {
-  return `The judge retracted this sentence because the evidence does not support it: «${sentence}». Continue without repeating unsupported claims.`;
+export function retractionNote(sentence: string, mode: DebateMode = "evidence"): string {
+  return mode === "blind"
+    ? `The fact-checker struck this sentence because its reference library shows it is false: «${sentence}». Continue without repeating it.`
+    : `The judge retracted this sentence because the evidence does not support it: «${sentence}». Continue without repeating unsupported claims.`;
 }

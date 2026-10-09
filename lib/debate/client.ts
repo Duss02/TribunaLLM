@@ -1,6 +1,7 @@
 import type { SavedKeys } from "@/lib/keys";
 import { type SetupStatus, setupStatus } from "@/lib/setup-status";
 import type { DebateEvent } from "./events";
+import type { DebateMode } from "./mode";
 import { createEventParser } from "./sse";
 
 export interface DebateRequest {
@@ -10,6 +11,7 @@ export interface DebateRequest {
   rounds: number;
   maxWords: number;
   strictMode: boolean;
+  mode: DebateMode;
   /** Keys saved in this browser. The server uses them for this debate only. */
   keys?: SavedKeys;
 }

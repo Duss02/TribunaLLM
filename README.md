@@ -1,6 +1,6 @@
-# retracted
+# TribunaLLM
 
-Two language models debate a motion while Jev, TypeSafe's typed decision model, checks every finished sentence against a shared evidence pack. When a factual claim is not supported by the pack, it is struck through on screen while the next sentence is still arriving. Points update live, and at the end Jev gives a verdict. Run headless across many models, the same engine produces a leaderboard of which model gets retracted least.
+Two language models debate a motion while Jev, TypeSafe's typed decision model, checks every finished sentence against a large reference library the debaters never see. When the library shows a claim is false, it is struck through on screen while the next sentence is still arriving. Points update live, and at the end Jev gives a verdict. Run headless across many models, the same engine produces a leaderboard of which model gets retracted least.
 
 Jev never generates text. It answers typed questions (yes/no probability, choice, score) about a state, and TypeSafe documents roughly 110 to 270 ms per request and $0.042 per million input tokens, with output free. That is cheap and fast enough to judge every sentence at the speed of streaming.
 
@@ -9,8 +9,8 @@ Jev never generates text. It answers typed questions (yes/no probability, choice
 ## Quickstart
 
 ```bash
-git clone <this repository> retracted
-cd retracted
+git clone <this repository> tribunallm
+cd tribunallm
 pnpm install
 cp .env.example .env.local
 ```
@@ -37,7 +37,12 @@ To record a debate, open `/?auto=1&pack=<slug>&pro=<key>&con=<key>`. It starts o
 
 ## How it works
 
-Two debaters alternate for 3 rounds (configurable). Both get the same system prompt: argue your side using only the evidence pack, cite passage ids like `[P07]`, at most 110 words, plain prose, answer the opponent from round 2. The pack is split into passages `P01`, `P02` and so on. Every turn is streamed, and server-side each finished sentence is sent to Jev without waiting for the next token. The sentence appears immediately and is restyled in place when its verdict arrives.
+There are two modes.
+
+- **Blind** (the default): the debaters argue from what they know, with no evidence in front of them. The evidence belongs to the judge: the curated pack for the motion plus a reference library of whole Wikipedia articles, hundreds of thousands of words across the ten motions. A claim the library contradicts is struck, a claim it supports scores, and a claim it cannot check is marked unverified and left alone. This measures what a model knows and how well it argues, and how often it gets facts wrong under pressure.
+- **Evidence pack**: both debaters get the curated pack and must argue from it, citing passage ids like `[P07]`; a claim the pack does not support is struck too. This measures how faithfully a model uses a given source.
+
+Two debaters alternate for 3 rounds (configurable). Both get the same system prompt for the mode, at most 110 words, plain prose, answer the opponent from round 2. The pack is split into passages `P01`, `P02` and so on, the library into `W0001`, `W0002` and so on. In blind mode each sentence goes to Jev with the 20 library and pack passages that best match it (BM25), since the whole library is far too large for one question. Every turn is streamed, and server-side each finished sentence is sent to Jev without waiting for the next token. The sentence appears immediately and is restyled in place when its verdict arrives.
 
 The judge never sees a model name or vendor. Sides are `PRO` and `CON`. The order of the passages in the judge's evidence is shuffled once per debate from a recorded seed, because the Jev documentation warns about a slight bias toward the first option of a `choice`.
 
@@ -91,13 +96,14 @@ verdict: choice("Which side made the stronger evidence-backed case for its posit
 
 The first row that matches wins. Thresholds are in `lib/scoring/rules.ts`; they were set before any data was collected and have not been tuned.
 
-| Verdict      | Condition                                  | On screen                                        |
-| ------------ | ------------------------------------------ | ------------------------------------------------ |
-| opinion      | `is_claim` < 0.5                           | italic, never struck                             |
-| contradicted | `relation.probabilities.contradicts` ≥ 0.7 | red strike-through                               |
-| supported    | `supported` ≥ 0.7                          | green underline, hover shows the `which` passage |
-| unsupported  | `supported` ≤ 0.35                         | amber strike-through                             |
-| uncertain    | anything else                              | grey dotted underline                            |
+| Verdict      | Condition                                         | On screen                                        |
+| ------------ | ------------------------------------------------- | ------------------------------------------------ |
+| opinion      | `is_claim` < 0.5                                  | italic, never struck                             |
+| contradicted | `relation.probabilities.contradicts` ≥ 0.7        | red strike-through                               |
+| supported    | `supported` ≥ 0.7                                 | green underline, hover shows the `which` passage |
+| unsupported  | `supported` ≤ 0.35                                | amber strike-through                             |
+| uncertain    | anything else                                     | grey dotted underline                            |
+| unverified   | blind mode, in place of unsupported and uncertain | faint dotted underline, never struck             |
 
 Opinions are never struck. The project makes a claim about unsupported facts, and a sentence that argues a value is not wrong for lacking a source; striking it would measure style.
 
@@ -121,6 +127,8 @@ Jev assigns every point and every penalty. The formula is fixed (`rules-v1`) and
 | Judge `J`    | final verdict: `3 × (p_side − p_other)`, 0 on tie | −3 … +3 |
 | Total `T`    | `E + A + J`                                       |         |
 
+In blind mode (`rules-blind-v1`) an unverified claim is worth 0 instead of −1, and nothing else changes.
+
 The winner has the higher `T`. A gap under 0.5 is a draw. "0 on tie" means `J` is 0 for both sides when `tie` is the most likely verdict. A probability-weighted `E` is also stored in every result but nothing is ranked on it.
 
 ## Tournament
@@ -130,13 +138,16 @@ pnpm tournament --dry-run                       # schedule and a Jev cost estima
 pnpm tournament --models a,b,c,d --packs all    # registry keys from pnpm models
 pnpm tournament --resume                        # continue the latest run, skipping finished debates
 pnpm leaderboard:build                          # bench/results/*.jsonl -> bench/leaderboard.json
+pnpm library:build                              # refetch the judge's reference libraries from Wikipedia
 ```
 
-Flags: `--models`, `--packs all|slug,slug`, `--rounds 3`, `--repeats 1`, `--concurrency 2`, `--run <id>`, `--dry-run`, `--resume`. Every pair of models plays every pack twice, once with each on PRO, so a side advantage cancels. The order is shuffled from the run id. Each finished debate is one line in `bench/results/<run-id>.jsonl` with the scores, verdict counts, token use per model, Jev tokens and cost, and wall time; a failed debate is recorded as a failure and skipped, and `--resume` retries it. The runner refuses to start with a model whose id is not in the route's model list and says which one.
+Flags: `--mode blind|evidence` (blind by default), `--models`, `--packs all|slug,slug`, `--rounds 3`, `--repeats 1`, `--concurrency 2`, `--run <id>`, `--dry-run`, `--resume`. Every pair of models plays every pack twice, once with each on PRO, so a side advantage cancels. The order is shuffled from the run id. Each finished debate is one line in `bench/results/<run-id>.jsonl` with the scores, verdict counts, token use per model, Jev tokens and cost, and wall time; a failed debate is recorded as a failure and skipped, and `--resume` retries it. The runner refuses to start with a model whose id is not in the route's model list and says which one.
 
 Cost: for 4 models on 4 packs, 48 debates of 3 rounds, `--dry-run` estimates about 1,800 Jev calls and $0.17 at the documented price. That is an estimate from pack size and typical sentence length, not a measurement, and it excludes the debaters, whose cost depends on the models and your route.
 
 Aggregation (`lib/bench/`): the rating is a Bradley-Terry fit to debate outcomes (a win is 1, a draw 0.5) on the Elo scale with the mean at 1500, with a quarter of a draw against every other model as a weak prior and a 95 percent interval from 500 bootstrap resamples of the debates. The headline metric is the retraction rate, `(unsupported + contradicted) / claims`, pooled over both sides, with a Wilson interval. The builder also reports the contradiction rate, win rate, mean `E`, `A`, `J`, `T`, points per 100 sentences, words per sentence, tokens per turn, a head-to-head matrix and a per-pack breakdown. It refuses to mix results from different judge models or rules versions.
+
+`/gui` shows the same debate as an isometric 3D courtroom with plush characters: the two models sit at their tables and take turns walking to the middle to speak, Jev rules from the bench beside the scales, and the camera pushes in on Jev for the verdict. It takes the same query parameters as the arena.
 
 `/leaderboard` renders `bench/leaderboard.json` and needs no keys. No tournament has been run against the live APIs from this repository yet, so no leaderboard is committed; the page says so until one is.
 
@@ -144,7 +155,7 @@ Aggregation (`lib/bench/`): the rating is a Bradley-Terry fit to debate outcomes
 
 - The judge can be wrong. Jev is calibrated, not infallible, and Rao and Callison-Burch find it fails in the same places as LLM judges. A retraction means Jev found no support in the pack, not that the sentence is false.
 - Whether a sentence is a factual claim at all is itself a Jev call, so opinion detection moves the denominators of every rate.
-- The packs are short, there are ten of them, they are written in English, and the shipped figures were checked by research agents against web sources, not by a domain expert. The weakest sourcing is listed in `DECISIONS.md`.
+- In blind mode a false claim about something the library does not cover goes unpunished, and the library is only as accurate as the Wikipedia revisions it was built from. The curated packs are short, there are ten of them, they are written in English, and their figures were checked against web sources, not by a domain expert. The weakest sourcing is listed in `DECISIONS.md`.
 - A model that writes fewer factual sentences has fewer chances to be retracted. Read the retraction rate next to the rating and the win rate.
 - Debaters get the same prompt, word cap and reasoning effort (`low`). Claude Opus 5.5, Claude Sonnet 5.5 and Kimi K3 do not accept a temperature parameter, so they sample at their own default instead of 0.7.
 - Jev's `choice` has a slight first-option bias. `PRO` is listed first in the final verdict, and the schedule plays every pairing on both sides to cancel it.
@@ -172,4 +183,4 @@ Papers:
 
 ## License
 
-MIT. See [LICENSE](LICENSE). To add a pack, a model or tournament results, see [CONTRIBUTING.md](CONTRIBUTING.md). Choices the design left open are in [DECISIONS.md](DECISIONS.md).
+MIT. See [LICENSE](LICENSE). The reference libraries in `packs/library/` are text from English Wikipedia under CC BY-SA 4.0; each file lists the articles, URLs and revisions it was built from. To add a pack, a model or tournament results, see [CONTRIBUTING.md](CONTRIBUTING.md). Choices the design left open are in [DECISIONS.md](DECISIONS.md).

@@ -94,6 +94,7 @@ describe("reduceArena", () => {
   it("finishes on final with the judge's own totals, and fails on error", () => {
     const final: DebateEvent = {
       type: "final",
+      mode: "evidence",
       verdict: { pro: 0.6, con: 0.3, tie: 0.1, latencyMs: 100, costUsd: 0 },
       score: {
         PRO: { E: 3, A: 1, J: 0.9, T: 4.9 },
@@ -111,6 +112,7 @@ describe("reduceArena", () => {
             unsupported: 0,
             contradicted: 0,
             uncertain: 1,
+            unverified: 0,
             opinions: 1,
             unjudged: 0,
           },
@@ -125,6 +127,7 @@ describe("reduceArena", () => {
             unsupported: 0,
             contradicted: 0,
             uncertain: 3,
+            unverified: 0,
             opinions: 1,
             unjudged: 0,
           },

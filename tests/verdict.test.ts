@@ -42,3 +42,17 @@ describe("isRetracted", () => {
     expect(isRetracted("supported")).toBe(false);
   });
 });
+
+describe("verdictFor in blind mode", () => {
+  const claim = { isClaim: 0.9 };
+
+  it("leaves a claim the library is silent on unverified instead of striking it", () => {
+    expect(verdictFor({ ...claim, supported: 0.1, contradicts: 0.1 }, "blind")).toBe("unverified");
+    expect(isRetracted("unverified")).toBe(false);
+  });
+
+  it("still strikes a contradicted claim and credits a supported one", () => {
+    expect(verdictFor({ ...claim, supported: 0.1, contradicts: 0.9 }, "blind")).toBe("contradicted");
+    expect(verdictFor({ ...claim, supported: 0.9, contradicts: 0 }, "blind")).toBe("supported");
+  });
+});

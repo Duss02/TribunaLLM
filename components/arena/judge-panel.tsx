@@ -7,6 +7,7 @@ const VERDICT_COLOR: Record<JudgedVerdict, string> = {
   contradicted: "text-contradicted",
   unsupported: "text-unsupported",
   uncertain: "text-muted",
+  unverified: "text-muted",
   opinion: "text-muted",
   unjudged: "text-muted",
 };

@@ -13,6 +13,7 @@ const counts = z.object({
   contradicted: z.number(),
   uncertain: z.number(),
   opinions: z.number(),
+  unverified: z.number().default(0),
   unjudged: z.number(),
 });
 
@@ -29,6 +30,7 @@ const okResult = z.object({
   status: z.literal("ok"),
   ...identity,
   rules: z.string(),
+  mode: z.enum(["blind", "evidence"]).default("evidence"),
   judge: z.string(),
   seed: z.number(),
   rounds: z.number().int(),
@@ -83,6 +85,7 @@ export function okResultFrom(
     ...identity,
     at: new Date().toISOString(),
     ...context,
+    mode: final.mode,
     score,
     verdict: { pro: verdict.pro, con: verdict.con, tie: verdict.tie },
     counts: { PRO: stats.PRO.counts, CON: stats.CON.counts },

@@ -1,7 +1,15 @@
 import { z } from "zod";
 
 const side = z.enum(["PRO", "CON"]);
-const verdictKind = z.enum(["opinion", "contradicted", "supported", "unsupported", "uncertain", "unjudged"]);
+const verdictKind = z.enum([
+  "opinion",
+  "contradicted",
+  "supported",
+  "unsupported",
+  "uncertain",
+  "unverified",
+  "unjudged",
+]);
 
 const sideScore = z.object({ E: z.number(), A: z.number(), J: z.number(), T: z.number() });
 const tokens = z.object({ input: z.number(), output: z.number(), reasoning: z.number() });
@@ -14,6 +22,7 @@ const counts = z.object({
   contradicted: z.number(),
   uncertain: z.number(),
   opinions: z.number(),
+  unverified: z.number().default(0),
   unjudged: z.number(),
 });
 
@@ -87,6 +96,8 @@ export const debateEvent = z.discriminatedUnion("type", [
       winner: z.enum(["PRO", "CON", "draw"]),
       margin: z.number(),
     }),
+    /** How the debate was run; absent in results written before blind mode existed. */
+    mode: z.enum(["blind", "evidence"]).default("evidence"),
     stats: z.object({
       PRO: sideStats,
       CON: sideStats,

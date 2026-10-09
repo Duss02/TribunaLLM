@@ -1,5 +1,6 @@
 "use client";
 
+import type { DebateMode } from "@/lib/debate/mode";
 import type { PickerOption } from "@/lib/model-search";
 import { ModelPicker } from "./model-picker";
 
@@ -15,6 +16,7 @@ export interface ControlValues {
   con: string;
   rounds: number;
   strictMode: boolean;
+  mode: DebateMode;
   demoMode: boolean;
 }
 
@@ -81,6 +83,21 @@ export function Controls({ packs, models, values, running, blocked, onChange, on
               {n}
             </option>
           ))}
+        </select>
+      </label>
+      <label
+        className={field}
+        title="Blind: the models argue from what they know and only Jev reads the reference library. Evidence pack: the models must argue from the curated pack."
+      >
+        Mode
+        <select
+          className={input}
+          value={values.mode}
+          disabled={running}
+          onChange={(e) => set("mode", e.target.value as DebateMode)}
+        >
+          <option value="blind">Blind (own knowledge)</option>
+          <option value="evidence">Evidence pack</option>
         </select>
       </label>
       <label

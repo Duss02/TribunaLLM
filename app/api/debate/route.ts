@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { withKeys } from "@/lib/credentials";
 import { runDebate } from "@/lib/debate/orchestrator";
+import { loadLibrary } from "@/lib/debate/library";
+import { DEBATE_MODES, DEFAULT_MODE } from "@/lib/debate/mode";
 import { loadPack } from "@/lib/debate/packs";
 import { encodeEvent } from "@/lib/debate/sse";
 import { judgeSetupProblem } from "@/lib/jev/judge";
@@ -18,6 +20,7 @@ const request = z.object({
   rounds: z.number().int().min(1).max(5),
   maxWords: z.number().int().min(30).max(250),
   strictMode: z.boolean(),
+  mode: z.enum(DEBATE_MODES as ["blind", "evidence"]).default(DEFAULT_MODE),
   /** Keys saved in the visitor's browser. They are used for this debate only. */
   keys: keysSchema.optional(),
 });
@@ -35,19 +38,30 @@ async function startDebate(
   settings: Omit<z.infer<typeof request>, "keys">,
   clientGone: AbortSignal,
 ): Promise<Response> {
-  const { pack: slug, pro: proKey, con: conKey, rounds, maxWords, strictMode } = settings;
+  const { pack: slug, pro: proKey, con: conKey, rounds, maxWords, strictMode, mode } = settings;
 
   const problem = judgeSetupProblem();
   if (problem) return refuse(problem, 412);
 
   let config;
   try {
-    const [pack, pro, con] = await Promise.all([
+    const [pack, library, pro, con] = await Promise.all([
       loadPack(slug),
+      mode === "blind" ? loadLibrary(slug) : null,
       resolveDebater(proKey, { paced: true }),
       resolveDebater(conKey, { paced: true }),
     ]);
-    config = { pack, pro, con, rounds, maxWords, strictMode, seed: Math.floor(Math.random() * 2 ** 31) };
+    config = {
+      pack,
+      library,
+      pro,
+      con,
+      rounds,
+      maxWords,
+      strictMode,
+      mode,
+      seed: Math.floor(Math.random() * 2 ** 31),
+    };
   } catch (error) {
     return refuse(error instanceof Error ? error.message : "Could not set up the debate.");
   }

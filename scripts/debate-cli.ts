@@ -1,5 +1,7 @@
 import { parseArgs } from "node:util";
 import { runDebate } from "@/lib/debate/orchestrator";
+import { loadLibrary } from "@/lib/debate/library";
+import { DEFAULT_MODE, isDebateMode } from "@/lib/debate/mode";
 import { listPacks, loadPack } from "@/lib/debate/packs";
 import { judgeModelId, judgeSetupProblem } from "@/lib/jev/judge";
 import { resolveDebater } from "@/lib/models/debater";
@@ -14,6 +16,7 @@ const { values } = parseArgs({
     "max-words": { type: "string", default: "110" },
     seed: { type: "string" },
     strict: { type: "boolean", default: false },
+    mode: { type: "string", default: DEFAULT_MODE },
     "list-packs": { type: "boolean", default: false },
   },
 });
@@ -42,6 +45,7 @@ const MARKS = {
   contradicted: "x",
   unsupported: "x",
   uncertain: "?",
+  unverified: "~",
   opinion: ".",
   unjudged: "!",
 } as const;
@@ -51,12 +55,15 @@ try {
   const proKey = values.pro ?? available[0]?.entry.key ?? "";
   const conKey = values.con ?? available[1]?.entry.key ?? "";
   const seed = values.seed ? Number(values.seed) : Math.floor(Math.random() * 2 ** 31);
+  if (!isDebateMode(values.mode)) throw new Error(`--mode must be blind or evidence, not "${values.mode}".`);
+  const mode = values.mode;
+  const library = mode === "blind" ? await loadLibrary(pack.slug) : null;
   const pro = await resolveDebater(proKey, { paced: false });
   const con = await resolveDebater(conKey, { paced: false });
 
   console.log(`Motion: ${pack.motion}`);
   console.log(
-    `Pack ${pack.slug} (${pack.passages.length} passages) | PRO ${pro.entry.label} (${pro.route}) | CON ${con.entry.label} (${con.route}) | judge ${judgeModelId()} | strict ${values.strict ? "on" : "off"} | seed ${seed}`,
+    `Pack ${pack.slug} (${pack.passages.length} passages) | PRO ${pro.entry.label} (${pro.route}) | CON ${con.entry.label} (${con.route}) | judge ${judgeModelId()} | mode ${mode}${library ? ` (${library.passages.length} library passages)` : ""} | strict ${values.strict ? "on" : "off"} | seed ${seed}`,
   );
 
   interface PendingTurn {
@@ -85,6 +92,8 @@ try {
     rounds: Number(values.rounds),
     maxWords: Number(values["max-words"]),
     strictMode: values.strict,
+    mode,
+    library,
     seed,
   })) {
     switch (event.type) {
@@ -148,7 +157,7 @@ try {
         for (const side of ["PRO", "CON"] as const) {
           const { counts } = event.stats[side];
           console.log(
-            `${side}: ${counts.sentences} sentences, ${counts.claims} claims, ${counts.supported} supported, ${counts.unsupported} unsupported, ${counts.contradicted} contradicted, ${counts.uncertain} uncertain, ${counts.opinions} opinions`,
+            `${side}: ${counts.sentences} sentences, ${counts.claims} claims, ${counts.supported} supported, ${counts.unsupported} unsupported, ${counts.contradicted} contradicted, ${counts.uncertain} uncertain, ${counts.unverified} unverified, ${counts.opinions} opinions`,
           );
         }
         break;

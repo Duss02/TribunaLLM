@@ -1,5 +1,5 @@
 {
-  "name": "retracted",
+  "name": "tribunallm",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
@@ -17,18 +17,23 @@
     "debate:cli": "tsx --env-file-if-exists=.env.local scripts/debate-cli.ts",
     "tournament": "tsx --env-file-if-exists=.env.local scripts/tournament.ts",
     "leaderboard:build": "tsx scripts/leaderboard-build.ts",
-    "format": "prettier --write ."
+    "library:build": "tsx scripts/library-build.ts",
+    "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.74",
     "@ai-sdk/google": "^4.0.90",
     "@ai-sdk/openai": "^4.0.86",
     "@ai-sdk/openai-compatible": "^3.0.65",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.1",
     "@typesafe-ai/sdk": "^0.6.0",
     "ai": "^7.0.130",
     "next": "^16.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "simple-icons": "^16.34.0",
+    "three": "^0.186.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -36,6 +41,7 @@
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
     "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",

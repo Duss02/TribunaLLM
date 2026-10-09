@@ -1,9 +1,8 @@
 node_modules
 .next
+.env
 .env*.local
 .scratch
 next-env.d.ts
 *.tsbuildinfo
-.claude
 bench/results-mock
-AGENTS.md

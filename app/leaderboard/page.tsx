@@ -6,7 +6,7 @@ import { RetractionChart } from "@/components/leaderboard/retraction-chart";
 import { LeaderboardTable } from "@/components/leaderboard/table";
 import { readLeaderboard } from "@/lib/bench/load";
 
-export const metadata: Metadata = { title: "retracted: leaderboard" };
+export const metadata: Metadata = { title: "TribunaLLM: leaderboard" };
 
 const heading = "mb-4 text-lg font-semibold";
 

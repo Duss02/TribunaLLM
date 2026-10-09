@@ -97,6 +97,13 @@ input {
   text-underline-offset: 4px;
 }
 
+/* Blind mode: a claim the judge's library cannot check. Marked as checked, neither struck nor credited. */
+.sentence[data-status="unverified"] {
+  text-decoration: underline dotted var(--line);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
 .sentence[data-status="opinion"] {
   font-style: italic;
 }
@@ -195,5 +202,107 @@ input {
   .caret::after,
   .flash {
     animation: none;
+  }
+}
+
+/* The courtroom at /gui is a light isometric diorama whatever the system theme says. White cards with a
+   soft blue-grey shadow sit over the scene; one saturated blue, and vermilion only for retractions. */
+.court {
+  color-scheme: light;
+  --court-ground: #e9edf5;
+  --court-card: #ffffff;
+  --court-paper: #ffffff;
+  --court-ink: #1b2238;
+  --court-ink-soft: #545e7a;
+  --court-blue: #2f5df5;
+  --court-blue-ink: #1f45c4;
+  --court-blue-soft: #e3e9ff;
+  --court-line-strong: #c2cadb;
+  --court-signal: #d63c22;
+  --font-display: var(--font-fredoka), "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-body: var(--font-nunito), "Nunito", ui-rounded, system-ui, sans-serif;
+
+  --bg: var(--court-card);
+  --fg: var(--court-ink);
+  --muted: var(--court-ink-soft);
+  --line: #dbe1ec;
+  --accent: var(--court-blue);
+  --supported: #8ea4e6;
+  --contradicted: var(--court-signal);
+  --unsupported: #a86400;
+
+  background: var(--court-ground);
+  color: var(--fg);
+  font-family: var(--font-body);
+  scrollbar-color: var(--court-line-strong) transparent;
+  accent-color: var(--court-blue);
+}
+
+.court ::selection {
+  background: var(--court-blue-soft);
+  color: var(--court-ink);
+}
+
+.court .font-display {
+  font-family: var(--font-display);
+}
+
+.court select,
+.court input,
+.court .rounded {
+  border-radius: 10px;
+}
+
+.court :focus-visible {
+  outline: 2px solid var(--court-blue);
+  outline-offset: 2px;
+}
+
+.court-bar {
+  background: var(--court-card);
+  box-shadow: 0 8px 24px -16px rgb(27 34 56 / 0.35);
+}
+
+.court-card {
+  background: var(--court-card);
+  color: var(--court-ink);
+  box-shadow: 0 10px 28px -14px rgb(27 34 56 / 0.35);
+}
+
+.court-paper {
+  scrollbar-color: var(--court-line-strong) transparent;
+}
+
+.court-flag {
+  animation: court-flag 2.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes court-flag {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  10%,
+  82% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .court-flag {
+    animation: court-flag-still 2.8s steps(1) both;
+  }
+  @keyframes court-flag-still {
+    0%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
 }

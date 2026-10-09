@@ -4,7 +4,7 @@ import { getKey } from "@/lib/credentials";
 import { KEY_FIELDS } from "@/lib/keys";
 import { isMockMode } from "@/lib/mock-mode";
 
-export const metadata: Metadata = { title: "retracted: settings" };
+export const metadata: Metadata = { title: "TribunaLLM: settings" };
 export const dynamic = "force-dynamic";
 
 export default function Page() {

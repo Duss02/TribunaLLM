@@ -9,6 +9,7 @@ const counts = (claims: number, unsupported: number, contradicted: number, sente
   unsupported,
   contradicted,
   uncertain: 0,
+  unverified: 0,
   opinions: sentences - claims,
   unjudged: 0,
 });
@@ -27,6 +28,7 @@ function debate(
   const side = (T: number) => ({ E: T, A: 0, J: 0, T });
   return {
     status: "ok",
+    mode: "evidence",
     runId: "r1",
     pack,
     pro,

@@ -1,3 +1,4 @@
+import type { DebateMode } from "@/lib/debate/mode";
 import type { JudgedVerdict } from "@/lib/jev/verdict";
 import type { Side } from "@/lib/side";
 import { DRAW_MARGIN, POINTS, THRESHOLDS } from "./rules";
@@ -48,6 +49,7 @@ export interface VerdictCounts {
   contradicted: number;
   uncertain: number;
   opinions: number;
+  unverified: number;
   unjudged: number;
 }
 
@@ -56,6 +58,7 @@ const EVIDENCE_POINTS: Record<JudgedVerdict, number> = {
   unsupported: POINTS.unsupported,
   contradicted: POINTS.contradicted,
   uncertain: 0,
+  unverified: 0,
   opinion: 0,
   unjudged: 0,
 };
@@ -65,8 +68,10 @@ function evidencePoints(sentences: JudgedSentence[], side: Side): number {
 }
 
 // Same signs and weights as the hard rule, spread over the probabilities. An
-// unsupported claim is one the judge neither supports nor contradicts.
-function weightedEvidencePoints(sentences: JudgedSentence[], side: Side): number {
+// unsupported claim is one the judge neither supports nor contradicts; in blind
+// mode that costs nothing, as in the hard rule.
+function weightedEvidencePoints(sentences: JudgedSentence[], side: Side, mode: DebateMode): number {
+  const silent = mode === "blind" ? 0 : POINTS.unsupported;
   return sentences
     .filter((s) => s.side === side && s.verdict !== "unjudged")
     .reduce(
@@ -75,7 +80,7 @@ function weightedEvidencePoints(sentences: JudgedSentence[], side: Side): number
         s.isClaim *
           (POINTS.supported * s.supported +
             POINTS.contradicted * s.contradicts +
-            POINTS.unsupported * (1 - s.supported) * (1 - s.contradicts)),
+            silent * (1 - s.supported) * (1 - s.contradicts)),
       0,
     );
 }
@@ -104,7 +109,9 @@ export function scoreDebate(input: {
   sentences: JudgedSentence[];
   turns: JudgedTurn[];
   final: FinalProbabilities | null;
+  mode?: DebateMode;
 }): DebateScore {
+  const mode = input.mode ?? "evidence";
   const side = (which: Side): SideScore => {
     const E = evidencePoints(input.sentences, which);
     const A = argumentPoints(input.turns, which);
@@ -112,7 +119,7 @@ export function scoreDebate(input: {
     return { E, A, J, T: E + A + J };
   };
   const weighted = (which: Side) =>
-    weightedEvidencePoints(input.sentences, which) +
+    weightedEvidencePoints(input.sentences, which, mode) +
     argumentPoints(input.turns, which) +
     judgePoints(input.final, which);
 
@@ -130,14 +137,16 @@ export function countVerdicts(sentences: JudgedSentence[], side: Side): VerdictC
   const unsupported = count("unsupported");
   const contradicted = count("contradicted");
   const uncertain = count("uncertain");
+  const unverified = count("unverified");
   return {
     sentences: mine.length,
-    claims: supported + unsupported + contradicted + uncertain,
+    claims: supported + unsupported + contradicted + uncertain + unverified,
     supported,
     unsupported,
     contradicted,
     uncertain,
     opinions: count("opinion"),
+    unverified,
     unjudged: count("unjudged"),
   };
 }

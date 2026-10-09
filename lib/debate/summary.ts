@@ -33,6 +33,6 @@ export function summaryText(input: {
     `${winner}. Jev verdict: PRO ${percent(verdict.pro)}, CON ${percent(verdict.con)}, tie ${percent(verdict.tie)}.`,
     side("PRO"),
     side("CON"),
-    `${input.rounds} rounds, strict mode ${input.strictMode ? "on" : "off"}. Judge: ${input.judgeLabel} · ${Math.round(stats.judge.medianLatencyMs)} ms median · $${stats.judge.costUsd.toFixed(4)}`,
+    `${final.mode === "blind" ? "Blind mode" : "Evidence-pack mode"}, ${input.rounds} rounds, strict mode ${input.strictMode ? "on" : "off"}. Judge: ${input.judgeLabel} · ${Math.round(stats.judge.medianLatencyMs)} ms median · $${stats.judge.costUsd.toFixed(4)}`,
   ].join("\n");
 }

@@ -110,7 +110,7 @@ async function sentenceAnswers(input: SentenceInput): Promise<RawSentenceAnswers
 export async function judgeSentence(input: SentenceInput): Promise<SentenceJudgment> {
   const raw = await sentenceAnswers(input);
   return {
-    verdict: verdictFor(raw),
+    verdict: verdictFor(raw, input.mode),
     isClaim: raw.isClaim,
     supported: raw.supported,
     contradicts: raw.contradicts,
@@ -130,7 +130,11 @@ async function turnAnswers(input: TurnInput): Promise<RawTurnAnswers> {
     evidence: input.evidence.text,
   };
   const withRebuts = input.opponentTurn !== null;
-  const { answers, latencyMs, inputTokens } = await ask(state, turnQuestions(withRebuts), input.signal);
+  const { answers, latencyMs, inputTokens } = await ask(
+    state,
+    turnQuestions(withRebuts, input.mode),
+    input.signal,
+  );
   return {
     rebuts: withRebuts && "rebuts" in answers ? answers.rebuts.noul : null,
     onMotion: answers.on_motion.noul,
@@ -157,7 +161,7 @@ async function finalAnswers(input: FinalInput): Promise<RawFinalAnswers> {
     transcriptPro: input.transcriptPro,
     transcriptCon: input.transcriptCon,
   };
-  const { answers, latencyMs, inputTokens } = await ask(state, finalQuestions(), input.signal);
+  const { answers, latencyMs, inputTokens } = await ask(state, finalQuestions(input.mode), input.signal);
   const { PRO, CON, tie } = answers.verdict.probabilities;
   return { pro: PRO, con: CON, tie, latencyMs, inputTokens };
 }

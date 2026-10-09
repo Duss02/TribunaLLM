@@ -1,4 +1,5 @@
 import { choice, noul, score } from "@typesafe-ai/sdk";
+import type { DebateMode } from "@/lib/debate/mode";
 
 export function sentenceQuestions(passageIds: readonly string[]) {
   const which: Record<string, string | null> = {};
@@ -23,16 +24,25 @@ export function sentenceQuestions(passageIds: readonly string[]) {
   };
 }
 
-export function turnQuestions(withRebuts: boolean) {
+export function turnQuestions(withRebuts: boolean, mode: DebateMode = "evidence") {
+  // In blind mode the debater never saw the evidence, so the question is whether its facts hold up, not whether it cited.
+  const evidenceUse =
+    mode === "blind"
+      ? score("How well is `turn` built on specific, checkable facts that the `evidence` confirms?", [
+          "vague or no facts",
+          "some facts, loosely",
+          "specific facts the evidence confirms",
+        ])
+      : score("How well does `turn` use the `evidence` to make its case?", [
+          "ignores it",
+          "mentions it loosely",
+          "builds the argument on specific passages",
+        ]);
   const questions = {
     on_motion: noul(
       "Is `turn` as a whole arguing for or against the `motion`, rather than drifting off topic?",
     ),
-    evidence_use: score("How well does `turn` use the `evidence` to make its case?", [
-      "ignores it",
-      "mentions it loosely",
-      "builds the argument on specific passages",
-    ]),
+    evidence_use: evidenceUse,
   };
   if (!withRebuts) return questions;
   return {
@@ -41,9 +51,13 @@ export function turnQuestions(withRebuts: boolean) {
   };
 }
 
-export function finalQuestions() {
+export function finalQuestions(mode: DebateMode = "evidence") {
+  const question =
+    mode === "blind"
+      ? "Which side made the stronger and more factually sound case for its position?"
+      : "Which side made the stronger evidence-backed case for its position?";
   return {
-    verdict: choice("Which side made the stronger evidence-backed case for its position?", {
+    verdict: choice(question, {
       PRO: null,
       CON: null,
       tie: "neither side is clearly stronger",

@@ -1,3 +1,4 @@
+import type { DebateMode } from "@/lib/debate/mode";
 import type { Side } from "@/lib/side";
 import type { Verdict } from "./verdict";
 
@@ -13,6 +14,8 @@ export interface SentenceInput {
   side: Side;
   sentence: string;
   evidence: Evidence;
+  /** Decides what a claim the evidence is silent on becomes. Evidence mode when absent. */
+  mode?: DebateMode;
   signal?: AbortSignal;
 }
 
@@ -23,6 +26,7 @@ export interface TurnInput {
   /** The opponent's previous turn, absent when this side opens the debate. */
   opponentTurn: string | null;
   evidence: Evidence;
+  mode?: DebateMode;
   signal?: AbortSignal;
 }
 
@@ -30,6 +34,7 @@ export interface FinalInput {
   motion: string;
   transcriptPro: string;
   transcriptCon: string;
+  mode?: DebateMode;
   signal?: AbortSignal;
 }
 

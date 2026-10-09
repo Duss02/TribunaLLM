@@ -1,4 +1,10 @@
+import type { DebateMode } from "@/lib/debate/mode";
+
 export const RULES_VERSION = "rules-v1";
+/** Blind mode scores differently (an uncheckable claim is neutral), so its results never mix with evidence mode's. */
+export const BLIND_RULES_VERSION = "rules-blind-v1";
+
+export const rulesVersionFor = (mode: DebateMode) => (mode === "blind" ? BLIND_RULES_VERSION : RULES_VERSION);
 
 // Chosen before any data was collected, not fitted. The band between
 // `unsupported` and `supported` is left alone on purpose: a sentence there is

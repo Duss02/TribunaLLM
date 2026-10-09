@@ -110,3 +110,17 @@ describe("shipped packs", () => {
     }
   });
 });
+
+describe("reference libraries", () => {
+  it("exist for every pack, are large, and number their passages uniquely", async () => {
+    const { loadLibrary } = await import("@/lib/debate/library");
+    for (const pack of await listPacks()) {
+      const library = await loadLibrary(pack.slug);
+      expect(library, pack.slug).not.toBeNull();
+      if (!library) continue;
+      expect(library.passages.length, pack.slug).toBeGreaterThanOrEqual(500);
+      expect(new Set(library.passages.map((p) => p.id)).size).toBe(library.passages.length);
+      expect(library.passages.every((p) => /^W\d{4}$/.test(p.id))).toBe(true);
+    }
+  });
+});

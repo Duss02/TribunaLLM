@@ -18,7 +18,9 @@ import { isMockMode } from "@/lib/mock-mode";
 import { resolveDebater } from "@/lib/models/debater";
 import { listAvailability } from "@/lib/models/availability";
 import { NO_MODELS_HINT } from "@/lib/models/pick";
-import { RULES_VERSION } from "@/lib/scoring/rules";
+import { rulesVersionFor } from "@/lib/scoring/rules";
+import { type Library, loadLibrary } from "@/lib/debate/library";
+import { DEFAULT_MODE, isDebateMode } from "@/lib/debate/mode";
 
 const MAX_WORDS = 110;
 
@@ -31,6 +33,7 @@ const { values } = parseArgs({
     concurrency: { type: "string", default: "2" },
     run: { type: "string" },
     "dry-run": { type: "boolean", default: false },
+    mode: { type: "string", default: DEFAULT_MODE },
     resume: { type: "boolean", default: false },
   },
 });
@@ -40,6 +43,9 @@ function stop(message: string): never {
   process.exit(1);
 }
 
+if (!isDebateMode(values.mode)) stop(`--mode must be blind or evidence, not "${values.mode}".`);
+const mode = values.mode;
+const rules = rulesVersionFor(mode);
 const rounds = Number(values.rounds);
 const repeats = Number(values.repeats);
 const concurrency = Number(values.concurrency);
@@ -109,13 +115,31 @@ const done = new Set(
 const schedule = buildSchedule({ models: chosen, packs: packs.map((p) => p.slug), repeats, runId });
 const pending = schedule.filter((pairing) => !done.has(debateKey(pairing)));
 const packBySlug = new Map(packs.map((pack) => [pack.slug, pack]));
+const libraryBySlug = new Map<string, Library | null>(
+  await Promise.all(
+    packs.map(async (pack) => [pack.slug, mode === "blind" ? await loadLibrary(pack.slug) : null] as const),
+  ),
+);
+if (mode === "blind") {
+  const missing = packs.filter((pack) => !libraryBySlug.get(pack.slug)).map((pack) => pack.slug);
+  if (missing.length > 0)
+    console.warn(
+      `No reference library for ${missing.join(", ")}: the judge will check those against the pack alone. Build one with pnpm library:build.`,
+    );
+}
 
 if (values["dry-run"]) {
   const estimates = pending.map((p) =>
-    estimateJudgeCost(packBySlug.get(p.pack) as EvidencePack, rounds, MAX_WORDS),
+    estimateJudgeCost(
+      packBySlug.get(p.pack) as EvidencePack,
+      rounds,
+      MAX_WORDS,
+      mode,
+      libraryBySlug.get(p.pack) ?? null,
+    ),
   );
   console.log(
-    `Run ${runId} | ${chosen.length} models | ${packs.length} packs | ${rounds} rounds | ${repeats} repeat(s)`,
+    `Run ${runId} | ${mode} mode | ${chosen.length} models | ${packs.length} packs | ${rounds} rounds | ${repeats} repeat(s)`,
   );
   console.log(
     `${schedule.length} debates scheduled, ${done.size} already done, ${pending.length} to play.\n`,
@@ -160,6 +184,8 @@ async function play(pairing: Pairing): Promise<FinalEvent> {
     rounds,
     maxWords: MAX_WORDS,
     strictMode: false,
+    mode,
+    library: libraryBySlug.get(pairing.pack) ?? null,
     seed: debateSeed(runId, pairing),
     signal: abort.signal,
   })) {
@@ -175,7 +201,7 @@ let judgeCost = 0;
 let next = 0;
 const started = Date.now();
 console.log(
-  `Run ${runId} | ${pending.length} debates to play, ${concurrency} at a time | judge ${judgeModelId()} | ${RULES_VERSION}`,
+  `Run ${runId} | ${pending.length} debates to play, ${concurrency} at a time | judge ${judgeModelId()} | ${mode} mode, ${rules}`,
 );
 
 async function worker() {
@@ -196,7 +222,7 @@ async function worker() {
       await append(
         okResultFrom(
           identity,
-          { rules: RULES_VERSION, judge: judgeModelId(), seed: debateSeed(runId, pairing), rounds },
+          { rules, judge: judgeModelId(), seed: debateSeed(runId, pairing), rounds },
           final,
         ),
       );
