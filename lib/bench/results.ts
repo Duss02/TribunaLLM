@@ -1,7 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import type { FinalEvent } from "@/lib/debate/events";
+import { type DebateEvent, type FinalEvent, verdictKind } from "@/lib/debate/events";
 
 const sideScore = z.object({ E: z.number(), A: z.number(), J: z.number(), T: z.number() });
 const tokens = z.object({ input: z.number(), output: z.number(), reasoning: z.number() });
@@ -16,6 +16,50 @@ const counts = z.object({
   unverified: z.number().default(0),
   unjudged: z.number(),
 });
+
+const transcriptSentence = z.object({
+  id: z.string(),
+  text: z.string(),
+  /** Null for a sentence dropped by a rewind before its verdict arrived. */
+  verdict: verdictKind.nullable(),
+  isClaim: z.number(),
+  supported: z.number(),
+  contradicts: z.number(),
+  passage: z.string().nullable(),
+  /** What the judge read, as passage ids in the order it read them. */
+  evidenceIds: z.array(z.string()),
+  dropped: z.boolean(),
+});
+
+const transcriptTurn = z.object({
+  id: z.string(),
+  side: z.enum(["PRO", "CON"]),
+  round: z.number().int(),
+  model: z.string(),
+  words: z.number(),
+  truncated: z.boolean(),
+  attempts: z.number(),
+  tokens,
+  sentences: z.array(transcriptSentence),
+  judgment: z
+    .object({ rebuts: z.number().nullable(), onMotion: z.number(), evidenceUse: z.number() })
+    .nullable(),
+});
+
+/** What a result line records about where its text and verdicts came from. */
+const provenance = z.object({
+  PRO: z.object({ route: z.string(), modelId: z.string() }),
+  CON: z.object({ route: z.string(), modelId: z.string() }),
+  maxWords: z.number(),
+  /** SHA-256 (first 16 hex digits) of the debater prompts, judge questions and scoring rules source files. */
+  promptHash: z.string(),
+  /** SHA-256 (first 16 hex digits) of the pack file. */
+  packHash: z.string(),
+  library: z.object({ builtAt: z.string(), passages: z.number() }).nullable(),
+});
+
+export type Transcript = z.infer<typeof transcriptTurn>[];
+export type Provenance = z.infer<typeof provenance>;
 
 const identity = {
   runId: z.string(),
@@ -53,6 +97,9 @@ const okResult = z.object({
     medianLatencyMs: z.number(),
   }),
   wallMs: z.number(),
+  /** Absent in lines written before transcripts were recorded. */
+  transcript: z.array(transcriptTurn).optional(),
+  provenance: provenance.optional(),
 });
 
 const failedResult = z.object({ status: z.literal("failed"), ...identity, error: z.string() });
@@ -74,10 +121,89 @@ export interface DebateIdentity {
 export const debateKey = ({ pack, pro, con, repeat }: Pick<DebateIdentity, "pack" | "pro" | "con" | "repeat">) =>
   `${pack}|${pro}|${con}|${repeat}`;
 
+/** The turns, sentences and verdicts of one debate, read back from its events. */
+export function transcriptFrom(events: readonly DebateEvent[]): Transcript {
+  const turns: Transcript = [];
+  const byTurn = new Map<string, Transcript[number]>();
+  const bySentence = new Map<string, Transcript[number]["sentences"][number]>();
+  for (const event of events) {
+    switch (event.type) {
+      case "turn_start": {
+        const turn: Transcript[number] = {
+          id: event.turn,
+          side: event.side,
+          round: event.round,
+          model: event.model,
+          words: 0,
+          truncated: false,
+          attempts: 1,
+          tokens: { input: 0, output: 0, reasoning: 0 },
+          sentences: [],
+          judgment: null,
+        };
+        turns.push(turn);
+        byTurn.set(event.turn, turn);
+        break;
+      }
+      case "sentence": {
+        const sentence = {
+          id: event.id,
+          text: event.text,
+          verdict: null,
+          isClaim: 0,
+          supported: 0,
+          contradicts: 0,
+          passage: null,
+          evidenceIds: [] as string[],
+          dropped: false,
+        };
+        byTurn.get(event.turn)?.sentences.push(sentence);
+        bySentence.set(event.id, sentence);
+        break;
+      }
+      case "verdict": {
+        const sentence = bySentence.get(event.id);
+        if (!sentence) break;
+        sentence.verdict = event.verdict;
+        sentence.isClaim = event.isClaim;
+        sentence.supported = event.supported;
+        sentence.contradicts = event.contradicts;
+        sentence.passage = event.passage?.id ?? null;
+        sentence.evidenceIds = event.evidenceIds;
+        break;
+      }
+      case "rewind":
+        for (const id of event.dropped) {
+          const sentence = bySentence.get(id);
+          if (sentence) sentence.dropped = true;
+        }
+        break;
+      case "turn_verdict": {
+        const turn = byTurn.get(event.turn);
+        if (turn) turn.judgment = { rebuts: event.rebuts, onMotion: event.onMotion, evidenceUse: event.evidenceUse };
+        break;
+      }
+      case "turn_end": {
+        const turn = byTurn.get(event.turn);
+        if (!turn) break;
+        turn.words = event.words;
+        turn.truncated = event.truncated;
+        turn.attempts = event.attempts;
+        turn.tokens = event.tokens;
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  return turns;
+}
+
 export function okResultFrom(
   identity: DebateIdentity,
   context: { rules: string; judge: string; seed: number; rounds: number },
   final: FinalEvent,
+  record: { transcript?: Transcript; provenance?: Provenance } = {},
 ): OkResult {
   const { stats, score, verdict } = final;
   return {
@@ -99,6 +225,7 @@ export function okResultFrom(
       medianLatencyMs: stats.judge.medianLatencyMs,
     },
     wallMs: stats.wallMs,
+    ...record,
   };
 }
 

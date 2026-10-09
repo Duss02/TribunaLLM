@@ -82,6 +82,15 @@ describe("a full debate", () => {
     vi.unstubAllEnvs();
   });
 
+  it("names the evidence the judge read for every sentence", () => {
+    const verdicts = of(events, "verdict");
+    expect(verdicts.length).toBeGreaterThan(0);
+    // Evidence mode: the whole pack, shuffled once per debate, so every sentence sees the same ids.
+    const ids = pack.passages.map((p) => p.id).sort();
+    for (const verdict of verdicts) expect([...verdict.evidenceIds].sort()).toEqual(ids);
+    expect(verdicts[0]?.evidenceIds).toEqual(verdicts.at(-1)?.evidenceIds);
+  });
+
   it("plays the turns in order and ends with the final judgment", () => {
     expect(of(events, "turn_start").map((e) => e.turn)).toEqual(["PRO-1", "CON-1", "PRO-2", "CON-2"]);
     expect(of(events, "turn_end")).toHaveLength(4);
@@ -234,6 +243,85 @@ const first = [
 ].join(" ");
 const restart =
   "Waiting times at peak hours averaged 22 minutes in 2023 [P07]. Fares rose 8 percent in 2024 [P03].";
+
+/** A debater that writes nothing on its first `silentCalls` attempts and `text` after that. */
+function silentAtFirst(
+  key: string,
+  silentCalls: number,
+  text: string,
+): { debater: Debater; calls: () => number } {
+  let calls = 0;
+  const usage = {
+    inputTokens: { total: 10, noCache: 10, cacheRead: undefined, cacheWrite: undefined },
+    outputTokens: { total: 20, text: 0, reasoning: 20 },
+  };
+  const debater: Debater = {
+    entry: findEntry(key)!,
+    route: "scripted",
+    model: new MockLanguageModelV4({
+      doStream: async () => {
+        calls++;
+        const chunks =
+          calls <= silentCalls
+            ? []
+            : [
+                { type: "text-start" as const, id: "t" },
+                { type: "text-delta" as const, id: "t", delta: text },
+                { type: "text-end" as const, id: "t" },
+              ];
+        return {
+          stream: simulateReadableStream({
+            chunks: [
+              ...chunks,
+              { type: "finish" as const, finishReason: { unified: "stop" as const, raw: undefined }, usage },
+            ],
+          }),
+        };
+      },
+    }),
+  };
+  return { debater, calls: () => calls };
+}
+
+describe("blind mode without keys", () => {
+  it("still plays a whole debate with scripted debaters, who then cite nothing", async () => {
+    const pro = await resolveDebater("claude-opus-5.5", { paced: false });
+    const con = await resolveDebater("gpt-6.1-sol", { paced: false });
+    const events = await collect(baseConfig({ pro, con }, { rounds: 1, mode: "blind", library: null }));
+    expect(events.at(-1)?.type).toBe("final");
+    const sentences = of(events, "sentence");
+    expect(sentences.length).toBeGreaterThan(2);
+    expect(sentences.some((s) => /\[P\d+\]/.test(s.text))).toBe(false);
+    const verdicts = of(events, "verdict").map((v) => v.verdict);
+    expect(verdicts).not.toContain("unsupported");
+    expect(verdicts).not.toContain("uncertain");
+  });
+});
+
+describe("a turn that comes back empty", () => {
+  it("is asked for once more, and the record says so", async () => {
+    const pro = silentAtFirst(
+      "claude-opus-5.5",
+      1,
+      "Waiting times at peak hours averaged 22 minutes in 2023 [P07].",
+    );
+    const con = await resolveDebater("gpt-6.1-sol", { paced: false });
+    const events = await collect(baseConfig({ pro: pro.debater, con }, { rounds: 1 }));
+    expect(pro.calls()).toBe(2);
+    expect(of(events, "turn_end").find((e) => e.turn === "PRO-1")).toMatchObject({ attempts: 2, words: 11 });
+    expect(of(events, "turn_end").find((e) => e.turn === "CON-1")).toMatchObject({ attempts: 1 });
+    expect(events.at(-1)?.type).toBe("final");
+  });
+
+  it("fails the debate when the second attempt is empty too", async () => {
+    const pro = silentAtFirst("claude-opus-5.5", 2, "never");
+    const con = await resolveDebater("gpt-6.1-sol", { paced: false });
+    await expect(collect(baseConfig({ pro: pro.debater, con }, { rounds: 1 }))).rejects.toThrow(
+      /wrote nothing/,
+    );
+    expect(pro.calls()).toBe(2);
+  });
+});
 
 describe("strict mode", () => {
   it("rewinds a turn that is still streaming and keeps the retracted sentence on screen, struck", async () => {

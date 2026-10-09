@@ -17,6 +17,7 @@ Choices that were not obvious, and why.
 - The roster is 16 models, two per large vendor. Every id was checked against the Vercel AI Gateway and OpenRouter model lists on 2026-10-07. Some differ from what a memory of model names would suggest: xAI is `spacexai/` on the gateway and `x-ai/` on OpenRouter, and Qwen 3.8 Max is `qwen/qwen3.8-max-0902` on OpenRouter.
 - `openWeights` is true where OpenRouter lists a Hugging Face repository for the model (DeepSeek V4 Pro and Flash, Kimi K3, Qwen 3.8 27B, Ministral 14B, Llama 4 Maverick). It is false otherwise.
 - Route order is gateway, then OpenRouter, then direct. A route is used when its key is set and its model list contains the id.
+- DeepSeek's direct model list (2026-10-09) has `deepseek-v4-pro` and `deepseek-flash`, so the direct id of DeepSeek V4 Flash is `deepseek-flash`. It is assumed to be the same model OpenRouter lists as `deepseek/deepseek-v4-flash`; the id actually used is recorded in each result's provenance.
 - The model lists for direct providers are fetched too (their own `/models` endpoints, with the key in a header), so `unknown-id` works on every route. Direct ids are the gateway ids without the vendor prefix, except Anthropic, whose ids use hyphens as the AI SDK docs show. Mistral Large 4 has no direct id because it was released the day before this was written and its direct id could not be confirmed; Ministral 14B does.
 - If a model list cannot be reached the entry stays `available` and the table says it was not verified. If a list answers 401 or 403 the key is reported as rejected and the entry is `missing-key`.
 - OpenRouter and the OpenAI-compatible direct providers (DeepSeek, Moonshot, Mistral, xAI) go through `@ai-sdk/openai-compatible` rather than a provider package each, to keep the dependency list short. Anthropic, OpenAI and Google use their own packages.
@@ -41,12 +42,29 @@ Choices that were not obvious, and why.
 
 ## Tournament and leaderboard
 
+- Every result line written since 2026-10-09 carries the full `transcript` (each turn's sentences with the verdict, the judge's three probabilities, the best passage and the ids of the passages the judge read) and a `provenance` block (route and model id per side, word cap, a hash of the prompt, question and rules source files, a hash of the pack file, and the library's build date and size). Without the transcript a retraction cannot be audited and the judge cannot be asked again about the same sentence; without the provenance a line cannot be traced to the prompts and evidence that produced it. Older lines without either still load.
+- The debaters' output budget is 4,000 tokens, up from 2,000. DeepSeek V4 Pro at `low` reasoning spent up to 1,100 reasoning tokens on one turn, and a turn whose whole budget went to reasoning came back empty and failed the debate. A turn that comes back empty is now asked for once more (`attempts: 2` in the record) before the debate fails; in the first blind pilot this fired once in 180 debates.
+- The leaderboard builder refuses to mix debates of different lengths unless `--rounds` picks one, because points per debate grow with the number of turns.
+- `pnpm spend` prices the tokens in the result files with the list prices in `lib/bench/prices.ts` (from OpenRouter's public list on 2026-10-09) and sums them per model and vendor, so a run can be kept under a budget. Jev cost is measured, not priced.
+
 - A result line is `ok` or `failed`. `--resume` skips only `ok` lines, so failures are retried. The run id names the file; without `--run` it is derived from the start time, and `--resume` alone continues the most recently modified file.
 - Mock-mode runs write to `bench/results-mock/` (ignored by git) so fake numbers cannot reach the committed leaderboard. If mock results are aggregated anyway, the leaderboard carries `mock: true` and the page says so.
 - The builder refuses to rank results from more than one judge model or rules version unless `--judge` and `--rules` pick one.
 - Rating: Bradley-Terry by minorisation-maximisation with a quarter-draw prior against every other model, 500 bootstrap resamples, 95 percent interval. A pack-level best and worst model needs at least 10 claims.
 - The dry-run cost estimate assumes 22 words per sentence and a fixed overhead for the question text. It is labelled an estimate.
 - The chart uses the eight validated categorical slots of the data-visualisation palette for eight vendors, in both modes. xAI, the ninth, and any unknown vendor share a neutral grey. The bars are also labelled with the model name and the table above carries every value, because three of the light-mode colours are below 3:1 against the page.
+
+## Validation scripts
+
+The scripts in `scripts/analysis/` check the judge rather than the debaters. They read the transcripts in `bench/results/` and write Markdown reports and JSONL to `bench/analysis/`. The findings of the first run are in `bench/analysis/REPORT.md`.
+
+- `analysis:sweep` recomputes verdicts and winners under other thresholds from the stored probabilities. No network.
+- `analysis:perturb` alters one number in sentences the judge called supported and asks again; `analysis:perturb-variants` asks the same pairs with other question designs (sharper description of `contradicts`, evidence narrowed to the best-matching passages, a direct yes/no question). Jev only.
+- `analysis:rejudge` judges every claim of a run again with the sharp question over the top three passages, to show what the contradiction counts would be under that design. Jev only.
+- `analysis:recall` has a cheap model write one claim per sampled library passage and measures whether BM25 ranks the source passage in the top 20. Debater route only.
+- `analysis:judge2` asks a language model the judge's questions on a stratified sample and reports agreement with Jev (Cohen's κ). Debater route only.
+- `analysis:position` asks the final verdict with PRO listed first and with CON listed first. Jev only.
+- `analysis:review` writes a sheet of sentences with the passages that match them best, for a reader to mark RIGHT, WRONG or UNCLEAR. No network. `hand-review-pilot-blind-a.md` is one such sheet filled in by Claude, not by a person, and is labelled so.
 
 ## Interface
 

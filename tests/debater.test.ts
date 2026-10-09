@@ -105,7 +105,7 @@ describe("a debater on the OpenRouter route", () => {
     expect(call?.body).toMatchObject({
       model: "openai/gpt-6.1-sol",
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: 4000,
       stream: true,
     });
     expect(JSON.stringify(call?.body)).toMatch(/"low"/);

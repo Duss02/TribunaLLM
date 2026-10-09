@@ -17,9 +17,25 @@ const OPINIONS = {
 } as const;
 
 interface PackSentence {
-  passage: string;
+  /** Null in blind mode, where the debater is given no pack to cite. */
+  passage: string | null;
   text: string;
 }
+
+// What a scripted debater says in blind mode, where there is no pack in the prompt to quote. The
+// figures are made up, so the mock judge mostly leaves them unverified, which is what blind mode shows.
+const BLIND_CLAIMS = [
+  "A 2023 review of 61 studies found effects of between 4 and 12 percent.",
+  "The programme cost 2.4 billion dollars over five years, according to its own audit.",
+  "Participation rose from 38 percent in 2019 to 51 percent in 2024.",
+  "The largest trial enrolled 1,200 people across 14 sites.",
+  "Average savings came to 310 dollars a year for each household.",
+  "Three of the four follow-up studies found no lasting change after 18 months.",
+  "The policy was adopted by 27 countries between 2010 and 2024.",
+  "The first-year drop was 11 percent, and 7 percent in the second year.",
+  "The 2021 audit counted 86,000 cases, growing by roughly 2,000 a year.",
+  "Costs fell by a third once the second phase began in 2016.",
+];
 
 function packSentences(prompt: string): PackSentence[] {
   const out: PackSentence[] = [];
@@ -34,7 +50,7 @@ function packSentences(prompt: string): PackSentence[] {
 }
 
 function cite({ passage, text }: PackSentence): string {
-  return text.replace(/([.!?])$/, ` [${passage}]$1`);
+  return passage === null ? text : text.replace(/([.!?])$/, ` [${passage}]$1`);
 }
 
 /** Replaces the first number with one the evidence does not contain. */
@@ -53,7 +69,8 @@ function scriptTurn(prompt: string, name: string): string {
   const side = /Your side: (PRO|CON)/.exec(prompt)?.[1] === "CON" ? "CON" : "PRO";
   const maxWords = Number(/at most (\d+) words/.exec(prompt)?.[1] ?? 110);
   const restarted = prompt.includes("The judge retracted this sentence");
-  const pool = packSentences(prompt);
+  const quoted = packSentences(prompt);
+  const pool = quoted.length > 0 ? quoted : BLIND_CLAIMS.map((text) => ({ passage: null, text }));
   const known = new Set(
     pool.flatMap((s) => s.text.match(/\d[\d,]*(?:\.\d+)?/g) ?? []).map((n) => n.replaceAll(",", "")),
   );

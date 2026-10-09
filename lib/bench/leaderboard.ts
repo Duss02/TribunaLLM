@@ -78,13 +78,28 @@ const MIN_CLAIMS_FOR_EXTREMES = 10;
 
 const rate = (part: number, whole: number) => (whole === 0 ? null : part / whole);
 
-export function selectComparable(results: readonly OkResult[], choice: { judge?: string; rules?: string }): OkResult[] {
+export function selectComparable(
+  results: readonly OkResult[],
+  choice: { judge?: string; rules?: string; rounds?: number },
+): OkResult[] {
   const combos = [...new Set(results.map((r) => `${r.judge} / ${r.rules}`))];
-  const wanted = results.filter((r) => (!choice.judge || r.judge === choice.judge) && (!choice.rules || r.rules === choice.rules));
+  const wanted = results.filter(
+    (r) =>
+      (!choice.judge || r.judge === choice.judge) &&
+      (!choice.rules || r.rules === choice.rules) &&
+      (choice.rounds === undefined || r.rounds === choice.rounds),
+  );
   const chosen = [...new Set(wanted.map((r) => `${r.judge} / ${r.rules}`))];
   if (chosen.length > 1) {
     throw new Error(
       `Results mix judge and rules versions (${combos.join(", ")}). Ratings from different judges are not comparable. Pass --judge and --rules to pick one.`,
+    );
+  }
+  // Points per debate grow with the number of turns, so a 1-round debate and a 3-round one do not rank together.
+  const lengths = [...new Set(wanted.map((r) => r.rounds))].sort((a, b) => a - b);
+  if (lengths.length > 1) {
+    throw new Error(
+      `Results mix debates of ${lengths.join(" and ")} rounds. Points per debate are not comparable across lengths. Pass --rounds to pick one.`,
     );
   }
   return wanted;

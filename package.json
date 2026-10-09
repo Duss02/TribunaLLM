@@ -18,7 +18,16 @@
     "tournament": "tsx --env-file-if-exists=.env.local scripts/tournament.ts",
     "leaderboard:build": "tsx scripts/leaderboard-build.ts",
     "library:build": "tsx scripts/library-build.ts",
-    "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude"
+    "format": "prettier --write . --ignore-path .gitignore --ignore-path .prettierignore --ignore-path .git/info/exclude",
+    "spend": "tsx scripts/spend.ts",
+    "analysis:sweep": "tsx scripts/analysis/threshold-sweep.ts",
+    "analysis:review": "tsx scripts/analysis/review-sheet.ts",
+    "analysis:perturb": "tsx --env-file-if-exists=.env.local scripts/analysis/perturb.ts",
+    "analysis:recall": "tsx --env-file-if-exists=.env.local scripts/analysis/retrieval-recall.ts",
+    "analysis:judge2": "tsx --env-file-if-exists=.env.local scripts/analysis/second-judge.ts",
+    "analysis:position": "tsx --env-file-if-exists=.env.local scripts/analysis/position-bias.ts",
+    "analysis:perturb-variants": "tsx --env-file-if-exists=.env.local scripts/analysis/perturb-variants.ts",
+    "analysis:rejudge": "tsx --env-file-if-exists=.env.local scripts/analysis/rejudge.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.74",

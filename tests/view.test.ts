@@ -28,6 +28,7 @@ const verdict = (
   supported: 0.5,
   contradicts: 0,
   passage: kind === "supported" ? { id: "P02", text: "Passage two." } : null,
+  evidenceIds: ["P01", "P02"],
   latencyMs,
   inputTokens: 1000,
   costUsd: 0.00004,

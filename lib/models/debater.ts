@@ -6,8 +6,9 @@ import { scriptedModel } from "./scripted";
 import { targetsFor } from "./routes";
 
 const DEBATER_TEMPERATURE = 0.7;
-// Room for a low reasoning budget plus a turn of about 110 words.
-const MAX_OUTPUT_TOKENS = 2000;
+// Room for a low reasoning budget plus a turn of about 110 words. DeepSeek V4 Pro at `low` was seen
+// spending 1,100 reasoning tokens on one turn, and 2,000 once left no room for the text at all.
+const MAX_OUTPUT_TOKENS = 4000;
 
 export interface Debater {
   entry: RegistryEntry;
@@ -47,6 +48,11 @@ export async function resolveDebater(key: string, { paced }: { paced: boolean })
     );
   }
   return { entry, route: target.route, model: target.create(apiKey) };
+}
+
+/** The id the route knows the model by, for the record. */
+export function debaterModelId(debater: Debater): string {
+  return typeof debater.model === "string" ? debater.model : debater.model.modelId;
 }
 
 export function streamDebaterTurn(

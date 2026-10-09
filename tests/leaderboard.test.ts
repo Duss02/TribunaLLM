@@ -160,6 +160,12 @@ describe("selectComparable", () => {
   it("keeps one judge when asked", () => {
     expect(selectComparable([a, b], { judge: "jev-1.13.0" })).toEqual([a]);
   });
+
+  it("refuses to mix debate lengths unless one is picked", () => {
+    const short = { ...a, rounds: 1 };
+    expect(() => selectComparable([a, short], {})).toThrow(/1 and 3 rounds.*--rounds/);
+    expect(selectComparable([a, short], { rounds: 3 })).toEqual([a]);
+  });
 });
 
 describe("parseResultLines", () => {

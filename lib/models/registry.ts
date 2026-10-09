@@ -128,7 +128,8 @@ export const REGISTRY: readonly RegistryEntry[] = [
     routes: {
       gateway: "deepseek/deepseek-v4-flash",
       openrouter: "deepseek/deepseek-v4-flash",
-      direct: { provider: "deepseek", id: "deepseek-v4-flash" },
+      // DeepSeek's own list names it without the version (checked 2026-10-09).
+      direct: { provider: "deepseek", id: "deepseek-flash" },
     },
   },
   {

@@ -1,21 +1,24 @@
+import { createHash } from "node:crypto";
 import { appendFile, mkdir, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { estimateJudgeCost } from "@/lib/bench/estimate";
 import {
   type DebateIdentity,
+  type Provenance,
   debateKey,
   failedResultFrom,
   okResultFrom,
   parseResultLines,
+  transcriptFrom,
 } from "@/lib/bench/results";
 import { type Pairing, buildSchedule, debateSeed } from "@/lib/bench/schedule";
-import { type FinalEvent } from "@/lib/debate/events";
+import { type DebateEvent, type FinalEvent } from "@/lib/debate/events";
 import { runDebate } from "@/lib/debate/orchestrator";
 import { type EvidencePack, listPacks, loadPack } from "@/lib/debate/packs";
 import { judgeModelId, judgeSetupProblem } from "@/lib/jev/judge";
 import { isMockMode } from "@/lib/mock-mode";
-import { resolveDebater } from "@/lib/models/debater";
+import { debaterModelId, resolveDebater } from "@/lib/models/debater";
 import { listAvailability } from "@/lib/models/availability";
 import { NO_MODELS_HINT } from "@/lib/models/pick";
 import { rulesVersionFor } from "@/lib/scoring/rules";
@@ -80,6 +83,19 @@ const packs: EvidencePack[] =
     ? await listPacks()
     : await Promise.all(values.packs.split(",").map((slug) => loadPack(slug.trim())));
 if (packs.length === 0) stop("No evidence packs found in packs/.");
+
+// What produced the text and the verdicts, so a result can be traced to the exact prompts, questions, rules and pack.
+const sha = (text: string) => createHash("sha256").update(text).digest("hex").slice(0, 16);
+const PROMPT_SOURCES = ["lib/debate/prompts.ts", "lib/jev/questions.ts", "lib/scoring/rules.ts"];
+const promptHash = sha((await Promise.all(PROMPT_SOURCES.map((file) => readFile(file, "utf8")))).join("\n"));
+const packHashBySlug = new Map(
+  await Promise.all(
+    packs.map(
+      async (pack) =>
+        [pack.slug, sha(await readFile(path.join("packs", `${pack.slug}.md`), "utf8"))] as const,
+    ),
+  ),
+);
 
 const directory = path.join("bench", isMockMode() ? "results-mock" : "results");
 await mkdir(directory, { recursive: true });
@@ -170,13 +186,26 @@ const append = (line: unknown) => {
   return writing;
 };
 
-async function play(pairing: Pairing): Promise<FinalEvent> {
+async function play(
+  pairing: Pairing,
+): Promise<{ final: FinalEvent; events: DebateEvent[]; provenance: Provenance }> {
   const pack = packBySlug.get(pairing.pack) as EvidencePack;
   const [pro, con] = await Promise.all([
     resolveDebater(pairing.pro, { paced: false }),
     resolveDebater(pairing.con, { paced: false }),
   ]);
+  const library = libraryBySlug.get(pairing.pack) ?? null;
+  const provenance: Provenance = {
+    PRO: { route: pro.route, modelId: debaterModelId(pro) },
+    CON: { route: con.route, modelId: debaterModelId(con) },
+    maxWords: MAX_WORDS,
+    promptHash,
+    packHash: packHashBySlug.get(pairing.pack) as string,
+    library:
+      library && mode === "blind" ? { builtAt: library.builtAt, passages: library.passages.length } : null,
+  };
   let final: FinalEvent | undefined;
+  const events: DebateEvent[] = [];
   for await (const event of runDebate({
     pack,
     pro,
@@ -185,14 +214,15 @@ async function play(pairing: Pairing): Promise<FinalEvent> {
     maxWords: MAX_WORDS,
     strictMode: false,
     mode,
-    library: libraryBySlug.get(pairing.pack) ?? null,
+    library,
     seed: debateSeed(runId, pairing),
     signal: abort.signal,
   })) {
     if (event.type === "final") final = event;
+    else if (event.type !== "token" && event.type !== "score") events.push(event);
   }
   if (!final) throw new Error("The debate ended without a final judgment.");
-  return final;
+  return { final, events, provenance };
 }
 
 let ok = 0;
@@ -218,12 +248,13 @@ async function worker() {
     };
     const label = `[${index + 1}/${pending.length}] ${pairing.pro} (PRO) vs ${pairing.con} (CON) on ${pairing.pack}`;
     try {
-      const final = await play(pairing);
+      const { final, events, provenance } = await play(pairing);
       await append(
         okResultFrom(
           identity,
           { rules, judge: judgeModelId(), seed: debateSeed(runId, pairing), rounds },
           final,
+          { transcript: transcriptFrom(events), provenance },
         ),
       );
       ok++;

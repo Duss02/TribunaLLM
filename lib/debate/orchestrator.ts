@@ -38,6 +38,8 @@ export interface DebateConfig {
 }
 
 const MAX_RESTARTS_PER_TURN = 2;
+// A reasoning model can spend its whole output budget before writing a word; one more attempt costs little.
+const EMPTY_TURN_RETRIES = 1;
 // In blind mode the library is far too large to send whole, so each call gets the passages that best match it.
 const PASSAGES_PER_SENTENCE = 20;
 const PASSAGES_PER_TURN = 30;
@@ -50,6 +52,7 @@ interface SentenceState {
   text: string;
   dropped: boolean;
   judged: JudgedSentence | null;
+  evidenceIds: readonly string[];
   settled: Promise<void>;
 }
 
@@ -63,6 +66,7 @@ interface TurnState {
   streaming: boolean;
   rewindTarget: SentenceState | null;
   truncated: boolean;
+  attempts: number;
   tokens: { input: number; output: number; reasoning: number };
   settled: Promise<void>;
 }
@@ -165,6 +169,7 @@ class DebateRun {
       streaming: false,
       rewindTarget: null,
       truncated: false,
+      attempts: 1,
       tokens: { input: 0, output: 0, reasoning: 0 },
       settled: Promise.resolve(),
     };
@@ -175,7 +180,11 @@ class DebateRun {
     let kept = "";
     for (;;) {
       const retracted = await this.streamAttempt(turn, debater, kept, note);
-      if (!retracted) break;
+      if (!retracted) {
+        if (turn.sentences.length > 0 || turn.truncated || turn.attempts > EMPTY_TURN_RETRIES) break;
+        turn.attempts++;
+        continue;
+      }
 
       const dropped = turn.sentences.filter((sentence) => sentence.index > retracted.index);
       for (const sentence of dropped) sentence.dropped = true;
@@ -200,6 +209,7 @@ class DebateRun {
       turn: turn.id,
       words: wordCount(delivered),
       truncated: turn.truncated,
+      attempts: turn.attempts,
       tokens: turn.tokens,
     });
 
@@ -282,12 +292,14 @@ class DebateRun {
 
   private addSentence(turn: TurnState, text: string, rest: string): void {
     const index = turn.nextIndex++;
+    const evidence = this.evidenceFor(text, PASSAGES_PER_SENTENCE);
     const sentence: SentenceState = {
       id: `${turn.id}-${index}`,
       index,
       text,
       dropped: false,
       judged: null,
+      evidenceIds: evidence.ids,
       settled: Promise.resolve(),
     };
     turn.sentences.push(sentence);
@@ -306,7 +318,7 @@ class DebateRun {
       motion: this.config.pack.motion,
       side: turn.side,
       sentence: text,
-      evidence: this.evidenceFor(text, PASSAGES_PER_SENTENCE),
+      evidence,
       mode: this.mode,
       signal: this.signal,
     }).then(
@@ -335,6 +347,7 @@ class DebateRun {
       supported: judgment.supported,
       contradicts: judgment.contradicts,
       passage: passage ? { id: passage.id, text: passage.text } : null,
+      evidenceIds: [...sentence.evidenceIds],
       latencyMs: judgment.latencyMs,
       inputTokens: judgment.inputTokens,
       costUsd: judgment.costUsd,
@@ -369,6 +382,7 @@ class DebateRun {
       supported: 0,
       contradicts: 0,
       passage: null,
+      evidenceIds: [...sentence.evidenceIds],
       latencyMs: 0,
       inputTokens: 0,
       costUsd: 0,

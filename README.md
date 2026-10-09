@@ -149,11 +149,18 @@ Aggregation (`lib/bench/`): the rating is a Bradley-Terry fit to debate outcomes
 
 `/gui` shows the same debate as an isometric 3D courtroom with plush characters: the two models sit at their tables and take turns walking to the middle to speak, Jev rules from the bench beside the scales, and the camera pushes in on Jev for the verdict. It takes the same query parameters as the arena.
 
-`/leaderboard` renders `bench/leaderboard.json` and needs no keys. No tournament has been run against the live APIs from this repository yet, so no leaderboard is committed; the page says so until one is.
+`/leaderboard` renders `bench/leaderboard.json` and needs no keys.
+
+Each result line carries the whole transcript (every sentence with its verdict, the judge's probabilities and the ids of the passages it read) and a provenance block (route and model id per side, hashes of the prompt and rules sources and of the pack, the library's build date), so a retraction can be audited and the judge asked again. `pnpm spend` prices the tokens in the result files at list price per model and vendor.
+
+## Checking the judge
+
+The scripts in `scripts/analysis/` test the judge rather than the debaters, from the transcripts in `bench/results/`, and write to `bench/analysis/`: a threshold sweep (`pnpm analysis:sweep`), a perturbation test that alters one number in supported sentences and asks again (`analysis:perturb`, `analysis:perturb-variants`), a re-judging of every claim under a sharper question (`analysis:rejudge`), a retrieval recall test (`analysis:recall`), a second judge for agreement (`analysis:judge2`), a position-bias test on the final verdict (`analysis:position`) and review sheets for hand checking (`analysis:review`). The first blind pilot and what these tests found about it are written up in [bench/analysis/REPORT.md](bench/analysis/REPORT.md).
 
 ## Caveats
 
 - The judge can be wrong. Jev is calibrated, not infallible, and Rao and Callison-Burch find it fails in the same places as LLM judges. A retraction means Jev found no support in the pack, not that the sentence is false.
+- As the questions are written today, the judge almost never strikes anything. In the first blind pilot (180 debates, 6 models) it struck 20 of 3,357 claims, and when one number was altered in 78 sentences it had called supported, it struck none of them. The committed leaderboard is that pilot; read its retraction column as a floor, not a measurement. What was tested and what would change it is in [bench/analysis/REPORT.md](bench/analysis/REPORT.md).
 - Whether a sentence is a factual claim at all is itself a Jev call, so opinion detection moves the denominators of every rate.
 - In blind mode a false claim about something the library does not cover goes unpunished, and the library is only as accurate as the Wikipedia revisions it was built from. The curated packs are short, there are ten of them, they are written in English, and their figures were checked against web sources, not by a domain expert. The weakest sourcing is listed in `DECISIONS.md`.
 - A model that writes fewer factual sentences has fewer chances to be retracted. Read the retraction rate next to the rating and the win rate.

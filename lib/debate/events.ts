@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const side = z.enum(["PRO", "CON"]);
-const verdictKind = z.enum([
+export const verdictKind = z.enum([
   "opinion",
   "contradicted",
   "supported",
@@ -50,6 +50,8 @@ export const debateEvent = z.discriminatedUnion("type", [
     supported: z.number(),
     contradicts: z.number(),
     passage: z.object({ id: z.string(), text: z.string() }).nullable(),
+    /** The passage ids the judge read for this sentence, in the order it read them. */
+    evidenceIds: z.array(z.string()).default([]),
     latencyMs: z.number(),
     inputTokens: z.number(),
     costUsd: z.number(),
@@ -78,6 +80,8 @@ export const debateEvent = z.discriminatedUnion("type", [
     turn: z.string(),
     words: z.number(),
     truncated: z.boolean(),
+    /** Streaming attempts not caused by a rewind: 2 when the model first wrote nothing and was asked again. */
+    attempts: z.number().default(1),
     tokens,
   }),
   z.object({

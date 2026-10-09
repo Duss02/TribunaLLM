@@ -10,6 +10,7 @@ const { values } = parseArgs({
     output: { type: "string", default: "bench/leaderboard.json" },
     judge: { type: "string" },
     rules: { type: "string" },
+    rounds: { type: "string" },
   },
 });
 
@@ -22,7 +23,11 @@ try {
   ).size;
 
   const board = buildLeaderboard({
-    results: selectComparable(ok, { judge: values.judge, rules: values.rules }),
+    results: selectComparable(ok, {
+      judge: values.judge,
+      rules: values.rules,
+      rounds: values.rounds === undefined ? undefined : Number(values.rounds),
+    }),
     failed,
     generatedAt: new Date().toISOString(),
     describe: (key) => {
