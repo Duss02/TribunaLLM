@@ -1,0 +1,152 @@
+\section{Study 2: where judges err together}
+\label{sec:study2}
+
+The correlated-error result of \S\ref{sec:llm} invites a question it cannot answer: is the weaker overlap between \jev{} and an LLM a property of the kind of judge, or of a task whose labels are free and whose evidence is fixed? \citet{rao2026jev} measured overlap on subjective rubric panels with human labels; I measured it on construction-labelled contradiction pairs. The two differ in task, evidence, judges and question at once. Study 2 separates them. It was pre-registered before any new API call (hypotheses, items, judges, measures, stopping rule; the pre-registration and its deviations ship with the code), and every result is reported whether or not it matches the prediction.
+
+\subsection{Hypotheses}
+
+\begin{enumerate}[nosep,leftmargin=1.6em]
+\item[H1] \emph{Task objectivity.} For the same pair of judges, the correlation of errors ($\phi$ between the two error indicators) is lower on \dc{} than on a subjective panel with human labels. Support: lower for at least 80\% of pairs, intervals disjoint for at least half.
+\item[H2] \emph{Kind of judge.} On \dc{}, with identical evidence, error correlation is ordered: two LLMs $>$ a decision model with an LLM $>$ two decision models of different makers (\jev{} and GPT-6 Luna through OpenAI's Decisions API). Stated before any Luna Decisions data existed.
+\item[H3] \emph{Error type.} \jev{}'s recall on altered entities, attributions, polarities and units is lower than on altered numbers by at least 15 points; GPT-6 Luna's falls by less than 10.
+\item[H4] \emph{Difficulty.} Within strata defined by whether a third judge was right, \jev{}--LLM correlation stays below LLM--LLM correlation.
+\item[H5] \emph{Framing replicates.} The framed criterion's AUROC gain over the relation question (for \jev{}, \S\ref{sec:framing}) replicates for GPT-6 Luna Decisions, with a gain of at least 0.05.
+\end{enumerate}
+
+\subsection{Items, judges and measures}
+
+\paragraph{Items.} The \nPairs{} numeric pairs of \S\ref{sec:dataset} are unchanged. To them I add 1,657 pairs of four new types, built from the same supported sentences with the same rule (the original token occurs in the evidence the judge reads, the replacement occurs nowhere in it, one edit per sentence, seed 2026): \emph{polarity} (a direction word flipped: rose/fell, more/fewer, higher/lower; 269 pairs), \emph{entity} (a country or city replaced by one of the same kind absent from the evidence; 741), \emph{attribution} (the source named for a fact replaced by another of the same kind; 305) and \emph{unit} (percent/percentage points, million/billion, per year/per month, dollars/euros; 342). Direction words are too common for the whole-evidence rule, so for polarity the rule is applied to the passages that state the sentence's fact; this amendment was recorded before any judge ran. The split by motion is unchanged (held-out: crewed spaceflight, rent control; 407 numeric and 400 new-type pairs). Every candidate edit is checked by code and rejections are logged.
+
+\paragraph{Judges.} Every judge answers the same framed criterion (\S\ref{sec:framing}) over the same evidence text, in two conditions: the twenty passages the arena read and the three that best match the sentence by BM25. Six judges of three kinds: two decision models of different makers, \jev{} 1.13.0 and GPT-6 Luna through the Decisions API (a predicate question, probability returned, input tokens only billed); three LLM judges answering with a JSON verdict at reasoning effort \emph{low}, GPT-6 Luna, DeepSeek V4 Pro and Claude Sonnet 5.5 (the last on a seeded sample of 400 held-out pairs, 200 numeric and 50 per new type; DeepSeek on every numeric pair and 1,262 of the 1,657 new-type pairs, where its balance ran out); and an NLI consistency classifier, Vectara's HHEM-2.1-Open, run on the CPU with the three passages as premise. Decision models and HHEM decide at 0.5, with a threshold fitted on the training motions reported beside it; an LLM answer without a parsable verdict is an abstention, excluded and counted in coverage.
+
+\paragraph{Subjective panels.} For H1 the same judges grade two rubric panels with human labels through the Autorubric library: CHARM-100 (the library's own example, 100 conversations, six criteria; primary) and HealthBench-100 test (100 items with physician majority labels per criterion; secondary), both obtained before any judge ran on them. Ordinal criteria are read as MET in the upper half of their scale; the nominal length criterion and not-applicable labels are not used. \jev{} runs under the library's \texttt{noul\_framed} framing, the LLM judges through LiteLLM at thinking level \emph{low}, Luna Decisions with one typed question per criterion. HHEM answers no question on these panels (no criterion compares the submission with a source), DeepSeek's API rejected the library's structured-output format on the day of the run, and Claude was stopped after CHARM-100 by the pre-registered spending rule; the pre-registration lists these deviations.
+
+\paragraph{Measures.} Per judge: accuracy, recall on altered sentences, false-alarm rate on unchanged ones, AUROC where a probability exists, overall and by type. Per pair of judges, on the items both answered: the $2\times2$ table of error indicators, $\phi$, Cohen's $\kappa$, $P(B\ \text{wrong} \mid A\ \text{wrong})$ against $P(B\ \text{wrong})$, and the effective number of independent votes $k/(1+(k-1)\bar\phi)$, the design-effect correction for equicorrelated units \citep{kish1965survey}. Coverage at guaranteed risk: thresholds chosen on the training motions as the widest acceptance region whose one-sided Clopper--Pearson 95\% bound on the error is at most 5\%, evaluated on the held-out motions. Intervals are percentile bootstraps resampling pairs (conversations on the panels), 1,000 resamples. Thresholds, selective rules and nothing else are fitted on the training motions; the held-out motions were not opened until every judge had finished on them.
+
+\subsection{Results on the held-out motions}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-judges.tex}}
+\caption{Every judge of Study 2 as a binary contradiction detector on the held-out motions, all five perturbation types pooled (the label rate is 50\% by construction). Claude Sonnet 5.5 was run on 400 of the 807 held-out pairs.}
+\label{tab:study-judges}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-recall-by-type.tex}}
+\caption{Recall on altered sentences by perturbation type, held-out motions, decision at 0.5 for the scored judges.}
+\label{tab:study-recall}
+\end{table}
+
+\paragraph{Judges and error types (H3).} Table~\ref{tab:study-judges} pools the five types; Table~\ref{tab:study-recall} splits recall by type. \jev{} under the framed criterion over twenty passages is the most accurate judge on the held-out motions (\studyJevTwoZeroAccuracy{}, AUROC \studyJevTwoZeroAuroc{}), ahead of the three LLM judges (\studyLunaChatAccuracy{} to \studyDeepseekProAccuracy{}), of GPT-6 Luna Decisions (\studyLunaDecTwoZeroAccuracy{}) and of HHEM (\studyHhemAccuracy{}, with \studyHhemFa{} false alarms); its advantage is a false-alarm rate (\studyJevTwoZeroFa{}) about half the LLMs' and a quarter of the second decision model's. H3 is supported: from numbers to the mean of the four new types, \jev{}'s recall over three passages falls by \studyJevThreeDrop{} points (\studyJevTwoZeroDrop{} over twenty), GPT-6 Luna Decisions' by \studyLunaDecThreeDrop{} (\studyLunaDecTwoZeroDrop{}), Luna chat's by \studyLunaChatDrop{}, DeepSeek V4 Pro's by \studyDeepseekProDrop{}, Claude's by \studyClaudeDrop{} and HHEM's by \studyHhemDrop{}. The drop is not uniform: \jev{} catches a flipped direction word as often as a changed number (\studyJevTwoZeroRecallPolarity{}), a changed place or country most of the time (\studyJevTwoZeroRecallEntity{}), a changed source two times in three (\studyJevTwoZeroRecallAttribution{}) and a changed unit one time in three (\studyJevTwoZeroRecallUnit{}), where every judge is weak and the human check of the construction labels (\S\ref{sec:study2}, pending) matters most. The decision model's weakness is concentrated in identifiable types, which is where an LLM second opinion can justify its price.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-correlated.tex}}
+\caption{Error correlation between judges on the items both answered, top-3 condition, held-out motions: counts of items both got wrong / only A / only B / neither, $\phi$ and $\kappa$ between the error indicators with bootstrap intervals, and $P(B\ \text{wrong}\mid A\ \text{wrong})$ against $B$'s own error rate.}
+\label{tab:study-correlated}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-votes.tex}}
+\caption{Effective independent votes of judge sets, $k/(1+(k-1)\bar\phi)$, on the items every judge of the set answered.}
+\label{tab:study-votes}
+\end{table}
+
+\paragraph{Kind of judge (H2).} Table~\ref{tab:study-correlated} gives every pair. The mean $\phi$ is \studyHTwoMeanLl{} between two LLMs, \studyHTwoMeanDl{} between a decision model and an LLM and \studyHTwoMeanDd{} between the two decision models, in the predicted order and with disjoint intervals between the extremes: H2 is supported. Two reasoning models of different families fail on the same items (Luna chat and DeepSeek V4 Pro $\phi$ = \studyPhiLunaChatDeepseekPro{}: when one is wrong the other is wrong \studyCondLunaChatDeepseekPro{} of the time against a base rate of \studyBaseLunaChatDeepseekPro{}; DeepSeek and Claude \studyPhiDeepseekProClaude{}), far more than the two decision models of different makers do ($\phi$ = \studyPhiJevThreeLunaDecThree{}, \studyCondJevThreeLunaDecThree{} against \studyBaseJevThreeLunaDecThree{}). HHEM's errors are uncorrelated with every other judge's ($\phi$ from \studyPhiLunaDecThreeHhem{} to \studyPhiClaudeHhem{}), the signature of a different kind of model, but at its accuracy the independence buys little. Table~\ref{tab:study-votes} turns the correlations into effective votes: two LLMs are worth \studyVotesLunaChatDeepSeekPro{} independent votes, \jev{} with Luna Decisions \studyVotesJevLunaDecisionsTopThree{}, the four together \studyVotesJevLunaDecisionsLunaChatDeepSeekPro{} and all six \studyVotesAllSixTopThree{}. The kind of judge, and not only its accuracy, determines what a second opinion is worth. The LLM pairs here are far more dependent than the 0.21 average error correlation that \citet{hossain2026agreement} report across ten judges on fixed items, in the direction they note for frontier judges of different providers; the exploratory split below attributes part of the excess to the evidence the judges share. The effective votes agree with \citet{kohli2026nine}, who get about two votes from nine judges: six judges of three kinds give \studyVotesAllSixTopThree{} here.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-h4.tex}}
+\caption{H4: error correlation within difficulty strata, items split by whether a third judge was right.}
+\label{tab:study-h4}
+\end{table}
+
+\paragraph{Difficulty (H4).} Table~\ref{tab:study-h4} repeats the correlations within the two strata. Every correlation falls once items are split by a third judge's success, as it must when part of what judges share is the difficulty of the item. \jev{}'s correlations with the LLMs stay below the Luna chat--DeepSeek pair in both strata (\studyHFourRightJevThreeLunaChat{}, \studyHFourRightJevThreeDeepseekPro{} and \studyHFourRightJevThreeClaude{} against \studyHFourRightLunaChatDeepseekPro{} where the third judge is right; \studyHFourWrongJevThreeLunaChat{}, \studyHFourWrongJevThreeDeepseekPro{} and \studyHFourWrongJevThreeClaude{} against \studyHFourWrongLunaChatDeepseekPro{} where it is wrong), but not below the Luna chat--Claude pair, which drops to the same level (\studyHFourRightLunaChatClaude{} and \studyHFourWrongLunaChatClaude{}). H4 is partly supported: the ordering survives stratification for one of the two LLM pairs that can be stratified.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-h5.tex}}
+\caption{H5: AUROC on numeric held-out items of the arena's relation question against the framed criterion, same input text, for the second decision model; \jev{} from the pilot for reference.}
+\label{tab:study-h5}
+\end{table}
+
+\paragraph{Framing (H5).} Table~\ref{tab:study-h5}. H5 is not supported, and the sign is reversed. For GPT-6 Luna Decisions the arena's relation question gives AUROC \studyHFiveLooseGPTSixLunaDecisionsTwoZeroPassages{} against \studyHFiveFramedGPTSixLunaDecisionsTwoZeroPassages{} for the framed criterion over twenty passages (\studyHFiveLooseGPTSixLunaDecisionsTopThree{} against \studyHFiveFramedGPTSixLunaDecisionsTopThree{} over three), a loss of 0.12, while for \jev{} on the same held-out items the framed criterion is ahead by \studyHFiveGainJevTwoZeroPassagesPilot{}. The framing effect of \S\ref{sec:framing} is real and large, but it belongs to the question and the model together: the framing that unlocks one decision model handicaps another of a different maker, so a criterion text has to be tuned against the judge that will answer it, with free labels of the kind \dc{} provides. \citet{liu2026cues} report the same sensitivity from the other side: logically equivalent presentations of one grading request change \jev{}'s vulnerability to a one-character edit in the candidate.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-selective.tex}}
+\caption{Coverage at guaranteed risk: acceptance thresholds fitted on the training motions so that the one-sided Clopper--Pearson 95\% bound on the error among accepted items is at most 5\%, then applied to the held-out motions.}
+\label{tab:study-selective}
+\end{table}
+
+\paragraph{Coverage at guaranteed risk.} Table~\ref{tab:study-selective}. Only \jev{}'s probabilities support a rule of this kind: over twenty passages the region fitted on the training motions accepts \studySelCoverageJevTwoZero{} of held-out items at \studySelErrorJevTwoZero{} error (one-sided 95\% bound \studySelUpperJevTwoZero{}, just above the 5\% target), over three passages \studySelCoverageJevThree{} at \studySelErrorJevThree{} (bound \studySelUpperJevThree{}). No region of Luna Decisions' or HHEM's probabilities reaches a 5\% bound on the training motions, and no agreement rule between two judges gets under 10\% error on the items they agree on: judges that agree are often wrong together, which is the correlation of Table~\ref{tab:study-correlated} seen from the other side. That Luna Decisions' probabilities support no guaranteed-risk region matches the finding of \citet{duan2026jeval} that decision models tend to identify the most likely outcome while overstating its probability; \jev{}'s probabilities, on this task, are usable as confidence.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-panel-charm100.tex}}
+\caption{CHARM-100 (\studyPanelCellsCharmOneZeroZero{} criterion judgements with a human label): agreement of each judge with the human labels under the MET/UNMET reading.}
+\label{tab:study-charm}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-h1.tex}}
+\caption{H1: the same pair of judges on \dc{} (top-3, held-out) and on the subjective panels; $\phi$ between error indicators with bootstrap intervals.}
+\label{tab:study-h1}
+\end{table}
+
+\paragraph{Task objectivity (H1).} Tables~\ref{tab:study-charm}, \ref{tab:study-healthbench} and \ref{tab:study-h1}. H1 is not supported. On CHARM-100, \dc{}'s $\phi$ is the lower one for \studyHOneLowerCharmOneZeroZero{} of \studyHOneTotalCharmOneZeroZero{} pairs, with disjoint intervals for \studyHOneDisjointCharmOneZeroZero{}, short of the 80\% the pre-registration asked for; on HealthBench-100 it is the lower one for one pair of three. The pattern is not noise. The pairs that include a decision model are less correlated on the objective task than on the panel (\jev{}--Luna Decisions \studyPhiJevThreeLunaDecThree{} against \studyPanelPhiCharmOneZeroZeroJevLunaDec{}, Luna Decisions--Luna chat \studyPhiLunaDecThreeLunaChat{} against \studyPanelPhiCharmOneZeroZeroLunaDecLunaChat{}), while the LLM pair is more correlated on it (Luna chat--Claude \studyPhiLunaChatClaude{} against \studyPanelPhiCharmOneZeroZeroLunaChatClaude{}). A task with free labels and fixed evidence does not lower shared error across the board; it lowers it for decision models and raises it for LLMs, which the next paragraph explains. On the panels themselves \jev{} agrees with the human labels as well as the best LLM on CHARM-100 (accuracy \studyPanelAccCharmOneZeroZeroJev{}, $\kappa$ \studyPanelKappaCharmOneZeroZeroJev{}, against \studyPanelAccCharmOneZeroZeroClaude{} for Claude and \studyPanelAccCharmOneZeroZeroLunaChat{} for Luna chat) and better than both OpenAI judges on HealthBench-100 (\studyPanelAccHealthbenchOneZeroZeroTestJev{} against \studyPanelAccHealthbenchOneZeroZeroTestLunaChat{} and \studyPanelAccHealthbenchOneZeroZeroTestLunaDec{}), which is the finding of \citet{rao2026jev} reproduced on their own material.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-panel-healthbench-100-test.tex}}
+\caption{HealthBench-100 test (\studyPanelCellsHealthbenchOneZeroZeroTest{} criterion judgements with a physician majority label): agreement of each judge with the human labels.}
+\label{tab:study-healthbench}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-retrieval.tex}}
+\caption{Exploratory, not pre-registered: held-out items split by whether the passage carrying the original token is among the three passages selected for the altered sentence (present for \studyRetrievalShare{} of pairs).}
+\label{tab:study-retrieval}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/study-retrieval-corr.tex}}
+\caption{Exploratory: error correlation within the two evidence strata of Table~\ref{tab:study-retrieval}.}
+\label{tab:study-retrieval-corr}
+\end{table}
+
+\paragraph{Exploratory: shared evidence, shared errors.} This check was not pre-registered. Three passages chosen by BM25 do not always contain the fact: the passage carrying the original token is among them for \studyRetrievalShare{} of held-out pairs. Table~\ref{tab:study-retrieval} splits recall by this. Where the fact passage is present, the LLM judges catch most altered sentences (Luna chat \studyRetrRecallPresentLunaChat{}, DeepSeek \studyRetrRecallPresentDeepseekPro{}, Claude \studyRetrRecallPresentClaude{}); where it is absent they fall to \studyRetrRecallAbsentLunaChat{}, \studyRetrRecallAbsentDeepseekPro{} and \studyRetrRecallAbsentClaude{}, and the correlation between two LLMs' errors is \studyRetrPhiAbsentLunaChatDeepseekPro{} in that stratum against \studyRetrPhiPresentLunaChatDeepseekPro{} where the fact is present (Table~\ref{tab:study-retrieval-corr}). \jev{} over three passages falls from \studyRetrRecallPresentJevThree{} to \studyRetrRecallAbsentJevThree{}, and over twenty, where the fact passage is always read, stays at \studyRetrRecallAbsentJevTwoZero{} on the same pairs. Much of what the LLM judges share on \dc{} is therefore the evidence they were handed: models that read the three passages carefully and find no passage about the fact all answer the same way, and that answer is wrong by construction. Shared error has an evidence component that a judge-only account misses, and that the twenty-passage condition removes.
+
+\FloatBarrier
+\subsection{The arena with the certified question}
+\label{sec:arena-v2}
+
+Study 2 certifies one question for the arena's retraction: the framed criterion over every passage the arena read, with \jev{} deciding at 0.5 or, for a strike that has to be right, at the confident threshold of the guaranteed-risk rule ($p \geq \studyLbThreshold{}$, about 5\% error on held-out \dc{}). I judged every claim of the \studyLbDebates{} pilot debates again under it: \studyLbClaims{} claims, \studyLbCost{} of judge time, no new debate, because every sentence is stored with the passages it was judged against. The pilot's own question had struck \studyLbPilotStruck{} claims. The framed criterion marks \studyLbContradicted{} at 0.5 (\studyLbRateAll{}) and \studyLbContradictedConfident{} at the confident rule (\studyLbRateAllConfident{}).
+
+\begin{table}[htbp]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/leaderboard-v2.tex}}
+\caption{Leaderboard v2: the pilot's \studyLbClaims{} claims judged again by \jev{} under the framed criterion over every passage the arena read. ``Struck (pilot)'' is what the arena's original question caught. Models are ordered by the confident rate; Wilson 95\% intervals. The win rate is the pilot's match outcome, unchanged.}
+\label{tab:leaderboard-v2}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/leaderboard-v2-packs.tex}}
+\caption{Leaderboard v2 by motion: contradiction rates vary more across motions than across models.}
+\label{tab:leaderboard-v2-packs}
+\end{table}
+
+Table~\ref{tab:leaderboard-v2} is the leaderboard the arena promised. Under the confident rule \studyLbBest{} is struck least (\studyLbRateConfidentClaudeSonnetFiveFive{} of its claims, interval \studyLbCiConfidentClaudeSonnetFiveFive{}), and the three models at the bottom, the two DeepSeek models and GPT-6 Luna (\studyLbRateConfidentDeepseekVFourPro{}, \studyLbRateConfidentDeepseekVFourFlash{} and \studyLbRateConfidentGptSixLuna{}), cannot be told apart: Luna's \studyLbCountConfidentGptSixLuna{} strikes on \studyLbClaimsGptSixLuna{} claims give it the highest rate by one or two strikes, with the widest interval (\studyLbCiConfidentGptSixLuna{}). The ends of the ranking are separated, the neighbours are not. At the 0.5 rule the two DeepSeek models stand apart from the other four (\studyLbRateDeepseekVFourPro{} and \studyLbRateDeepseekVFourFlash{} of their claims against \studyLbRateGptSixOneSol{} to \studyLbRateClaudeOpusFiveFive{}), with disjoint intervals, and the four overlap among themselves. The spread the leaderboard was built to show exists, and it broadly follows the pilot's match outcomes at the top (the two Claude models and GPT-6.1 Sol) and the bottom (GPT-6 Luna). Two cautions belong with it. The rate varies more across motions than across models (Table~\ref{tab:leaderboard-v2-packs}): motions whose packs are dense with figures (sugar tax, nuclear power) produce more strikes for everyone, so the comparison holds within a schedule in which every model argued every motion on both sides, as here, and not across schedules. And a strike means that the library gives a different figure for the same thing, which the pilot's hand review showed can be an edition conflict (Lazard's 2023 against 2024 cost ranges, a study quoted from a later revision) rather than a falsehood; the \studyLbContradictedConfident{} confident strikes are listed with the data for review, and the arena still needs a third verdict, ``not in this edition'', before a strike can be read as an error of the debater rather than a disagreement with the library.
+
+\FloatBarrier
+\subsection{What the study says}
+
+Of five pre-registered predictions, two held (H2, H3), one held in part (H4) and two failed (H1, H5); the failed predictions carry the most information. Error overlap between judges is ordered by the kind of judge: two reasoning models of different families are worth \studyVotesLunaChatDeepSeekPro{} votes, a decision model and an LLM more, two decision models of different makers most, and an NLI classifier is independent of all of them but too weak to use. The overlap is not lower on a task with free labels in general; it is lower for pairs that include a decision model and higher for pairs of LLMs, and the exploratory split shows why: LLMs that read the same three passages fail together when the fact is not in them, so part of what looks like shared judgement is shared evidence. The framing that moved \jev{} from catching one altered number in twenty to nine in ten moves a second decision model the other way, so the lesson of \S\ref{sec:framing} is not that the framed criterion should be adopted everywhere, but that the question has to be tuned to the judge that answers it, with labels one can afford. \jev{}'s weakness has a shape, units and attributions, where an LLM second opinion is worth having and where the human check of the construction labels is due. And \jev{} over twenty passages remains the best single judge on this task and the only one whose probability supports a guaranteed-risk rule, while agreeing with human labels on the subjective panels as well as the LLMs do, the result the Autorubric authors reported, reproduced here on their material with their library. With that question the arena does what it was built for: the same 180 debates, judged again for \studyLbCost{}, give \studyLbContradictedConfident{} confident strikes instead of \studyLbPilotStruck{} and a leaderboard whose ends are separated.
+\FloatBarrier

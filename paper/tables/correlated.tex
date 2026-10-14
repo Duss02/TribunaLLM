@@ -1,0 +1,12 @@
+\begin{tabular}{@{}llrrrrrrr@{}}
+\toprule
+Jev wording & LLM judge & Items & LLM err. & Jev err. & $P(\text{LLM wrong}\mid\text{Jev wrong})$ & $P(\text{LLM wrong}\mid\text{Jev conf.\ wrong})$ & $n$ conf. & $\kappa_{\text{err}}$ \\
+\midrule
+sharp, top-3 & deepseek-v4-flash & 2080 & 16.5\% & 25.5\% & 44.3\% & 61.2\% & 263 & 0.42 \\
+sharp, top-3 & gpt-6-luna & 2328 & 18.0\% & 26.0\% & 50.8\% & 67.5\% & 305 & 0.49 \\
+framed, top-3 & deepseek-v4-flash & 2080 & 16.5\% & 17.5\% & 67.0\% & 88.0\% & 117 & 0.63 \\
+framed, top-3 & gpt-6-luna & 2328 & 18.0\% & 19.0\% & 60.5\% & 78.2\% & 133 & 0.53 \\
+framed, 20 & deepseek-v4-flash & 2080 & 16.5\% & 11.9\% & 49.4\% & 67.6\% & 37 & 0.32 \\
+framed, 20 & gpt-6-luna & 2328 & 18.0\% & 12.8\% & 40.8\% & 48.9\% & 47 & 0.22 \\
+\bottomrule
+\end{tabular}

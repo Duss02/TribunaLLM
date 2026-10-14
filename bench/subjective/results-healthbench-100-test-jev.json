@@ -1,0 +1,58 @@
+{
+ "jev-noul_framed": {
+  "judge": "jev-noul_framed",
+  "n_items": 100,
+  "n_samples": 205,
+  "accuracy": 0.8048780487804879,
+  "kappa_micro": 0.6082178690874342,
+  "kappa_mean": 0.6082178690874342,
+  "phi": 0.6083345993462038,
+  "precision_met": 0.8240740740740741,
+  "recall_met": 0.8090909090909091,
+  "bias": "mean_bias=-0.00975609756097561 std_bias=0.4426994277805714 is_significant=False p_value=0.7526799313234677 direction='negative' effect_size=-0.02203774603885714 ci=ConfidenceInterval(lower=-0.07071880576208545, upper=0.05120661064013423, confidence=0.95, method='t') n_samples=205",
+  "coverage": null,
+  "confusion": null,
+  "bootstrap": null,
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": [
+   "Per-item heterogeneous rubrics: reporting pooled rubric-point metrics (per-criterion table and weighted-score correlation are undefined across differing rubrics). See `pooled_by_scale`."
+  ]
+ },
+ "jev-choice": {
+  "judge": "jev-choice",
+  "n_items": 100,
+  "n_samples": 205,
+  "accuracy": 0.7853658536585366,
+  "kappa_micro": 0.5690396559961777,
+  "kappa_mean": 0.5690396559961777,
+  "phi": 0.5691488671023792,
+  "precision_met": 0.8055555555555556,
+  "recall_met": 0.7909090909090909,
+  "bias": "mean_bias=-0.00975609756097561 std_bias=0.46431737690344976 is_significant=False p_value=0.7638415499809151 direction='negative' effect_size=-0.021011700285781667 ci=ConfidenceInterval(lower=-0.07369574370594405, upper=0.05418354858399283, confidence=0.95, method='t') n_samples=205",
+  "coverage": null,
+  "confusion": null,
+  "bootstrap": null,
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": [
+   "Per-item heterogeneous rubrics: reporting pooled rubric-point metrics (per-criterion table and weighted-score correlation are undefined across differing rubrics). See `pooled_by_scale`."
+  ]
+ },
+ "jev-choice-exclude": {
+  "accuracy": 0.7853658536585366,
+  "kappa_micro": 0.5690396559961777,
+  "phi": 0.5691488671023792,
+  "n_samples": 205,
+  "coverage": "None"
+ },
+ "jev-choice-as_unmet": {
+  "accuracy": 0.7853658536585366,
+  "kappa_micro": 0.5690396559961777,
+  "phi": 0.5691488671023792,
+  "n_samples": 205,
+  "coverage": "None"
+ }
+}

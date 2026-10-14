@@ -25,6 +25,7 @@ const transcriptSentence = z.object({
   isClaim: z.number(),
   supported: z.number(),
   contradicts: z.number(),
+  contradicted: z.number().default(0),
   passage: z.string().nullable(),
   /** What the judge read, as passage ids in the order it read them. */
   evidenceIds: z.array(z.string()),
@@ -152,6 +153,7 @@ export function transcriptFrom(events: readonly DebateEvent[]): Transcript {
           verdict: null,
           isClaim: 0,
           supported: 0,
+          contradicted: 0,
           contradicts: 0,
           passage: null,
           evidenceIds: [] as string[],
@@ -168,6 +170,7 @@ export function transcriptFrom(events: readonly DebateEvent[]): Transcript {
         sentence.isClaim = event.isClaim;
         sentence.supported = event.supported;
         sentence.contradicts = event.contradicts;
+        sentence.contradicted = event.contradicted;
         sentence.passage = event.passage?.id ?? null;
         sentence.evidenceIds = event.evidenceIds;
         break;

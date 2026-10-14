@@ -1,4 +1,5 @@
 import { APIError, type EntryType, type Questions, TypeSafeClient } from "@typesafe-ai/sdk";
+import { contradictionQuestions, contradictionState } from "@/lib/jev/criterion";
 import { getKey } from "@/lib/credentials";
 import { MissingKeyError } from "@/lib/errors";
 import { isMockMode } from "@/lib/mock-mode";
@@ -91,19 +92,26 @@ async function sentenceAnswers(input: SentenceInput): Promise<RawSentenceAnswers
     sentence: input.sentence,
     evidence: input.evidence.text,
   };
-  const { answers, latencyMs, inputTokens } = await ask(
-    state,
-    sentenceQuestions(input.evidence.ids),
-    input.signal,
-  );
+  // Two calls in parallel: the relation set (claim, support, best passage, relevance) and the framed
+  // contradiction criterion, which alone decides a strike (rules v2). Latency is the slower of the two.
+  const [relation, framed] = await Promise.all([
+    ask(state, sentenceQuestions(input.evidence.ids), input.signal),
+    ask(
+      contradictionState(input.motion, input.evidence.text, input.sentence),
+      contradictionQuestions(),
+      input.signal,
+    ),
+  ]);
+  const { answers } = relation;
   return {
     isClaim: answers.is_claim.noul,
     supported: answers.supported.noul,
     contradicts: answers.relation.probabilities.contradicts,
+    contradicted: framed.answers.met.noul,
     onMotion: answers.on_motion.noul,
     which: answers.which.choice,
-    latencyMs,
-    inputTokens,
+    latencyMs: Math.max(relation.latencyMs, framed.latencyMs),
+    inputTokens: relation.inputTokens + framed.inputTokens,
   };
 }
 
@@ -114,6 +122,7 @@ export async function judgeSentence(input: SentenceInput): Promise<SentenceJudgm
     isClaim: raw.isClaim,
     supported: raw.supported,
     contradicts: raw.contradicts,
+    contradicted: raw.contradicted,
     onMotion: raw.onMotion,
     passage: raw.which === "none" ? null : raw.which,
     ...stats(raw),

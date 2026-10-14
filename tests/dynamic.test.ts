@@ -182,6 +182,7 @@ describe("a model picked from the catalogue", () => {
             which: { type: "choice", choice: "none", confidence: 1, probabilities: { none: 1 } },
           });
         }
+        if ("met" in questions) answers.met = { type: "noul", noul: 0.05 };
         if ("evidence_use" in questions) {
           Object.assign(answers, {
             on_motion: noul,

@@ -13,15 +13,18 @@ export type JudgedVerdict = Verdict | "unjudged";
 export interface SentenceProbabilities {
   isClaim: number;
   supported: number;
+  /** p(contradicts) of the relation question; decides only when `contradicted` is absent (pilot data). */
   contradicts: number;
+  /** p(MET) of the framed contradiction criterion, the certified question (rules v2). */
+  contradicted?: number;
 }
 
 export function verdictFor(
-  { isClaim, supported, contradicts }: SentenceProbabilities,
+  { isClaim, supported, contradicts, contradicted }: SentenceProbabilities,
   mode: DebateMode = "evidence",
 ): Verdict {
   if (isClaim < THRESHOLDS.claim) return "opinion";
-  if (contradicts >= THRESHOLDS.contradicted) return "contradicted";
+  if ((contradicted ?? contradicts) >= THRESHOLDS.contradicted) return "contradicted";
   if (supported >= THRESHOLDS.supported) return "supported";
   if (mode === "blind") return "unverified";
   if (supported <= THRESHOLDS.unsupported) return "unsupported";

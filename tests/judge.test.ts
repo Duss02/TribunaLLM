@@ -22,18 +22,24 @@ interface Captured {
   body: { state: Record<string, unknown>; model: string; questions: Record<string, unknown> };
 }
 
-function stubJev(answers: Record<string, unknown>, inputTokens = 1000): Captured[] {
+/**
+ * Answers every request with `answers`, except the framed contradiction request (the one whose only
+ * question is `met`), which gets `framed` or, by default, the relation question's p(contradicts).
+ */
+function stubJev(answers: Record<string, unknown>, inputTokens = 1000, framed?: number): Captured[] {
   const calls: Captured[] = [];
   vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
-    calls.push({
-      url,
-      authorization: new Headers(init.headers).get("authorization"),
-      body: JSON.parse(String(init.body)),
-    });
+    const body = JSON.parse(String(init.body)) as Captured["body"];
+    calls.push({ url, authorization: new Headers(init.headers).get("authorization"), body });
+    const isFramed = Object.keys(body.questions).join() === "met";
+    const relation = answers.relation as { probabilities?: { contradicts?: number } } | undefined;
+    const reply = isFramed
+      ? { met: noulAnswer(framed ?? relation?.probabilities?.contradicts ?? 0) }
+      : answers;
     return new Response(
       JSON.stringify({
         model: "jev-1.13.0",
-        answers,
+        answers: reply,
         usage: { input_tokens: inputTokens, output_tokens: 0 },
       }),
       { status: 200, headers: { "content-type": "application/json" } },
@@ -41,6 +47,8 @@ function stubJev(answers: Record<string, unknown>, inputTokens = 1000): Captured
   });
   return calls;
 }
+const relationCall = (calls: Captured[]) => calls.find((c) => "relation" in c.body.questions);
+const framedCall = (calls: Captured[]) => calls.find((c) => Object.keys(c.body.questions).join() === "met");
 
 beforeEach(() => {
   vi.stubEnv("TYPESAFE_API_KEY", "test-key");
@@ -62,12 +70,12 @@ describe("judgeSentence against the API", () => {
     on_motion: noulAnswer(0.9),
   });
 
-  it("sends one request with a pinned model, a blind state and all five questions", async () => {
+  it("sends two requests with a pinned model: the five relation questions on a blind state, and the framed criterion", async () => {
     const calls = stubJev(sentenceAnswers(0.8));
     await judgeSentence({ motion: "m", side: "PRO", sentence: "Fares fell.", evidence });
 
-    expect(calls).toHaveLength(1);
-    const [call] = calls;
+    expect(calls).toHaveLength(2);
+    const call = relationCall(calls);
     expect(call?.url).toBe("https://api.typesafe.ai/v1/systemone");
     expect(call?.authorization).toBe("Bearer test-key");
     expect(call?.body.model).toBe("jev-1.13.0");
@@ -84,21 +92,42 @@ describe("judgeSentence against the API", () => {
       "which",
       "on_motion",
     ]);
+    const framed = framedCall(calls);
+    expect(framed?.body.model).toBe("jev-1.13.0");
+    expect(framed?.body.state).toEqual({
+      input: `Motion under debate: m\n\nEvidence passages (id| text):\n${evidence.text}`,
+      submission: "Fares fell.",
+    });
+    expect(Object.keys(framed?.body.questions ?? {})).toEqual(["met"]);
+  });
+
+  it("strikes on the framed criterion, not on the relation question", async () => {
+    stubJev(sentenceAnswers(0.8), 1000, 0.2);
+    const notStruck = await judgeSentence({ motion: "m", side: "PRO", sentence: "s", evidence });
+    expect(notStruck.contradicts).toBe(0.8);
+    expect(notStruck.contradicted).toBe(0.2);
+    expect(notStruck.verdict).not.toBe("contradicted");
+
+    stubJev(sentenceAnswers(0.1), 1000, 0.9);
+    const struck = await judgeSentence({ motion: "m", side: "PRO", sentence: "s", evidence });
+    expect(struck.contradicted).toBe(0.9);
+    expect(struck.verdict).toBe("contradicted");
   });
 
   it("offers the passages in the order given, then an explicit none", async () => {
     const calls = stubJev(sentenceAnswers(0.8));
     await judgeSentence({ motion: "m", side: "CON", sentence: "s", evidence });
-    const which = calls[0]?.body.questions.which as { criteria: Record<string, unknown> };
+    const which = relationCall(calls)?.body.questions.which as { criteria: Record<string, unknown> };
     expect(Object.keys(which.criteria)).toEqual(["P02", "P01", "none"]);
   });
 
-  it("maps a contradicting answer to a contradicted verdict and prices the call", async () => {
+  it("maps a contradicting answer to a contradicted verdict and prices both calls", async () => {
     stubJev(sentenceAnswers(0.8), 2_000_000);
     const judgment = await judgeSentence({ motion: "m", side: "PRO", sentence: "s", evidence });
     expect(judgment.verdict).toBe("contradicted");
     expect(judgment.passage).toBeNull();
-    expect(judgment.costUsd).toBeCloseTo(0.084, 6);
+    expect(judgment.inputTokens).toBe(4_000_000);
+    expect(judgment.costUsd).toBeCloseTo(0.168, 6);
   });
 
   it("returns the best passage when one supports the sentence", async () => {
@@ -116,7 +145,7 @@ describe("judgeSentence against the API", () => {
     vi.stubEnv("TYPESAFE_MODEL", "jev-1.14.0");
     const calls = stubJev(sentenceAnswers(0.8));
     await judgeSentence({ motion: "m", side: "PRO", sentence: "s", evidence });
-    expect(calls[0]?.body.model).toBe("jev-1.14.0");
+    expect(calls.map((c) => c.body.model)).toEqual(["jev-1.14.0", "jev-1.14.0"]);
   });
 
   it("names the variable to set when the key is missing", async () => {

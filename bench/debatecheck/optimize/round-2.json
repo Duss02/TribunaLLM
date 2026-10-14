@@ -1,0 +1,70 @@
+{
+  "round": 2,
+  "candidates": [
+    {
+      "text": "Compare the factual details in `sentence` with the corresponding facts in `evidence` and choose this option if even one detail is incompatible, but not merely because a detail is absent or a passage discusses something different.",
+      "metrics": {
+        "auroc": 0.905028125,
+        "detection70": 0.47,
+        "falseAlarm70": 0.0075,
+        "detection50": 0.58,
+        "falseAlarm50": 0.035,
+        "youden70": 0.46249999999999997,
+        "n": 400,
+        "tokens": 638367
+      }
+    },
+    {
+      "text": "A passage in `evidence` gives a number, date, name, place, threshold, or outcome incompatible with the corresponding detail in `sentence`, or explicitly states the opposite, even if every other detail agrees.",
+      "metrics": {
+        "auroc": 0.9031625,
+        "detection70": 0.385,
+        "falseAlarm70": 0.0075,
+        "detection50": 0.52,
+        "falseAlarm50": 0.015,
+        "youden70": 0.3775,
+        "n": 400,
+        "tokens": 638367
+      }
+    },
+    {
+      "text": "The `evidence` conflicts with a fact asserted in `sentence`; missing details, equivalent units, and figures for a different entity, measure, period, or source edition do not count as conflicts.",
+      "metrics": {
+        "auroc": 0.8930875,
+        "detection70": 0.1975,
+        "falseAlarm70": 0.0025,
+        "detection50": 0.3825,
+        "falseAlarm50": 0.0125,
+        "youden70": 0.195,
+        "n": 400,
+        "tokens": 635967
+      }
+    },
+    {
+      "text": "The `evidence` describes the same fact as `sentence` but assigns it an incompatible value or detail; agreement on the general claim does not cancel a mismatch in one asserted detail.",
+      "metrics": {
+        "auroc": 0.88605,
+        "detection70": 0.3925,
+        "falseAlarm70": 0.0075,
+        "detection50": 0.56,
+        "falseAlarm50": 0.04,
+        "youden70": 0.385,
+        "n": 400,
+        "tokens": 633567
+      }
+    }
+  ],
+  "best": {
+    "text": "The `evidence` gives a different number, date, name, place, threshold, or outcome for a fact asserted in `sentence`, or explicitly states its opposite, even if the rest of the sentence agrees with the evidence.",
+    "metrics": {
+      "auroc": 0.90544375,
+      "detection70": 0.4425,
+      "falseAlarm70": 0.01,
+      "detection50": 0.5675,
+      "falseAlarm50": 0.03,
+      "youden70": 0.4325,
+      "n": 400,
+      "tokens": 640767
+    }
+  }
+}

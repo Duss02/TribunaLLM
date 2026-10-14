@@ -27,6 +27,7 @@ const verdict = (
   isClaim: 0.9,
   supported: 0.5,
   contradicts: 0,
+  contradicted: kind === "contradicted" ? 0.9 : 0,
   passage: kind === "supported" ? { id: "P02", text: "Passage two." } : null,
   evidenceIds: ["P01", "P02"],
   latencyMs,

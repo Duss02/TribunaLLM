@@ -48,7 +48,10 @@ export interface SentenceJudgment extends CallStats {
   verdict: Verdict;
   isClaim: number;
   supported: number;
+  /** p(contradicts) of the relation question, kept for the record; the verdict no longer depends on it. */
   contradicts: number;
+  /** p(MET) of the framed contradiction criterion (lib/jev/criterion.ts): what strikes a sentence. */
+  contradicted: number;
   onMotion: number;
   /** Best supporting passage id, or null when the judge picked none. */
   passage: string | null;
@@ -71,6 +74,7 @@ export interface RawSentenceAnswers {
   isClaim: number;
   supported: number;
   contradicts: number;
+  contradicted: number;
   onMotion: number;
   which: string;
   latencyMs: number;

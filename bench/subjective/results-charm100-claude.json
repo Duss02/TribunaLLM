@@ -1,0 +1,413 @@
+{
+ "jev-noul_framed": {
+  "judge": "jev-noul_framed",
+  "n_items": 100,
+  "n_samples": 582,
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "kappa_mean": 0.6824352734769447,
+  "phi": 0.6933343818549305,
+  "precision_met": 0.8658536585365854,
+  "recall_met": 0.9861111111111112,
+  "bias": "mean_bias=0.16983174104336893 std_bias=0.1696149320922322 is_significant=True p_value=1.0259474939540321e-16 direction='positive' effect_size=1.0012782421244542 ci=ConfidenceInterval(lower=0.13617645869341033, upper=0.20348702339332753, confidence=0.95, method='t') n_samples=100",
+  "coverage": "n_total=600 n_covered=582 coverage=0.97 judge_abstain_rate=0.021666666666666667 gt_abstain_rate=0.015 union_exclusion_rate=0.030000000000000027 n_errored=0 error_rate=0.0",
+  "confusion": {
+   "labels": [
+    "1 - Very dissatisfied",
+    "2 - Somewhat dissatisfied",
+    "3 - Somewhat satisfied",
+    "4 - Very satisfied"
+   ]
+  },
+  "bootstrap": "accuracy_ci=(0.81, 0.94) kappa_ci=(0.6107079350404211, 0.7431234073235962) rmse_ci=(0.20951812385454677, 0.26745490572195707) n_bootstrap=1000 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": []
+ },
+ "jev-choice": {
+  "judge": "jev-choice",
+  "n_items": 100,
+  "n_samples": 580,
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "kappa_mean": 0.6741218453073975,
+  "phi": 0.6933343818549305,
+  "precision_met": 0.8658536585365854,
+  "recall_met": 0.9861111111111112,
+  "bias": "mean_bias=0.169216153362665 std_bias=0.1733535375345165 is_significant=True p_value=3.6284888093783775e-16 direction='positive' effect_size=0.9761332579035042 ci=ConfidenceInterval(lower=0.134819050583319, upper=0.20361325614201098, confidence=0.95, method='t') n_samples=100",
+  "coverage": null,
+  "confusion": {
+   "labels": [
+    "1 - Very dissatisfied",
+    "2 - Somewhat dissatisfied",
+    "3 - Somewhat satisfied",
+    "4 - Very satisfied"
+   ]
+  },
+  "bootstrap": "accuracy_ci=(0.81, 0.94) kappa_ci=(0.6002371884136866, 0.7351769859906909) rmse_ci=(0.21173118028357238, 0.27046164452314997) n_bootstrap=1000 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": []
+ },
+ "jev-choice-exclude": {
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "phi": 0.6933343818549305,
+  "n_samples": 580,
+  "coverage": "n_total=600 n_covered=580 coverage=0.9666666666666667 judge_abstain_rate=0.025 gt_abstain_rate=0.015 union_exclusion_rate=0.033333333333333326 n_errored=0 error_rate=0.0"
+ },
+ "jev-choice-as_unmet": {
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "phi": 0.6933343818549305,
+  "n_samples": 580,
+  "coverage": "None"
+ },
+ "llm-anthropic/claude-sonnet-5-5": {
+  "judge": "anthropic/claude-sonnet-5-5",
+  "n_items": 100,
+  "n_samples": 590,
+  "accuracy": 0.86,
+  "kappa_micro": 0.6806569343065694,
+  "kappa_mean": 0.6962982912277412,
+  "phi": 0.6922808557870438,
+  "precision_met": 0.953125,
+  "recall_met": 0.8472222222222222,
+  "bias": "mean_bias=0.05341910747957262 std_bias=0.16279247623802254 is_significant=True p_value=0.0014271419719542812 direction='positive' effect_size=0.3281423608390067 ci=ConfidenceInterval(lower=0.021117548385351285, upper=0.08572066657379396, confidence=0.95, method='t') n_samples=100",
+  "coverage": "n_total=600 n_covered=590 coverage=0.9833333333333333 judge_abstain_rate=0.005 gt_abstain_rate=0.015 union_exclusion_rate=0.01666666666666672 n_errored=0 error_rate=0.0",
+  "confusion": {
+   "labels": [
+    "1 - Very dissatisfied",
+    "2 - Somewhat dissatisfied",
+    "3 - Somewhat satisfied",
+    "4 - Very satisfied"
+   ]
+  },
+  "bootstrap": "accuracy_ci=(0.79, 0.93) kappa_ci=(0.6388068306028049, 0.7469861198430741) rmse_ci=(0.1452193503303443, 0.1968782181105473) n_bootstrap=1000 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": []
+ },
+ "cascade": {
+  "points": [
+   {
+    "threshold": null,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.02,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.04,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.06,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.08,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.1,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.12,
+    "escalation_rate": 0.021666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.03946999133333333
+   },
+   {
+    "threshold": 0.14,
+    "escalation_rate": 0.025,
+    "metric": 0.88,
+    "cost_usd": 0.045668624666666664
+   },
+   {
+    "threshold": 0.16,
+    "escalation_rate": 0.025,
+    "metric": 0.88,
+    "cost_usd": 0.045668624666666664
+   },
+   {
+    "threshold": 0.18,
+    "escalation_rate": 0.025,
+    "metric": 0.88,
+    "cost_usd": 0.045668624666666664
+   },
+   {
+    "threshold": 0.2,
+    "escalation_rate": 0.028333333333333332,
+    "metric": 0.88,
+    "cost_usd": 0.050368258
+   },
+   {
+    "threshold": 0.22,
+    "escalation_rate": 0.03333333333333333,
+    "metric": 0.89,
+    "cost_usd": 0.059511874666666666
+   },
+   {
+    "threshold": 0.24,
+    "escalation_rate": 0.03833333333333333,
+    "metric": 0.89,
+    "cost_usd": 0.06850182466666667
+   },
+   {
+    "threshold": 0.26,
+    "escalation_rate": 0.04,
+    "metric": 0.89,
+    "cost_usd": 0.070782808
+   },
+   {
+    "threshold": 0.28,
+    "escalation_rate": 0.04833333333333333,
+    "metric": 0.88,
+    "cost_usd": 0.08449739133333332
+   },
+   {
+    "threshold": 0.3,
+    "escalation_rate": 0.051666666666666666,
+    "metric": 0.88,
+    "cost_usd": 0.09007035799999999
+   },
+   {
+    "threshold": 0.32,
+    "escalation_rate": 0.055,
+    "metric": 0.88,
+    "cost_usd": 0.09715032466666666
+   },
+   {
+    "threshold": 0.34,
+    "escalation_rate": 0.06333333333333334,
+    "metric": 0.88,
+    "cost_usd": 0.108227908
+   },
+   {
+    "threshold": 0.36,
+    "escalation_rate": 0.06666666666666667,
+    "metric": 0.88,
+    "cost_usd": 0.11406454133333332
+   },
+   {
+    "threshold": 0.38,
+    "escalation_rate": 0.1,
+    "metric": 0.89,
+    "cost_usd": 0.16648387466666664
+   },
+   {
+    "threshold": 0.4,
+    "escalation_rate": 0.11,
+    "metric": 0.9,
+    "cost_usd": 0.18171877466666667
+   },
+   {
+    "threshold": 0.42,
+    "escalation_rate": 0.13333333333333333,
+    "metric": 0.9,
+    "cost_usd": 0.22034187466666666
+   },
+   {
+    "threshold": 0.44,
+    "escalation_rate": 0.145,
+    "metric": 0.9,
+    "cost_usd": 0.23737642466666664
+   },
+   {
+    "threshold": 0.46,
+    "escalation_rate": 0.15833333333333333,
+    "metric": 0.9,
+    "cost_usd": 0.26000729133333333
+   },
+   {
+    "threshold": 0.48,
+    "escalation_rate": 0.17333333333333334,
+    "metric": 0.9,
+    "cost_usd": 0.28411947466666665
+   },
+   {
+    "threshold": 0.5,
+    "escalation_rate": 0.18666666666666668,
+    "metric": 0.9,
+    "cost_usd": 0.30401634133333333
+   },
+   {
+    "threshold": 0.52,
+    "escalation_rate": 0.195,
+    "metric": 0.9,
+    "cost_usd": 0.32390305799999997
+   },
+   {
+    "threshold": 0.54,
+    "escalation_rate": 0.21,
+    "metric": 0.9,
+    "cost_usd": 0.34599790799999997
+   },
+   {
+    "threshold": 0.56,
+    "escalation_rate": 0.21833333333333332,
+    "metric": 0.91,
+    "cost_usd": 0.36138382466666663
+   },
+   {
+    "threshold": 0.58,
+    "escalation_rate": 0.23833333333333334,
+    "metric": 0.91,
+    "cost_usd": 0.3912432913333333
+   },
+   {
+    "threshold": 0.6,
+    "escalation_rate": 0.245,
+    "metric": 0.91,
+    "cost_usd": 0.402449558
+   },
+   {
+    "threshold": 0.62,
+    "escalation_rate": 0.2683333333333333,
+    "metric": 0.91,
+    "cost_usd": 0.440296658
+   },
+   {
+    "threshold": 0.64,
+    "escalation_rate": 0.295,
+    "metric": 0.91,
+    "cost_usd": 0.48132472466666665
+   },
+   {
+    "threshold": 0.66,
+    "escalation_rate": 0.30666666666666664,
+    "metric": 0.91,
+    "cost_usd": 0.5006439413333333
+   },
+   {
+    "threshold": 0.68,
+    "escalation_rate": 0.32,
+    "metric": 0.91,
+    "cost_usd": 0.5207314746666667
+   },
+   {
+    "threshold": 0.7,
+    "escalation_rate": 0.32666666666666666,
+    "metric": 0.91,
+    "cost_usd": 0.5303957413333333
+   },
+   {
+    "threshold": 0.72,
+    "escalation_rate": 0.35333333333333333,
+    "metric": 0.91,
+    "cost_usd": 0.574692808
+   },
+   {
+    "threshold": 0.74,
+    "escalation_rate": 0.37833333333333335,
+    "metric": 0.91,
+    "cost_usd": 0.6143002246666667
+   },
+   {
+    "threshold": 0.76,
+    "escalation_rate": 0.39666666666666667,
+    "metric": 0.9,
+    "cost_usd": 0.646172708
+   },
+   {
+    "threshold": 0.78,
+    "escalation_rate": 0.41333333333333333,
+    "metric": 0.9,
+    "cost_usd": 0.6724358746666667
+   },
+   {
+    "threshold": 0.8,
+    "escalation_rate": 0.43333333333333335,
+    "metric": 0.89,
+    "cost_usd": 0.7079753413333333
+   },
+   {
+    "threshold": 0.82,
+    "escalation_rate": 0.44666666666666666,
+    "metric": 0.89,
+    "cost_usd": 0.7305585413333333
+   },
+   {
+    "threshold": 0.84,
+    "escalation_rate": 0.4766666666666667,
+    "metric": 0.89,
+    "cost_usd": 0.7812292413333333
+   },
+   {
+    "threshold": 0.86,
+    "escalation_rate": 0.5033333333333333,
+    "metric": 0.89,
+    "cost_usd": 0.826301308
+   },
+   {
+    "threshold": 0.88,
+    "escalation_rate": 0.5383333333333333,
+    "metric": 0.88,
+    "cost_usd": 0.8864366246666666
+   },
+   {
+    "threshold": 0.9,
+    "escalation_rate": 0.5633333333333334,
+    "metric": 0.88,
+    "cost_usd": 0.9279340413333333
+   },
+   {
+    "threshold": 0.92,
+    "escalation_rate": 0.6,
+    "metric": 0.86,
+    "cost_usd": 0.9946641413333334
+   },
+   {
+    "threshold": 0.94,
+    "escalation_rate": 0.6166666666666667,
+    "metric": 0.86,
+    "cost_usd": 1.0225936413333334
+   },
+   {
+    "threshold": 0.96,
+    "escalation_rate": 0.6433333333333333,
+    "metric": 0.86,
+    "cost_usd": 1.070730708
+   },
+   {
+    "threshold": 0.98,
+    "escalation_rate": 0.7083333333333334,
+    "metric": 0.86,
+    "cost_usd": 1.1831881913333333
+   },
+   {
+    "threshold": 1.0,
+    "escalation_rate": 0.78,
+    "metric": 0.86,
+    "cost_usd": 1.3004824746666666
+   }
+  ],
+  "best": {
+   "threshold": 0.4,
+   "escalation_rate": 0.11,
+   "metric": 0.9,
+   "cost_usd": 0.18171877466666667
+  },
+  "llm_alone_metric": 0.86,
+  "llm_alone_cost": null,
+  "jev_alone_metric": 0.88
+ }
+}

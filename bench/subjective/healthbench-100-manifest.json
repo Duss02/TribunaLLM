@@ -1,0 +1,923 @@
+{
+  "seed": 20260517,
+  "source": "healthbench_meta.json",
+  "reference_join_source": "healthbench_physician_ideal.json",
+  "filters": {
+    "drop_cannot_assess_ground_truth": true,
+    "require_physician_ideal_match": true
+  },
+  "pool_sizes": {
+    "raw_meta_items": 14592,
+    "dropped_cannot_assess": 5077,
+    "dropped_no_physician_ideal": 1459,
+    "after_filters": 8056
+  },
+  "stratification": {
+    "axes": [
+      "theme",
+      "verdict_class"
+    ],
+    "class_targets": {
+      "all_met": 66,
+      "mixed": 68,
+      "all_unmet": 66
+    },
+    "cell_floor_combined": 4,
+    "themes": [
+      "communication",
+      "complex_responses",
+      "context_seeking",
+      "emergency_referrals",
+      "global_health",
+      "health_data_tasks",
+      "hedging"
+    ],
+    "verdict_classes": [
+      "all_met",
+      "mixed",
+      "all_unmet"
+    ]
+  },
+  "cell_counts": {
+    "val": {
+      "communication": {
+        "all_met": 6,
+        "mixed": 6,
+        "all_unmet": 3
+      },
+      "complex_responses": {
+        "all_met": 4,
+        "mixed": 3,
+        "all_unmet": 2
+      },
+      "context_seeking": {
+        "all_met": 4,
+        "mixed": 5,
+        "all_unmet": 7
+      },
+      "emergency_referrals": {
+        "all_met": 3,
+        "mixed": 3,
+        "all_unmet": 6
+      },
+      "global_health": {
+        "all_met": 7,
+        "mixed": 0,
+        "all_unmet": 9
+      },
+      "health_data_tasks": {
+        "all_met": 3,
+        "mixed": 8,
+        "all_unmet": 4
+      },
+      "hedging": {
+        "all_met": 6,
+        "mixed": 9,
+        "all_unmet": 2
+      }
+    },
+    "test": {
+      "communication": {
+        "all_met": 5,
+        "mixed": 5,
+        "all_unmet": 2
+      },
+      "complex_responses": {
+        "all_met": 4,
+        "mixed": 4,
+        "all_unmet": 2
+      },
+      "context_seeking": {
+        "all_met": 4,
+        "mixed": 5,
+        "all_unmet": 8
+      },
+      "emergency_referrals": {
+        "all_met": 4,
+        "mixed": 3,
+        "all_unmet": 6
+      },
+      "global_health": {
+        "all_met": 6,
+        "mixed": 0,
+        "all_unmet": 8
+      },
+      "health_data_tasks": {
+        "all_met": 4,
+        "mixed": 7,
+        "all_unmet": 4
+      },
+      "hedging": {
+        "all_met": 6,
+        "mixed": 10,
+        "all_unmet": 3
+      }
+    }
+  },
+  "splits": {
+    "val": [
+      {
+        "prompt_id": "b1d6df53-1107-4d32-9f46-1d36c557ab2d",
+        "completion_id": "dc01ae8a-c137-4df1-81e3-d7d08ac82bc3"
+      },
+      {
+        "prompt_id": "2901fc0a-810a-4582-b10f-02356fb54eac",
+        "completion_id": "f73f3d6b-bd01-4857-b0a8-47f30fe93c44"
+      },
+      {
+        "prompt_id": "ce324f68-53c9-4998-b280-29104c1e0cbc",
+        "completion_id": "dac8d6be-0b4c-49a2-8bdf-9cc0cb2b735b"
+      },
+      {
+        "prompt_id": "24816a86-1ef5-4588-b275-21e675bfd1d5",
+        "completion_id": "bdc33bb5-c6a8-494e-9a8d-1a138873e218"
+      },
+      {
+        "prompt_id": "0009fb20-718d-4321-a254-76008362be7b",
+        "completion_id": "209965f2-ea8a-40f1-a28f-8861c9eb408a"
+      },
+      {
+        "prompt_id": "b72def5a-66f2-48bc-88e3-0c61e5197609",
+        "completion_id": "ed189661-0d3f-435c-b18e-e5c46244321c"
+      },
+      {
+        "prompt_id": "faa496a8-d5a4-4e49-ac70-8b18649d5e0a",
+        "completion_id": "08ccce32-26bc-45f4-9d8e-cd86ad2f49c5"
+      },
+      {
+        "prompt_id": "66d5f4c3-a677-461e-b46f-d3b15ace9786",
+        "completion_id": "3df883ac-c2d3-47a3-8f0e-05badcec6653"
+      },
+      {
+        "prompt_id": "9994198e-8d08-4c6c-9b4b-64236d713bf9",
+        "completion_id": "7ee1bb40-664a-41d5-80b8-21e88bb54b76"
+      },
+      {
+        "prompt_id": "0445c710-0629-4b80-99ce-98682bea4d97",
+        "completion_id": "24ad502e-3add-4d26-aa38-55d6dc8577fa"
+      },
+      {
+        "prompt_id": "d9af04a8-d3f8-4f02-b578-0f2185044a62",
+        "completion_id": "e3c73fad-a862-4852-9aa3-8da10bbb8303"
+      },
+      {
+        "prompt_id": "6b46231c-37cb-4bdb-aa7a-0b154c6e6d6f",
+        "completion_id": "88ed4ee9-17c3-4d01-b46d-fcc92d0da181"
+      },
+      {
+        "prompt_id": "d96e89c3-dc03-4599-870b-e029d10f98bc",
+        "completion_id": "775375df-ad10-4bfb-8a63-806e1cb94fe6"
+      },
+      {
+        "prompt_id": "b5f5f1c5-5623-4c0f-85c8-03cf1e643bf6",
+        "completion_id": "3b685bef-c6a9-4f80-bb52-fe2c1fc6874e"
+      },
+      {
+        "prompt_id": "795a80e0-aea8-413d-b03a-0b2e9ebee6b2",
+        "completion_id": "703d63df-684b-4f9b-aed0-292b87982492"
+      },
+      {
+        "prompt_id": "0ce8ff10-262e-41d8-b290-19e76d337f1a",
+        "completion_id": "c45225d3-7303-4854-a33f-c0533771aa04"
+      },
+      {
+        "prompt_id": "08d8042e-28e9-4922-85ad-1e7e4ad4785e",
+        "completion_id": "27cab1fd-82b1-449a-ae86-6d61d6a192c6"
+      },
+      {
+        "prompt_id": "2722eaf6-d189-4704-8e91-1bada79872ba",
+        "completion_id": "e9d7d3d5-d516-43a7-a656-2c9990bb1583"
+      },
+      {
+        "prompt_id": "a59b8192-d97a-40e8-8063-d0f03aa361b0",
+        "completion_id": "bbb7da5d-7285-4618-af2e-bcccb20f1175"
+      },
+      {
+        "prompt_id": "085a9e8a-856e-4044-95c9-0e5a8bdcd16e",
+        "completion_id": "9ae6985d-f4e6-4e94-a317-794e5ed9f54d"
+      },
+      {
+        "prompt_id": "ce49e310-06bb-4c34-aaf4-135bfc7915ac",
+        "completion_id": "c3d6f088-ceb8-4c94-9ece-6a40994533ca"
+      },
+      {
+        "prompt_id": "7455b4a9-e80d-4a8f-856d-0700767d8238",
+        "completion_id": "3f94a409-1059-40f7-8d85-a028470fdf2c"
+      },
+      {
+        "prompt_id": "8f6b254c-6cfe-4eec-a680-f4ae06ca19c6",
+        "completion_id": "77f42c95-11a7-48fa-9cec-08211fc6f44e"
+      },
+      {
+        "prompt_id": "e6e6d27b-2368-40c3-8167-3b2edb3d197a",
+        "completion_id": "e234de93-f402-49f0-8157-882c1464c517"
+      },
+      {
+        "prompt_id": "f9ce861c-029b-4d69-8490-19f998569c4a",
+        "completion_id": "897b73c1-c0a2-4d44-bbf1-a069d4bf90a7"
+      },
+      {
+        "prompt_id": "05bb2c34-17d8-4096-a56e-334865952672",
+        "completion_id": "655ba65b-e368-4953-bd71-7e7cbec2d348"
+      },
+      {
+        "prompt_id": "9f7e10f3-446b-4364-889c-053cbd752ea5",
+        "completion_id": "5e95ec14-1d36-4df0-a542-ff7429be97d7"
+      },
+      {
+        "prompt_id": "5772ff36-6503-4f1d-885a-6a3479e6c6ea",
+        "completion_id": "224d6aed-30da-4635-a4c6-7783d9c7ae2f"
+      },
+      {
+        "prompt_id": "52713106-dadc-48ac-8506-1be5bda0ed0f",
+        "completion_id": "ac81c297-07e3-448e-89d8-01ed1bad4d57"
+      },
+      {
+        "prompt_id": "1344eee4-edfd-4f70-96a6-55dd61a4e518",
+        "completion_id": "9e8e956e-1173-4a76-8e1d-b567c105d920"
+      },
+      {
+        "prompt_id": "8651af2b-540c-4d52-b4dd-025b93295fbe",
+        "completion_id": "2971c5de-3053-4878-9192-ab95892e83a8"
+      },
+      {
+        "prompt_id": "6e4f8d8d-ff93-4f78-9553-b15e2cf897e6",
+        "completion_id": "e002d607-51da-42e8-8a7a-2155e2f85f7d"
+      },
+      {
+        "prompt_id": "239e2d1d-8046-4237-9e89-e4780d0d9cc9",
+        "completion_id": "2d649285-d865-488e-9f17-4d8900938f6c"
+      },
+      {
+        "prompt_id": "022b9368-09fd-4c69-85d1-f1c255bb2ade",
+        "completion_id": "6cca9df6-13d9-4b6b-930a-0bfa213956a9"
+      },
+      {
+        "prompt_id": "43d2bdaa-6061-4eee-91e1-310e4d50e17d",
+        "completion_id": "83acb003-ec30-4ceb-9d9a-511467686559"
+      },
+      {
+        "prompt_id": "1eabeb08-34b1-4bbf-929c-f8089ff52e7e",
+        "completion_id": "aa68681d-cce5-4a2d-964f-2962004b7c6d"
+      },
+      {
+        "prompt_id": "0b3a0788-3357-4a22-9ba5-e374d54d4a7c",
+        "completion_id": "443d2929-d18c-4a37-9057-b005792675e4"
+      },
+      {
+        "prompt_id": "4a6dd904-9295-47a9-88d8-45272be3be50",
+        "completion_id": "0aefccc1-0af6-4c8f-9219-64b90d8de01f"
+      },
+      {
+        "prompt_id": "b9b2de5c-bf94-4738-8947-1bf323b61142",
+        "completion_id": "4c5595dc-5562-4da4-a81e-3f6b907e907e"
+      },
+      {
+        "prompt_id": "efc3b769-d158-4690-b2a5-ca531db5e0c5",
+        "completion_id": "517e945a-b2be-467c-bd84-71e5904d606e"
+      },
+      {
+        "prompt_id": "cd556433-efd0-487e-aa10-73aa51c318b5",
+        "completion_id": "973bdde9-9fef-418f-83f1-249a914a878e"
+      },
+      {
+        "prompt_id": "767f1620-f1da-4bc2-b03c-9f4531aa1cd4",
+        "completion_id": "1b66e4e3-6744-4958-af85-76f06044f70d"
+      },
+      {
+        "prompt_id": "c6e35217-7e6e-4b70-aacd-74a485dbff9f",
+        "completion_id": "44e18db6-5e8f-45d1-bc88-1003233fa164"
+      },
+      {
+        "prompt_id": "5b3bfe52-5f67-4504-b7ac-a5f98d63ff09",
+        "completion_id": "c0ae2e59-1c80-401b-840c-3b45cf341cc4"
+      },
+      {
+        "prompt_id": "6a7f1844-d582-4d34-b7db-d7a4fa222eca",
+        "completion_id": "bcee44d4-637f-41ee-b975-a5a9583e681f"
+      },
+      {
+        "prompt_id": "0ad91939-24bb-449d-a924-b5a1465d868f",
+        "completion_id": "2cb6350e-551a-45cf-b140-3b0f1d950bc9"
+      },
+      {
+        "prompt_id": "88d5a74d-2772-42c2-81d0-7cf791ea3370",
+        "completion_id": "ca74cac5-4d35-46e5-86ca-d0255112bb21"
+      },
+      {
+        "prompt_id": "85754571-21c2-41d1-a412-270b53a107bf",
+        "completion_id": "458decee-d1c1-418d-83c2-67b939e09fbd"
+      },
+      {
+        "prompt_id": "c5f6bb12-a633-4ee4-b6a8-e6f9539472dc",
+        "completion_id": "870f74ef-0185-4a8f-a3ff-f1f5b29cca42"
+      },
+      {
+        "prompt_id": "5b05fcac-cada-4ac1-b546-3ead42332592",
+        "completion_id": "482f4e7c-0e52-4e4e-98fe-f5bb83485a0c"
+      },
+      {
+        "prompt_id": "53efa3f8-24e0-4fab-a492-ef99c40c341d",
+        "completion_id": "48f8056f-b666-4571-b92d-e5ab2e13eab5"
+      },
+      {
+        "prompt_id": "72f4d375-81b0-4131-8d3e-a07cfbc69428",
+        "completion_id": "d3b40585-959b-40c3-bfff-fa11025ac88d"
+      },
+      {
+        "prompt_id": "5d21c0aa-fb55-473f-9007-28a8034055f6",
+        "completion_id": "ff951a2d-a2a6-4df2-b99b-ee8d84edf42a"
+      },
+      {
+        "prompt_id": "e5c8c163-8005-4dbb-8216-d3b15cdac862",
+        "completion_id": "aca6eaef-1e25-4dcf-935b-e03550c03169"
+      },
+      {
+        "prompt_id": "60f561ff-f35b-409b-af0d-11d20bd57be8",
+        "completion_id": "9621367b-bac5-411c-b861-7027cdfb41e6"
+      },
+      {
+        "prompt_id": "5e2d2a3f-be63-46d1-8f9d-314f8421f83c",
+        "completion_id": "9cd5904f-fc1d-4240-9025-e671bad96835"
+      },
+      {
+        "prompt_id": "a5d35c52-1344-45fa-874c-324b976d2836",
+        "completion_id": "64b76cbb-479f-4f78-bdfd-e8dac13ef4a6"
+      },
+      {
+        "prompt_id": "9627cb68-cb9f-4c35-9789-f1172bcc9e76",
+        "completion_id": "8941dac7-60b0-4d86-a5b4-652b48c0a334"
+      },
+      {
+        "prompt_id": "666de4b3-74ea-4e45-b171-730d9855389d",
+        "completion_id": "41a5aaf8-e437-4e97-9940-b36322e6b93a"
+      },
+      {
+        "prompt_id": "f8aca3ec-c2e1-4e7a-a3a8-f3a5c5d70b75",
+        "completion_id": "1647e712-2cdd-4288-9ff7-cb26537a8f4b"
+      },
+      {
+        "prompt_id": "7a4548e6-38b7-48dd-9088-d7d1219f7852",
+        "completion_id": "1bd0c9bd-48d3-4949-992d-7c26bc286d87"
+      },
+      {
+        "prompt_id": "37bc6053-df10-4c98-bc1f-c6eeebecd4c3",
+        "completion_id": "f0bfdb0c-d6af-4e14-8936-32538f7d373d"
+      },
+      {
+        "prompt_id": "bcc96b39-ec68-4e08-b6b7-d4af03763338",
+        "completion_id": "83940c90-ab55-496d-a606-73abaae2a9af"
+      },
+      {
+        "prompt_id": "668009d9-8097-4734-8a95-7da716a24e3d",
+        "completion_id": "26b36be1-1a6e-4f6a-ae55-ffc8535c4653"
+      },
+      {
+        "prompt_id": "9702f02c-bd4f-4f6b-80ac-b46325c05c31",
+        "completion_id": "07a21a9c-943e-45e5-be91-f50b478bd026"
+      },
+      {
+        "prompt_id": "ccfddd01-072a-4a91-8881-f2ed572f3417",
+        "completion_id": "d88a4595-ea0c-4b76-b55d-0ff0afa35454"
+      },
+      {
+        "prompt_id": "7665841a-edc3-4b28-bad4-259f86fbb49b",
+        "completion_id": "1f9da02e-9554-4f73-9e9d-56a6a293133b"
+      },
+      {
+        "prompt_id": "c580f9e9-0bb9-438c-af35-09c06ac7a95b",
+        "completion_id": "62d09bba-b2a0-4a99-957e-d9e4c826312f"
+      },
+      {
+        "prompt_id": "119ce4b9-0298-4b12-bf82-844438364f4d",
+        "completion_id": "861c9d47-b07d-41f5-9595-f09b4cf07fdd"
+      },
+      {
+        "prompt_id": "0d5ee21c-9116-43e5-a856-8d1b639273a3",
+        "completion_id": "5a21a50c-a572-4378-85ab-1b30fb6c98ee"
+      },
+      {
+        "prompt_id": "12a9a33a-47a2-446b-9689-7a49c5667d1b",
+        "completion_id": "228af238-258a-4f3c-ac95-653e460dd6bf"
+      },
+      {
+        "prompt_id": "d24b5c35-b04e-4cb4-98f7-d05891dc63d7",
+        "completion_id": "dc5581e2-2a04-4c82-9a3a-571d9e261ba7"
+      },
+      {
+        "prompt_id": "c518a22d-8dfb-4bb7-a035-cadb53fd7e83",
+        "completion_id": "99831f6d-f016-43da-bcc2-a4e196781849"
+      },
+      {
+        "prompt_id": "cf3cf7c0-213e-484f-86bc-7a8f4fd1de7c",
+        "completion_id": "51cee911-870a-4a3f-926a-3c3b7a87bb96"
+      },
+      {
+        "prompt_id": "6fb23359-4443-44b0-aa95-244d23709170",
+        "completion_id": "44073510-2f98-4d09-9b69-f761e72df1cb"
+      },
+      {
+        "prompt_id": "dadf2f41-3b2b-46a7-a23c-f2b5132af005",
+        "completion_id": "e67d6c79-2cdb-4ed4-b178-54f888fc871d"
+      },
+      {
+        "prompt_id": "67545df8-5d12-42a3-8544-ca9adca61544",
+        "completion_id": "adba4895-cf02-48d9-87f3-2cb3c3313083"
+      },
+      {
+        "prompt_id": "927401a8-f97c-4a76-92ca-fc52b2f25d08",
+        "completion_id": "9a3058a5-c79b-4d2e-960d-0c2d6c40c24e"
+      },
+      {
+        "prompt_id": "e6474429-9176-4537-bcad-908513bd8503",
+        "completion_id": "52b41cb6-d6c0-4075-9cd9-0e2b845f22d3"
+      },
+      {
+        "prompt_id": "d3e06bca-281b-4ecd-85a3-bea3698f6b71",
+        "completion_id": "212ed9d4-cea2-42e8-9c13-edb3db3427bc"
+      },
+      {
+        "prompt_id": "e2ef39f2-821f-4aa6-ab90-e30e6f78e08b",
+        "completion_id": "3afec086-cf29-4ba1-bfdf-56b8c9916131"
+      },
+      {
+        "prompt_id": "7bfd77f3-84af-48ad-845f-f9581f96a72b",
+        "completion_id": "b43bf00a-af7a-44c2-ae45-fa9486d1d0ea"
+      },
+      {
+        "prompt_id": "ca9307c4-6a12-4f71-8630-4d6284bab914",
+        "completion_id": "a54a65bb-3673-44b0-ab65-9fb7f8e32ffc"
+      },
+      {
+        "prompt_id": "a83962af-1779-4d1e-a1f3-fe10f25afc33",
+        "completion_id": "f6877277-c9e1-4c4f-87d7-38b44d008716"
+      },
+      {
+        "prompt_id": "0dc9b1a2-4d30-4c12-85e5-9866f1cbc563",
+        "completion_id": "fea7a3d0-fe6a-4982-afd7-18dd7379769e"
+      },
+      {
+        "prompt_id": "f4305156-36c2-40b3-a69a-2e07b569ff74",
+        "completion_id": "e584df80-f8e4-4713-9235-68df3f93d2c5"
+      },
+      {
+        "prompt_id": "c72bac1e-648c-47b8-ae3d-5c3cc71b0a7c",
+        "completion_id": "a197e3ac-6156-4a06-9661-fa3f79e948dd"
+      },
+      {
+        "prompt_id": "9bfae7c6-dcff-4edb-b16b-a7e82d7d2d3a",
+        "completion_id": "0c7db8b8-8ae3-471f-b5f2-281e8fc32779"
+      },
+      {
+        "prompt_id": "88e30adc-0ce9-48a8-8482-0f018818c581",
+        "completion_id": "e7c871c5-8ec6-40f1-9595-978087e2c082"
+      },
+      {
+        "prompt_id": "c9c4a9d4-be45-4801-95f6-ed146862224d",
+        "completion_id": "88e2fa0e-0a2f-4bb2-b74e-c864fd219ef3"
+      },
+      {
+        "prompt_id": "6e67c0ea-f382-4188-b259-edab1dc0efed",
+        "completion_id": "45b5cf9e-f183-43cb-8202-9b66b1c2b2b8"
+      },
+      {
+        "prompt_id": "6e6691b9-4ed8-4f81-82fe-4fb22e5c5702",
+        "completion_id": "f88cb854-aaf3-45d3-9304-fcd388985793"
+      },
+      {
+        "prompt_id": "b9e0bfa6-cc27-4195-9ec0-19621d9a88bf",
+        "completion_id": "9989adca-c0fc-4f18-a69a-b7af37bd6638"
+      },
+      {
+        "prompt_id": "fd4d13db-6ed7-45a4-a8c1-3e5e878f6bd3",
+        "completion_id": "740a3bb2-2ff9-49c5-a0ce-db980dc7e6d1"
+      },
+      {
+        "prompt_id": "c7b3eeb8-6374-4cdf-8868-be583cce21a9",
+        "completion_id": "57e9a28f-5e44-4230-bc16-e447de2af7d5"
+      },
+      {
+        "prompt_id": "93e671e8-eb58-47b8-83e0-3a3de52b6f13",
+        "completion_id": "ddeaed12-04a7-4f35-ae93-446c6cb774b4"
+      },
+      {
+        "prompt_id": "2ae9c374-fb05-419a-aadd-e7497d4f4f2d",
+        "completion_id": "5652a937-3341-44e3-9aa0-fac821db8e18"
+      },
+      {
+        "prompt_id": "f1ed2913-abfa-4b9b-8d64-069430ca5db0",
+        "completion_id": "ebc58beb-06aa-4b33-94aa-4841d8f70877"
+      },
+      {
+        "prompt_id": "a669551a-e0b9-4471-9cd9-f333eeacb802",
+        "completion_id": "7735fdf3-2a72-47bc-adb6-1cba10c5ccbe"
+      },
+      {
+        "prompt_id": "8ba2b627-ce87-4345-8cca-e5e108282854",
+        "completion_id": "026e3fee-64b7-49fb-8d17-edd3565a850d"
+      }
+    ],
+    "test": [
+      {
+        "prompt_id": "5587fe73-49a4-47a7-894d-54001e13a51a",
+        "completion_id": "f557af6b-3ad0-46b1-bb00-ec31264ecf2e"
+      },
+      {
+        "prompt_id": "5f7541bf-c82a-44f4-9184-943bd8fb1e31",
+        "completion_id": "5a446752-3375-445d-a364-9de0c6e7a3f7"
+      },
+      {
+        "prompt_id": "376d9d45-9d5f-438e-bc8f-418b550417ae",
+        "completion_id": "8dc890be-728c-4c5e-a79d-95980190153f"
+      },
+      {
+        "prompt_id": "8fff3d73-be3c-4bfe-93ca-306dbfd4879a",
+        "completion_id": "eaa85056-1da6-49b3-b681-7cbe9ea89374"
+      },
+      {
+        "prompt_id": "9ad0fc0c-e591-41a1-9cab-73b587931664",
+        "completion_id": "68c0c255-c161-4b1c-8aa6-0060a6377b21"
+      },
+      {
+        "prompt_id": "bf33f25c-b4fa-446a-b7a0-8ecf9bd6ad8e",
+        "completion_id": "ed883bc4-35c4-49ad-b8e4-c78db0298644"
+      },
+      {
+        "prompt_id": "44b18635-61d8-41c1-bd85-4de7b3e76e56",
+        "completion_id": "a3531695-f752-4f6c-b480-19e436596f03"
+      },
+      {
+        "prompt_id": "9ba8549a-1244-4894-8cd8-e7521f905d3c",
+        "completion_id": "5cc7242f-4c28-4f45-99a0-3ccaa15b4aaf"
+      },
+      {
+        "prompt_id": "cbb0ca6e-aa5e-4683-b107-d7dfa4cb60ce",
+        "completion_id": "f045b71f-1c8e-4cbf-ae25-7026d73b8233"
+      },
+      {
+        "prompt_id": "b9201718-9ee4-4c47-ae9a-11fdc3b8ccda",
+        "completion_id": "e8a7fada-da7b-4afb-97cd-661e5e660ded"
+      },
+      {
+        "prompt_id": "a079d928-7b78-4a85-a72b-4274d7fc2914",
+        "completion_id": "c0ebe7fb-9197-4cb0-b85a-f4fb6007faab"
+      },
+      {
+        "prompt_id": "d2c55bfd-049d-4d76-a243-47d6002fb054",
+        "completion_id": "c76838fb-2340-4940-ac15-a9f040f349d6"
+      },
+      {
+        "prompt_id": "d90e1686-8a91-42b0-90a0-9f09c4b110ee",
+        "completion_id": "44378ad7-998f-4924-885d-3dfe2aaba09b"
+      },
+      {
+        "prompt_id": "dec2b31a-ffa3-4b24-9a80-06b71330e6b5",
+        "completion_id": "e22f9f48-cd4e-4071-a89b-4e20f20026e5"
+      },
+      {
+        "prompt_id": "23a11e58-b288-470c-9888-35d76aff6e93",
+        "completion_id": "24a153e9-a8c7-40aa-aebf-5606523391ce"
+      },
+      {
+        "prompt_id": "24873375-7d53-4caf-8483-88a5f041e600",
+        "completion_id": "ac07a0d7-a6d3-486d-8365-ed0e835e1b7b"
+      },
+      {
+        "prompt_id": "da458227-fc02-454e-ad42-18a3e4642100",
+        "completion_id": "4bf07992-1261-4218-8a76-ae7efe68f573"
+      },
+      {
+        "prompt_id": "ea7d4f01-9495-4f9d-961d-77104e692d8a",
+        "completion_id": "fc680c5c-7fb1-4c46-a1d8-cd481fd99dd7"
+      },
+      {
+        "prompt_id": "5b065c34-3aba-4c8d-86da-f8c2e206708e",
+        "completion_id": "a7da9cdf-06e5-4519-be3d-3a85325ba385"
+      },
+      {
+        "prompt_id": "d12d388c-922a-426e-b2a3-7074658d5e6b",
+        "completion_id": "f5f4faef-0c14-441e-b76b-13e3b356efbe"
+      },
+      {
+        "prompt_id": "c20ad9cd-50b2-49b7-bb1e-0ad5e73cbcb9",
+        "completion_id": "bcf20f05-9098-4a1b-9d7d-1f8409f1abe8"
+      },
+      {
+        "prompt_id": "1a7a814a-3b16-4ca9-b072-12adb301e678",
+        "completion_id": "709e8198-a825-42b1-9405-6053c6a96795"
+      },
+      {
+        "prompt_id": "cd53e21a-e5ed-4d9b-a258-42a23e9715bb",
+        "completion_id": "8d0c384b-7a68-4d1c-98e8-c5dcc7a671b1"
+      },
+      {
+        "prompt_id": "fbe96ec6-3f41-4ad0-850d-f87024a055d7",
+        "completion_id": "aeed83bc-27da-40bb-8d0c-28e23261b3aa"
+      },
+      {
+        "prompt_id": "19aba1c6-8cd3-49bd-bfc1-5af65d85da8c",
+        "completion_id": "fd098753-d682-4aa8-858b-edd4e1cd23fe"
+      },
+      {
+        "prompt_id": "0c2c9b61-b5a5-46df-a5fb-037e96097f71",
+        "completion_id": "9436c7e7-8706-442a-bb95-a80d74b4fc92"
+      },
+      {
+        "prompt_id": "7c3d4014-f843-4436-bd13-9e0df9900e3c",
+        "completion_id": "1e1c0648-3304-4c87-87ad-a5fb423eb140"
+      },
+      {
+        "prompt_id": "3782fc83-77eb-4e06-8ea2-d304f8434752",
+        "completion_id": "b1ce3f87-e9a8-447b-9e45-91e83b6e9193"
+      },
+      {
+        "prompt_id": "ca477ec4-40ad-418a-993c-a5e0fd5e3496",
+        "completion_id": "c088f6b9-5463-4a77-af7c-aca604da1a3e"
+      },
+      {
+        "prompt_id": "cf4bdbcf-72e3-447b-b919-9f7192cecc6b",
+        "completion_id": "ce11ffaf-6d4b-4ac8-b4e0-1fd49d2ac2cc"
+      },
+      {
+        "prompt_id": "d1f2964f-1d45-4e38-807f-94e5b14611f4",
+        "completion_id": "6b5c3cb4-77d2-448c-bcf8-36fec3aca3a6"
+      },
+      {
+        "prompt_id": "2ab52d46-6b53-475c-ad8b-1da315eeee40",
+        "completion_id": "3d17b07c-f876-44aa-a304-8cdfe818f494"
+      },
+      {
+        "prompt_id": "df6eae05-0617-438c-8e7e-1e577882af21",
+        "completion_id": "e4c55108-4d46-4583-8c5f-c8d69fcf4b26"
+      },
+      {
+        "prompt_id": "19d9f810-e8e6-45b8-98ee-bca17ec347af",
+        "completion_id": "4d3e0d0b-d232-4d29-af7f-2a4913fee228"
+      },
+      {
+        "prompt_id": "cc5d20d6-33c7-4d77-bfbe-7e2727893b22",
+        "completion_id": "579fbd9f-e497-4924-9ac1-a366dde85837"
+      },
+      {
+        "prompt_id": "36c6e780-d4a8-47b2-8a36-90ee4b97607f",
+        "completion_id": "2508acfa-9dbd-4fc6-b954-edb54fe1015d"
+      },
+      {
+        "prompt_id": "057c4f88-d747-4e33-a027-984d2b2afbeb",
+        "completion_id": "25c80c9b-a874-442c-980d-9caa109ddd54"
+      },
+      {
+        "prompt_id": "6efe7017-38ba-4a9f-befe-9a2321859049",
+        "completion_id": "379046e2-9cdf-4154-9f49-eeaf85adb888"
+      },
+      {
+        "prompt_id": "b5d9300b-a859-41d4-b4a2-467e50436d1a",
+        "completion_id": "973b2068-5c76-424c-a7ec-d85dcc97d914"
+      },
+      {
+        "prompt_id": "adf87628-41eb-4285-893c-cd6493102a9d",
+        "completion_id": "e887e9d2-1b6a-4f49-82ce-031049b0637d"
+      },
+      {
+        "prompt_id": "085cca9a-1716-4042-8568-c5e90ea50fec",
+        "completion_id": "0456036d-31f9-4f57-a078-9e1eb1a96d8f"
+      },
+      {
+        "prompt_id": "66d5f4c3-a677-461e-b46f-d3b15ace9786",
+        "completion_id": "a90af8e2-02d7-4b1c-95a0-57d58b215e2a"
+      },
+      {
+        "prompt_id": "cad38091-ac40-43eb-b6a4-d5056c154e27",
+        "completion_id": "9da9cc1a-7810-432b-b397-1b90bfb3e134"
+      },
+      {
+        "prompt_id": "7e941485-a478-45ab-94d6-17da3e3b94e5",
+        "completion_id": "27c15016-9ef0-49c7-98ad-a9a947f58dda"
+      },
+      {
+        "prompt_id": "4315a466-825c-451d-958e-80d50af409a5",
+        "completion_id": "7a916446-ba8c-4de5-9262-0cb9bce585ba"
+      },
+      {
+        "prompt_id": "c6e35217-7e6e-4b70-aacd-74a485dbff9f",
+        "completion_id": "72d3f001-faf4-4ae4-a036-037eaa91b733"
+      },
+      {
+        "prompt_id": "06902be5-32f0-4adc-ba00-e5ad2f98ea2d",
+        "completion_id": "60876eb5-ee7c-4c9e-8637-660fd7e8e2d0"
+      },
+      {
+        "prompt_id": "3ea18618-e020-484a-a985-65add97d4f99",
+        "completion_id": "87088351-fea4-4664-8cf5-a48008d62a9f"
+      },
+      {
+        "prompt_id": "51433193-b0c3-4725-a3a8-9dd15e969b0c",
+        "completion_id": "d8379c38-22a5-4c28-a031-416ff00abe2a"
+      },
+      {
+        "prompt_id": "592aab7b-4125-427e-b8fe-8654dd561eda",
+        "completion_id": "327756c0-fc6d-4e4e-aa37-81725982b4f2"
+      },
+      {
+        "prompt_id": "8e1ff4c9-ffa0-4505-b6e3-1ce6edf8ce59",
+        "completion_id": "517df475-2ed4-4f37-aeb6-a7acb5b689ca"
+      },
+      {
+        "prompt_id": "28ae7f02-443e-4ce8-b770-79e289cc2981",
+        "completion_id": "dc70db45-6468-4aa6-9c15-ac9af5758e65"
+      },
+      {
+        "prompt_id": "22052127-eb82-4c36-9ce9-3931e5bc0c2c",
+        "completion_id": "97e3b61e-5f49-40e4-a976-0f0758310323"
+      },
+      {
+        "prompt_id": "80c7ba61-b3a3-46f3-a013-f8d4d8b1857a",
+        "completion_id": "b6da1a9e-3ab0-466a-a9bf-76017d1d87a6"
+      },
+      {
+        "prompt_id": "321730f7-d09e-4f19-b574-ec38e98b60ef",
+        "completion_id": "f043c344-de5a-4d5a-8afd-5e5ce3b86a39"
+      },
+      {
+        "prompt_id": "d6db09c0-0bed-4113-bca2-a3b8abb814a7",
+        "completion_id": "9548e205-5a16-476d-a0e7-bf4638a3558e"
+      },
+      {
+        "prompt_id": "50c5ea6d-3d13-4d93-b2cd-1cf27b9a04d5",
+        "completion_id": "c9e0edd2-7ca0-4233-996f-54dd7c2f1e58"
+      },
+      {
+        "prompt_id": "a2e5c6f8-e0b9-4ae6-8d6a-25247cb15389",
+        "completion_id": "34687e2e-21c2-4e57-8f86-44d835ad9f4e"
+      },
+      {
+        "prompt_id": "19ec4833-86e9-4166-8b82-d1da09f31fd7",
+        "completion_id": "414744bd-c4b7-4ae4-92b5-91bc0c70b873"
+      },
+      {
+        "prompt_id": "1eca957b-496a-449b-9c54-5127285f7079",
+        "completion_id": "108ecc30-7457-43f1-b45d-b3e9e828ac83"
+      },
+      {
+        "prompt_id": "c8c033aa-e2ea-421a-8085-141bcc976077",
+        "completion_id": "90873417-f868-48c1-b1a7-198ec0abe51d"
+      },
+      {
+        "prompt_id": "bde9acba-66c4-4278-8abc-23b446f630fb",
+        "completion_id": "0cd88c2e-a9de-4285-9df9-683bdda39195"
+      },
+      {
+        "prompt_id": "d156852d-70b1-4270-a815-fa6a8258fad1",
+        "completion_id": "b0d16e68-4891-4fb4-a9cd-60054e936ee1"
+      },
+      {
+        "prompt_id": "2f4d6688-00bc-48e4-9292-7a7f71527a73",
+        "completion_id": "8e76f094-034d-4197-9341-685e3bb3adba"
+      },
+      {
+        "prompt_id": "02efd788-9450-406a-bf35-29ac04f039d6",
+        "completion_id": "b72e996f-dddb-471a-bcd3-3bd3a1cafd0f"
+      },
+      {
+        "prompt_id": "b65596f9-fc35-4be0-a380-ca6c8a158a85",
+        "completion_id": "aabead77-e74b-469b-8c19-9047d333b0e7"
+      },
+      {
+        "prompt_id": "adc7c8da-6f41-45a7-9907-3e1b4f76d1c2",
+        "completion_id": "e10a53b6-3e12-4187-9345-5f15b5e5b52b"
+      },
+      {
+        "prompt_id": "84b14018-7a99-4aaf-bbea-a1113682c004",
+        "completion_id": "cc784da4-3838-4424-88a9-d3fce3bc8365"
+      },
+      {
+        "prompt_id": "19b0a886-d716-4977-a313-254b4d12fa6e",
+        "completion_id": "5c3614b5-c331-4e02-ac92-5be4b7f4b9e2"
+      },
+      {
+        "prompt_id": "ef79e596-9fa3-4fdc-8d6d-3a23ffe6d31c",
+        "completion_id": "dab95bc3-e311-47f4-9616-faaf3667f614"
+      },
+      {
+        "prompt_id": "e668ec0d-fb4b-4c3c-a2e0-9969863aa869",
+        "completion_id": "c95ad6dc-a75b-4440-a576-e327f95ed947"
+      },
+      {
+        "prompt_id": "9f7e2cb8-ba28-428b-99e7-93ce6162739c",
+        "completion_id": "3c86e34f-f66d-41c2-b136-ce031c6c8a5a"
+      },
+      {
+        "prompt_id": "b2f4a7e9-7399-43d1-8b73-b3822af003f8",
+        "completion_id": "2fee27c7-1a8c-4d5e-8fb5-c7f7e69022af"
+      },
+      {
+        "prompt_id": "87fa64df-bb0b-417a-b853-0306486aae73",
+        "completion_id": "c6a8eb6e-f40f-4ef8-b8c6-8492a3b18d3a"
+      },
+      {
+        "prompt_id": "08b67397-58a1-4b8a-80d5-f8653bcc90f5",
+        "completion_id": "80c42f05-019b-4164-9401-1e89f4c15783"
+      },
+      {
+        "prompt_id": "c61b073c-ba01-48ad-95c2-d8337d1c69d1",
+        "completion_id": "fc3c386e-3a46-47bd-9d09-4000561d123f"
+      },
+      {
+        "prompt_id": "ce551b8e-814f-4b84-ba83-c7f83b465c29",
+        "completion_id": "085d97f0-56e1-42b3-af5d-90d0d25e32a6"
+      },
+      {
+        "prompt_id": "b7bf5ff8-4046-4e41-abef-84b52cc9e65e",
+        "completion_id": "264bb6b4-673b-490f-9a57-433ec41d8549"
+      },
+      {
+        "prompt_id": "cc61a43d-acd7-428e-a437-4dc891057a09",
+        "completion_id": "de96b453-2708-42d4-aaa9-b6153865c108"
+      },
+      {
+        "prompt_id": "20d791be-9094-4df1-bded-b026c3e1df66",
+        "completion_id": "21189f42-0335-429d-8a5a-3bc2ec3d0f97"
+      },
+      {
+        "prompt_id": "aa2f5031-b9c4-4e6d-a40d-4c4e3d756263",
+        "completion_id": "75b8b4e6-f907-41c6-aac0-15362eaa2814"
+      },
+      {
+        "prompt_id": "e1cf80cd-965e-4a64-b2e3-a9549735161a",
+        "completion_id": "6bfcda37-bb37-4372-8d6b-d6c1efa763cc"
+      },
+      {
+        "prompt_id": "0148ec42-59ba-47d2-a1cb-3ea3ed5f5fa0",
+        "completion_id": "c40be6a0-c694-4b6e-8d59-05d1ae73eaca"
+      },
+      {
+        "prompt_id": "592aab7b-4125-427e-b8fe-8654dd561eda",
+        "completion_id": "f9adf6c7-ce64-40ea-b05a-3ada65ebbe01"
+      },
+      {
+        "prompt_id": "d9452848-c66f-408b-9dbf-9ec8ab140b1f",
+        "completion_id": "8c005ad7-e897-4b91-a00d-f2dcc8f4b9f8"
+      },
+      {
+        "prompt_id": "8dcc8c30-6781-4f61-aa3e-c0d5a7b4f5ca",
+        "completion_id": "38fd747f-dca4-4fc9-bc2a-56a6833e89af"
+      },
+      {
+        "prompt_id": "8d0d9310-b6fb-43ad-bfd5-783dbdb1252d",
+        "completion_id": "ca9e6d07-872e-4e11-b0be-a2996c70865c"
+      },
+      {
+        "prompt_id": "419c6ff1-a7a0-4d1c-9594-92c0e1b84264",
+        "completion_id": "69804371-da4f-43a2-9afc-fe53f822dd3a"
+      },
+      {
+        "prompt_id": "21a22c97-7f01-4280-8980-0e1c774bfc79",
+        "completion_id": "b9b4a07f-af36-462d-b91c-9125a4013b8b"
+      },
+      {
+        "prompt_id": "20cdebb7-9189-4f09-ad21-bfc8e8b75680",
+        "completion_id": "cd9a1cfb-f564-4ed6-a06a-ba69298484e9"
+      },
+      {
+        "prompt_id": "42465540-8af1-423b-9b35-a31de1e1d49e",
+        "completion_id": "0770b520-5d44-4b16-b2fd-cb8a98f23e3c"
+      },
+      {
+        "prompt_id": "cd53e21a-e5ed-4d9b-a258-42a23e9715bb",
+        "completion_id": "15d5d74c-2106-4e4f-ba6d-34af9e79327d"
+      },
+      {
+        "prompt_id": "10e3a385-edd8-4a06-876c-056f99169025",
+        "completion_id": "5b24b634-bba1-40bf-977f-1f5f5025a69d"
+      },
+      {
+        "prompt_id": "8fd1890f-d536-47b4-b8fe-8a1a1dd89afd",
+        "completion_id": "8ab513c1-7e7a-42d7-8d4e-299364661499"
+      },
+      {
+        "prompt_id": "f54bddd8-52f2-41c0-90c2-9cda589e4ea6",
+        "completion_id": "c1013920-599d-4f53-b154-c62a906d6e15"
+      },
+      {
+        "prompt_id": "b0057353-670a-4eb4-8593-952c01e666d2",
+        "completion_id": "89fd695b-b1c8-4e08-a8e4-da6aabbb8711"
+      },
+      {
+        "prompt_id": "1a6f03dd-e600-41bf-ba29-1f61f1969247",
+        "completion_id": "2cae0829-40bf-4096-8ab4-f82a173ff18e"
+      },
+      {
+        "prompt_id": "a7df33f5-777e-4179-b337-2896de5a61ea",
+        "completion_id": "a2dd3425-9e97-4141-85c8-20492be29389"
+      },
+      {
+        "prompt_id": "30f7fc2b-2060-4d05-b592-b95260fa5f5c",
+        "completion_id": "ed6ed8bb-b607-41ad-83ba-e9663408b394"
+      },
+      {
+        "prompt_id": "3852d050-c009-4e33-b953-fd734a5b5e73",
+        "completion_id": "7bc5306c-08b4-4d95-93f1-8f1f521481c7"
+      }
+    ]
+  }
+}

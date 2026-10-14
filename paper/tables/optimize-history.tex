@@ -1,0 +1,19 @@
+\begin{tabular}{@{}rrrrp{0.62\linewidth}@{}}
+\toprule
+Round & AUROC & Det. & FA & Wording of the \texttt{contradicts} option \\
+\midrule
+0 & 0.899 & 37.3\% & 0.8\% & a passage gives a different number, date, name, place or outcome for the same thing 'sentence' describes, or states the opposite \\
+1 & 0.905 & 44.3\% & 1.0\% & The 'evidence' gives a different number, date, name, place, threshold, or outcome for a fact asserted in 'sentence', or explicitly states its opposite, even if the rest of the sentence agrees with the evidence. \\
+1 & 0.876 & 32.5\% & 0.8\% & A passage in 'evidence' describes the same entity, event, measure, and relevant period as 'sentence' but assigns an incompatible value or detail to at least one asserted fact. \\
+1 & 0.889 & 15.8\% & 0.3\% & The 'evidence' conflicts with an asserted fact in 'sentence', not merely its tone or interpretation; figures for another measure, unit, period, source edition, or entity, and missing information, do not count as conflicts. \\
+1 & 0.894 & 41.0\% & 0.8\% & Compare each factual detail in 'sentence' with passages in 'evidence' about that same fact, and select this option if any passage supplies an incompatible detail, even when other details match; do not treat an unmentioned detail as contradicted. \\
+2 & 0.903 & 38.5\% & 0.8\% & A passage in 'evidence' gives a number, date, name, place, threshold, or outcome incompatible with the corresponding detail in 'sentence', or explicitly states the opposite, even if every other detail agrees. \\
+2 & 0.886 & 39.3\% & 0.8\% & The 'evidence' describes the same fact as 'sentence' but assigns it an incompatible value or detail; agreement on the general claim does not cancel a mismatch in one asserted detail. \\
+2 & 0.893 & 19.8\% & 0.3\% & The 'evidence' conflicts with a fact asserted in 'sentence'; missing details, equivalent units, and figures for a different entity, measure, period, or source edition do not count as conflicts. \\
+2 & 0.905 & 47.0\% & 0.8\% & Compare the factual details in 'sentence' with the corresponding facts in 'evidence' and choose this option if even one detail is incompatible, but not merely because a detail is absent or a passage discusses something different. \\
+3 & 0.905 & 49.0\% & 2.0\% & A passage in 'evidence' states a different number, date, name, place, threshold, or outcome for a fact asserted in 'sentence', even when it confirms the main claim or every other detail. \\
+3 & 0.895 & 36.8\% & 0.5\% & The 'evidence' and 'sentence' describe the same fact but give incompatible details, such as different start dates for the same scheme or different percentages for the same result; one such mismatch is enough. \\
+3 & 0.885 & 26.3\% & 0.5\% & The 'evidence' gives an incompatible detail for the same fact in 'sentence', not merely a missing detail, an equivalent value in different units, or a figure for another measure, period, entity, or source edition. \\
+3 & 0.901 & 35.0\% & 1.0\% & Check each asserted detail in 'sentence' against passages in 'evidence' about that fact, and choose this option when any corresponding detail cannot be true alongside the evidence, regardless of other agreements; an unmentioned detail alone does not qualify. \\
+\bottomrule
+\end{tabular}

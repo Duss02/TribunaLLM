@@ -1,8 +1,11 @@
 import type { DebateMode } from "@/lib/debate/mode";
 
-export const RULES_VERSION = "rules-v1";
+// v2 (2026-10-11): a sentence is struck by the framed contradiction criterion (lib/jev/criterion.ts), the
+// question DebateCheck certified, instead of the relation question's `contradicts`; the threshold stays 0.7.
+// Results under v1 (the pilot) never mix with v2 in a leaderboard.
+export const RULES_VERSION = "rules-v2";
 /** Blind mode scores differently (an uncheckable claim is neutral), so its results never mix with evidence mode's. */
-export const BLIND_RULES_VERSION = "rules-blind-v1";
+export const BLIND_RULES_VERSION = "rules-blind-v2";
 
 export const rulesVersionFor = (mode: DebateMode) => (mode === "blind" ? BLIND_RULES_VERSION : RULES_VERSION);
 

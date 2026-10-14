@@ -27,7 +27,21 @@
     "analysis:judge2": "tsx --env-file-if-exists=.env.local scripts/analysis/second-judge.ts",
     "analysis:position": "tsx --env-file-if-exists=.env.local scripts/analysis/position-bias.ts",
     "analysis:perturb-variants": "tsx --env-file-if-exists=.env.local scripts/analysis/perturb-variants.ts",
-    "analysis:rejudge": "tsx --env-file-if-exists=.env.local scripts/analysis/rejudge.ts"
+    "analysis:rejudge": "tsx --env-file-if-exists=.env.local scripts/analysis/rejudge.ts",
+    "debatecheck:build": "tsx scripts/debatecheck/build.ts",
+    "debatecheck:jev": "tsx --env-file-if-exists=.env.local scripts/debatecheck/judge-jev.ts",
+    "debatecheck:llm": "tsx --env-file-if-exists=.env.local scripts/debatecheck/judge-llm.ts",
+    "debatecheck:optimize": "tsx --env-file-if-exists=.env.local scripts/debatecheck/optimize.ts",
+    "debatecheck:analyze": "tsx scripts/debatecheck/analyze.ts",
+    "debatecheck:export": "tsx scripts/debatecheck/export-autorubric.ts",
+    "debatecheck:paper": "tsx scripts/debatecheck/paper-tables.ts",
+    "debatecheck:build-types": "tsx scripts/debatecheck/build-types.ts",
+    "debatecheck:decisions": "tsx --env-file-if-exists=.env.local scripts/debatecheck/judge-decisions.ts",
+    "debatecheck:human-sheet": "tsx scripts/debatecheck/human-sheet.ts",
+    "debatecheck:study": "tsx scripts/debatecheck/analyze-study.ts",
+    "debatecheck:study-tables": "tsx scripts/debatecheck/study-tables.ts",
+    "debatecheck:study-spend": "tsx scripts/debatecheck/study-spend.ts",
+    "leaderboard:v2": "tsx --env-file-if-exists=.env.local scripts/leaderboard-v2.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.74",

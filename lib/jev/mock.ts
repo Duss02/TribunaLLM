@@ -86,6 +86,7 @@ export async function mockSentenceAnswers(input: SentenceInput): Promise<RawSent
     isClaim,
     supported,
     contradicts,
+    contradicted: contradicts,
     onMotion: 0.8 + 0.18 * u3,
     which: supported >= 0.7 ? bestPassage(input.sentence, input.evidence.text) : "none",
     latencyMs,

@@ -1,0 +1,68 @@
+{
+ "jev-noul_framed": {
+  "judge": "jev-noul_framed",
+  "n_items": 100,
+  "n_samples": 580,
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "kappa_mean": 0.6852919265991154,
+  "phi": 0.6933343818549305,
+  "precision_met": 0.8658536585365854,
+  "recall_met": 0.9861111111111112,
+  "bias": "mean_bias=0.16793959773727216 std_bias=0.17027284029671752 is_significant=True p_value=2.1774962879005055e-16 direction='positive' effect_size=0.9862970362426594 ci=ConfidenceInterval(lower=0.13415377212612078, upper=0.20172542334842353, confidence=0.95, method='t') n_samples=100",
+  "coverage": "n_total=600 n_covered=580 coverage=0.9666666666666667 judge_abstain_rate=0.025 gt_abstain_rate=0.015 union_exclusion_rate=0.033333333333333326 n_errored=0 error_rate=0.0",
+  "confusion": {
+   "labels": [
+    "1 - Very dissatisfied",
+    "2 - Somewhat dissatisfied",
+    "3 - Somewhat satisfied",
+    "4 - Very satisfied"
+   ]
+  },
+  "bootstrap": "accuracy_ci=(0.81, 0.94) kappa_ci=(0.6154122263896267, 0.7451664821631042) rmse_ci=(0.20905517865821457, 0.2666742031042693) n_bootstrap=1000 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": []
+ },
+ "jev-choice": {
+  "judge": "jev-choice",
+  "n_items": 100,
+  "n_samples": 580,
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "kappa_mean": 0.6859220548841288,
+  "phi": 0.6933343818549305,
+  "precision_met": 0.8658536585365854,
+  "recall_met": 0.9861111111111112,
+  "bias": "mean_bias=0.16733469516027658 std_bias=0.16802044975010413 is_significant=True p_value=1.342891621029999e-16 direction='positive' effect_size=0.9959186242457542 ci=ConfidenceInterval(lower=0.13399579269954354, upper=0.20067359762100961, confidence=0.95, method='t') n_samples=100",
+  "coverage": null,
+  "confusion": {
+   "labels": [
+    "1 - Very dissatisfied",
+    "2 - Somewhat dissatisfied",
+    "3 - Somewhat satisfied",
+    "4 - Very satisfied"
+   ]
+  },
+  "bootstrap": "accuracy_ci=(0.81, 0.94) kappa_ci=(0.6167132965963295, 0.7468041638691454) rmse_ci=(0.20684234066924206, 0.263803295884582) n_bootstrap=1000 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 100,
+  "total_items": 100,
+  "warnings": []
+ },
+ "jev-choice-exclude": {
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "phi": 0.6933343818549305,
+  "n_samples": 580,
+  "coverage": "n_total=600 n_covered=580 coverage=0.9666666666666667 judge_abstain_rate=0.025 gt_abstain_rate=0.015 union_exclusion_rate=0.033333333333333326 n_errored=0 error_rate=0.0"
+ },
+ "jev-choice-as_unmet": {
+  "accuracy": 0.88,
+  "kappa_micro": 0.665924276169265,
+  "phi": 0.6933343818549305,
+  "n_samples": 580,
+  "coverage": "None"
+ }
+}

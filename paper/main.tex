@@ -1,0 +1,319 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+% Safety net for characters the generated tables might carry that inputenc does not map by default.
+\DeclareUnicodeCharacter{2265}{\ensuremath{\geq}}
+\DeclareUnicodeCharacter{2264}{\ensuremath{\leq}}
+\DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+\DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+\DeclareUnicodeCharacter{03BA}{\ensuremath{\kappa}}
+\DeclareUnicodeCharacter{03C6}{\ensuremath{\phi}}
+\DeclareUnicodeCharacter{03C4}{\ensuremath{\tau}}
+\DeclareUnicodeCharacter{0394}{\ensuremath{\Delta}}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{enumitem}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{adjustbox}
+\usepackage{placeins}
+
+% Every number below that is not a fixed fact of the pilot comes from these macros, which
+% scripts/debatecheck/paper-tables.ts writes from the JSON produced by the analysis scripts.
+\input{tables/macros.tex}
+\input{tables/study-macros.tex}
+
+\newcommand{\jev}{\textsc{Jev}}
+\newcommand{\dc}{\textsc{DebateCheck}}
+\newcommand{\tribuna}{\textsc{TribunaLLM}}
+\newcommand{\pc}{$p(\text{contradicts})$}
+
+\title{What a Cheap Judge Sees Depends on How You Ask:\\
+Perturbation-Grounded Evidence Verification from Live LLM Debates}
+
+\author{Michele Dussin\thanks{Independent researcher. Code, data and every intermediate file: \url{https://github.com/Duss02/tribunallm}. The sample reviews of judge verdicts reported in \S\ref{sec:pilot} and \S\ref{sec:dataset} were produced by a language model and are labelled as such; no human annotation has been collected yet.}}
+\date{October 2026 \\ \small Draft for comment}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\tribuna{} stages live debates between language models and checks every finished sentence against a reference library with \jev{}, TypeSafe's decision model, striking contradicted sentences while the next one is still arriving. Its first tournament failed as a measurement: in 180 blind debates between six frontier models the judge struck 20 of 3,357 claims, and when I altered one number in 78 sentences it had called supported, it caught none. I use the failure as an instrument. Every supported sentence with a number becomes a contrastive pair, the original and a copy with the number changed, labelled by construction: \dc{}, \nPairs{} pairs split by motion, later extended with 1,657 pairs of four further perturbation types. Holding the model, the evidence and the labels fixed and varying only the question, the debate's own relation question detects \detLooseTwoZero{} of altered sentences at its threshold, while the same criterion posed in Autorubric's binary framing \citep{rao2026autorubric} reaches \arAllJevchoiceAcc{} accuracy on held-out motions. A pre-registered second study then asks whether judges err in the same places because of the task or because of the kind of judge, with six judges of three kinds on the same items and on two rubric panels with human labels. Two LLMs of different families are worth \studyVotesLunaChatDeepSeekPro{} independent votes, a decision model and an LLM more, two decision models of different makers most; part of the shared error is shared evidence; and the framing that helps \jev{} hurts the second decision model, so a criterion has to be tuned to the judge that answers it. Judged again with the certified question, the same 180 debates yield the leaderboard the arena promised, with \studyLbContradictedConfident{} confident strikes instead of \studyLbPilotStruck{}. Two of five pre-registered predictions failed and are reported.
+\end{abstract}
+
+\section{Introduction}
+
+A debate is a hostile environment for a fact. Each side is rewarded for sounding right, the other side will not check the figures, and the audience cannot. \tribuna{} was built on the idea that a judge that can keep up with streaming text could change that: two language models debate a motion, every finished sentence goes to \jev{}, a typed decision model that answers yes/no, choice and score questions in about 200\,ms for \$0.042 per million input tokens, and a sentence the reference library contradicts is struck through on screen while the next one is still being written. Run headless across many models, the same engine was meant to produce a leaderboard of which model gets retracted least.
+
+The leaderboard does not work; this paper explains why, and what the failure can be used for. Section~\ref{sec:pilot} reports the pilot: 180 blind debates, 3,357 factual claims, 20 retractions, 7 of them right on review. A perturbation test settled whether the models were accurate or the judge was blind. I took 78 sentences \jev{} had called supported, changed one number in each (a year by a few years, a figure by a factor of two), and asked again with the same evidence: not one altered sentence was called contradicted, and 38\% stayed ``supported''. The retrieval was not at fault (the source passage sits in the judge's top 20 for 96\% of model-written claims), and \jev{} was not at fault as a model, because the same \jev{} with a different question catches the same alterations.
+
+That observation motivates the rest of the paper. \citet{rao2026jev} compare \jev{} with three LLM judges on nine rubric panels, find them wrong in the same places, trace the shared shortfall to conventions the criterion texts do not carry, and state in their limitations that their account is observational: ``No experiment supplied exemplars or rewrote level descriptions.'' They propose rerunning their panels with exemplars and with level descriptions that name observable features. I ran an experiment of that kind, on a task where the labels are free: everything is held fixed except what the judge is told. Section~\ref{sec:dataset} builds \dc{}: every sentence a debater said that the judge called supported and that contains a number becomes a pair, the original and a copy with the number altered to one the evidence does not contain. The altered copy is contradicted by the evidence by construction; the original is the debate's own supported sentence, re-judged for consistency. \nPairs{} pairs, from six motions, six debaters and both sides, carry the exact twenty passages the judge read in the debate, so the judge can be re-asked offline for a few cents. Section~\ref{sec:experiments} then holds the model, the evidence and the labels fixed and varies the question.
+
+\paragraph{Contributions.}
+\begin{enumerate}[nosep,leftmargin=1.4em]
+\item \tribuna{}, a live arena in which a decision model retracts sentences during streaming, and the negative result of its first tournament, reported in full (\S\ref{sec:pilot}).
+\item \dc{}, a perturbation-grounded benchmark of evidence verification mined from adversarial debate, labelled by construction, split by motion, released in Autorubric's dataset format (\S\ref{sec:dataset}).
+\item The criterion-text experiment: seven ways of asking \jev{} the same question on identical items, from the debate's relation question (detection \detLooseTwoZero{}) to Autorubric's framed binary criterion (accuracy \arAllJevchoiceAcc{}), with a decomposition into wording, evidence selection, threshold and framing (\S\ref{sec:variants}--\S\ref{sec:framing}).
+\item A held-out criterion-optimisation loop for a decision model, the counterpart of Autorubric's held-out rubric improvement, which the library offers only for LLM judges (\S\ref{sec:optimise}).
+\item Correlated-error and cascade measurements between \jev{} and two reasoning-model judges on construction-labelled adversarial items (\S\ref{sec:llm}).
+\item Study 2, a pre-registered test of whether judges' errors overlap because of the task or because of the kind of judge: six judges of three kinds (two decision models of different makers, three LLMs, an NLI classifier), four new perturbation types, two subjective panels with human labels, effective votes and coverage at guaranteed risk (\S\ref{sec:study2}).
+\end{enumerate}
+
+\section{Related work}
+
+\paragraph{Rubric-based judging and decision models.}
+Autorubric \citep{rao2026autorubric} makes the design choices of rubric-based LLM evaluation explicit: atomic criteria, mixed criterion types, ensembles, few-shot calibration, abstention, bias mitigations and agreement diagnostics, with decision models as judges and confidence cascades that send uncertain criteria to an LLM. I use the library as released (version 1.6.1) to validate the judges and to replicate the framing it gives a binary criterion. \citet{rao2026jev} find \jev{} within noise of three LLM judges on 19 of 27 comparisons at 29 to 325 times lower cost, and find that on \jev{}'s most confident errors the LLM judges repeat the wrong answer 96\% of the time; they attribute the shared shortfall to conventions the criterion text does not state and recommend giving \jev{} the verdict definitions, supplying exemplars, and correcting each criterion's offset where labelled pairs exist. \citet{rao2026agreement} show that a reported agreement number depends on the judgment scale, the abstention rule and the aggregation level, and give a reporting checklist that I follow in \S\ref{sec:llm}. \citet{li2026jevjudge} measure \jev{}'s confidence as a routing signal against sixteen judges with blinded human adjudication: a cascade with a threshold set in advance matches GPT-6 at 41\% of its fee, and the confidence tracks the boundary between verdicts that can be read from the text and verdicts that must be derived. \citet{xu2026jevout} show that short natural context can flip a decision model to a fixed wrong option, and \citet{liu2026cues} that a single added colon in a candidate raises \jev{}'s false-acceptance rate from 1\% to 26\% under some presentations of the same request and not under others. \citet{duan2026jeval} benchmark decision models beyond \jev{} on 11,257 instances, find them competitive where a decision can be resolved from the evidence given, weaker on specialist knowledge, and prone to overstating the probability of the most likely outcome, and release open-weight decision models distilled from a reasoning LLM. On correlated errors among LLM judges, \citet{kohli2026nine} find that nine frontier judges from seven families carry about two independent votes' worth of information by the Kish effective sample size; \citet{hossain2026agreement} report an average pairwise error correlation of 0.21 across ten judges, equivalent to 3.5 independent judges, with the dependence strongest among the high-accuracy frontier judges, including ones from different providers; \citet{yang2026judge} ask that reports of LLM-as-judge results include error-dependence estimates. These studies measure dependence among LLMs on fixed items; none varies the question or the evidence, and none puts a decision model of a second maker in the panel. My setting differs from all of these in two ways: the items are adversarial by origin, because a debater produced them under pressure to sound right, and the labels cost nothing, because I made the wrong ones myself.
+
+\paragraph{Debate.}
+\citet{irving2018debate} proposed debate as a way for a weak judge to supervise strong models; \citet{khan2024debate} and \citet{kenton2024oversight} test it with LLM debaters and judges, and \citet{elasky2026debate} find that debate helps weak judges reward stronger models. Those judges decide who won. Mine decides, sentence by sentence, whether the evidence says what the debater said, which is a narrower question with a checkable answer. Public debate leaderboards \citep{mazur2026debate} score overall quality with LLM judges and do not verify claims.
+
+\paragraph{Fact verification and contrast sets.}
+Claim verification against evidence has a long benchmark history \citep{thorne2018fever}; \citet{atanasova2022insufficient} build contrastive claim pairs whose labels depend on which version of the evidence is in play, the closest construction to mine. \citet{tang2024minicheck} and \citet{wang2023factcheckgpt} check LLM output against grounding documents sentence by sentence offline. My pairs follow the logic of contrast sets \citep{gardner2020contrast} and behavioural tests \citep{ribeiro2020checklist}: a minimal edit with a known effect on the label, applied to the judge rather than to the model that wrote the text.
+
+\section{TribunaLLM: a live arena with a non-generative judge}
+\label{sec:system}
+
+Two debaters alternate for three rounds of at most 110 words. In \emph{blind} mode, the one the tournament uses, they argue from what they know and see no evidence. The evidence belongs to the judge: a curated pack of 19 to 22 verified passages per motion and a reference library of 14 to 18 whole Wikipedia articles cut into passages of at most 110 words (700 to 1,700 passages, 50,000 to 120,000 words per motion). Each finished sentence is sent to \jev{} with the 20 library and pack passages that best match it under BM25, shuffled from a recorded seed because \jev{}'s documentation notes a slight first-option bias. The judge never sees a model name.
+
+The sentence request carries five typed questions over the state $\{$motion, side, sentence, evidence$\}$: whether the sentence is a checkable claim (\texttt{is\_claim}, yes/no), whether it is supported (\texttt{supported}, yes/no), how the evidence relates to it (\texttt{relation}, a choice among \emph{supports}, \emph{contradicts}, \emph{says\_nothing}), which passage supports it best, and whether it is on the motion. A sentence is \emph{contradicted} when \pc{} $\ge 0.7$, \emph{supported} when $p(\text{supported}) \ge 0.7$, an \emph{opinion} when $p(\text{is\_claim}) < 0.5$, and otherwise \emph{unverified}, which costs nothing in blind mode because silence in a library the debater never saw says nothing about the claim. Contradicted sentences are struck and cost two points, supported ones earn one. A turn-level request scores rebuttal and relevance, and a final request asks which side made the stronger and more factually sound case; the three parts sum to a score and the higher score wins. Ratings are Bradley--Terry \citep{bradley1952rank} on wins and draws with bootstrap intervals; every pairing is played on both sides of every motion so a side advantage cancels. The thresholds were set before any data was collected and have not been tuned.
+
+Every result line stores the full transcript: each sentence with its verdict, the three probabilities, the best passage and the ids of the twenty passages the judge read, plus the route and model id of each debater and hashes of the prompt, question and rule sources and of the pack. Everything below is computed from those files.
+
+\section{The pilot and its negative result}
+\label{sec:pilot}
+
+Six models the available keys could reach (Claude Opus 5.5 and Sonnet 5.5, GPT-6.1 Sol and GPT-6 Luna, DeepSeek V4 Pro and V4 Flash) played every pairing on both sides of six motions (nuclear power, sugar taxes, congestion pricing, a four-day week, rent control, crewed spaceflight): 180 debates, none failed, judged by \texttt{jev-1.13.0}. The debaters cost \$3.10 (the two Claude models), \$0.61 (the two OpenAI models) and \$0.46 (the two DeepSeek models) at list prices; the judge, 8,419 calls, cost \$1.10.
+
+\paragraph{Retractions.} Of 3,357 factual claims the judge struck 20 (0.6\%). Thirteen were from one model, DeepSeek V4 Pro, and nine of those were rebuttals that deny an opponent's point which the library supports (``your claim that low-income workers get discounts is not true'', when New York gives them a 50\% discount). On review\footnote{The sample reviews in this paper were produced by a language model reading each sentence against the passages the judge read; they are not human annotations, and the review sheets are released so that a person can check them.} 7 of the 20 are real contradictions, 5 are unclear and 8 are false alarms. The ranking that results (Opus, Sol and Sonnet above; Flash, Pro and Luna below, with the three intervals in each tier overlapping) is driven by the final verdict and the argument points, not by retractions, of which there are almost none.
+
+\paragraph{The perturbation test.} To tell a careful debater from a blind judge, I took 78 sentences the judge had called supported, changed one number in each, and asked the same five questions with the same twenty passages. Years moved by three to seven, percentages by a factor, other figures roughly doubled; the replacement was rejected if it occurred anywhere in the evidence. The unchanged sentences were judged again too, as a consistency check. Table~\ref{tab:perturb} gives the result: no altered sentence was called contradicted, and 30 of 78 stayed supported, among them ``in January 5,945 Mexico introduced a tax'' at $p(\text{supported}) = 0.93$ and ``Vogtle cost above \$74 billion'' at $0.75$. The mean \pc{} on altered sentences was 0.15 for years, 0.30 for percentages and 0.11 for other figures, against a threshold of 0.7; no threshold rescues this, since lowering it to 0.5 finds 12 contradictions in the whole run.
+
+\begin{table}[t]
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Judged again (debate's question, 20 passages) & Unchanged & One number altered \\
+\midrule
+supported & 75 (96\%) & 30 (38\%) \\
+contradicted & 0 & 0 \\
+unverified & 3 (4\%) & 48 (62\%) \\
+\bottomrule
+\end{tabular}
+\caption{The first perturbation test, 78 sentences from the first 60 debates. The judge's own question, with the evidence it read in the debate, does not react to a wrong number.}
+\label{tab:perturb}
+\end{table}
+
+\paragraph{Ruling out retrieval.} For 300 library passages (30 per motion) a cheap model wrote one claim in its own words; BM25 over pack plus library ranked the source passage in the top 5 for 92.0\% of them, in the top 20 for 96.3\%. The verbatim first sentence of a passage is found at rank 1 every time.
+
+\paragraph{Other checks.} Two reasoning models asked the same questions over the same evidence agree with \jev{} at $\kappa$ = 0.48 (GPT-6.1 Sol, 103 sentences) and 0.46 (DeepSeek V4 Pro, 123), confirm one and two of its three contradictions, and find eight and eleven of their own, several genuine (5.5\% where the study says 6\%; 50\,g\,CO$_2$/kWh where the passage says 85). The final verdict carries a position effect: listing a side first lowers its probability by 0.059 on average (standard error 0.004) over 60 debates and by 0.056 over 120 more, the opposite direction from the first-option bias the documentation describes; asking twice in the same order drifts by 0.018. The schedule plays both sides, so the effect cancels in the ranking but not in a single debate.
+
+\section{DebateCheck}
+\label{sec:dataset}
+
+\paragraph{Construction.} From the 180 transcripts I take every sentence the judge called supported (1,920) and keep those with at least one number outside a citation (1,225). For each I build the altered copy as in the pilot test, with a fixed seed, rejecting replacements present in the evidence; 1,164 survive. A pair carries the motion, the debater and side, the ids of the twenty passages the judge read in the debate (from which the evidence is rebuilt verbatim), the kind of number altered (\nYear{} years, \nPercent{} percentages, \nOther{} other figures) and the debate's own probabilities for the original. The split is by motion: four motions train (\nTrain{} pairs), two are held out (crewed spaceflight and rent control, \nTest{} pairs), so that anything fitted on the training motions is tested on claims about subjects it never saw.
+
+\paragraph{What the labels mean.} The altered sentence is wrong relative to the evidence by construction: the evidence contains the original figure and not the altered one. The original is a sentence the debate's judge called supported; my review of 30 such sentences found 22 right, 1 wrong and 7 unclear, the unclear ones mostly a figure that appears in no passage accepted because the surrounding claim is supported. So the ``unchanged'' side is a noisy negative, and the false-alarm rates below are upper bounds on the judge's error. The altered side is a clean positive for the question I care about, whether a judge notices that the evidence gives a different figure.
+
+\paragraph{What the items are.} They are not synthetic claims. A debater wrote each sentence to win an argument, under instructions that a false claim would be struck and a confirmed one rewarded. The pairs inherit the register of adversarial argument: hedges, attributions to studies, numbers quoted from memory. Table~\ref{tab:models} shows how the six debaters differ in how often their altered sentences are caught.
+
+\section{Experiments}
+\label{sec:experiments}
+
+All runs use \texttt{jev-1.13.0} through the TypeSafe API, and the LLM judges through the providers' own APIs with reasoning effort \emph{low}. A bootstrap over pairs (1,000 resamples) gives the intervals. Asking \jev{} the debate's question twice about the same unchanged sentence changes \pc{} by \retestDelta{} on average and flips \retestFlips{} verdicts in \retestN{} at the 0.7 threshold, so counts at a threshold can move by a few between runs.
+
+\subsection{Seven ways of asking}
+\label{sec:variants}
+
+I hold the model, the items and the evidence source fixed and vary only the question (Table~\ref{tab:variants}, Figure~\ref{fig:roc}). The \emph{relation} forms ask the debate's choice question; \emph{loose} is the debate's wording (\emph{contradicts}: ``a passage states or directly implies the claim is false''), \emph{sharp} names what a contradiction looks like (``a passage gives a different number, date, name, place or outcome for the same thing \texttt{sentence} describes, or states the opposite''). ``20 passages'' is the evidence the judge read in the debate; ``top-3'' keeps the three of those twenty that best match the sentence under BM25. \emph{Direct} asks a single yes/no question whether the evidence gives a different figure. \emph{Two-step} asks two yes/no questions in one request, whether a passage describes the same fact and whether it gives a different value, and multiplies them. \emph{Framed} is Autorubric's binary framing for a decision model, reproduced from the library's source: the state carries the task as \texttt{input} and the sentence as \texttt{submission}; the yes/no question reads ``Determine whether this criterion is satisfied by the \texttt{submission}. Criterion: A passage in the evidence gives a different number, date, name, place or outcome for the same thing the sentence describes, or states the opposite.''; and its outcomes carry the library's definitions for an error-describing criterion (``The submission advocates, states, or recommends the problematic thing'' / ``The submission does NOT make this error, OR mentions it only to warn against it'').
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/variants.tex}}
+\caption{\jev{} on all \nPairs{} pairs under each way of asking. AUROC separates altered from unchanged sentences by \pc{}; detection is the share of altered sentences at or above the threshold, false alarm (FA) the share of unchanged ones. Tokens are the judge's input per pair (both sentences).}
+\label{tab:variants}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.62\linewidth,height=0.5\linewidth,xlabel={False alarm rate (unchanged sentences)},ylabel={Detection rate (altered sentences)},xmin=0,xmax=1,ymin=0,ymax=1,grid=both,legend pos=south east,legend style={font=\scriptsize,cells={anchor=west}},tick label style={font=\scriptsize},label style={font=\small}]
+\addplot[thick,black] table[x=fpr,y=tpr] {data/roc-loose20.dat}; \addlegendentry{relation, loose, 20}
+\addplot[thick,blue] table[x=fpr,y=tpr] {data/roc-sharp20.dat}; \addlegendentry{relation, sharp, 20}
+\addplot[thick,blue,dashed] table[x=fpr,y=tpr] {data/roc-sharp3.dat}; \addlegendentry{relation, sharp, top-3}
+\addplot[thick,red] table[x=fpr,y=tpr] {data/roc-direct3.dat}; \addlegendentry{direct yes/no, top-3}
+\addplot[thick,green!60!black] table[x=fpr,y=tpr] {data/roc-framed20.dat}; \addlegendentry{framed criterion, 20}
+\addplot[thick,green!60!black,dashed] table[x=fpr,y=tpr] {data/roc-framed3.dat}; \addlegendentry{framed criterion, top-3}
+\addplot[gray,dotted] coordinates {(0,0) (1,1)};
+\end{axis}
+\end{tikzpicture}
+\caption{ROC curves of \pc{} for the same \jev{}, the same items and the same evidence source under six questions. The debate's question (black) separates the two sides of a pair almost as well as the others; what it lacks is a scale on which the altered sentences cross any sensible threshold.}
+\label{fig:roc}
+\end{figure}
+
+Three things stand out. First, the debate's own question is not blind: its AUROC of \aurocLooseTwoZero{} means that \pc{} ranks an altered sentence above its unchanged twin most of the time. What it lacks is location: on the training motions the mean \pc{} is \meanAltLooseTwoZero{} on altered sentences and \meanUnLooseTwoZero{} on unchanged ones (Table~\ref{tab:offset}), apart from each other but both far below a threshold of 0.7. This is the pattern \citet{rao2026jev} report on graded scales, where the judges' ordering is right and their placement is off by a level, now on a binary verdict. Second, wording and evidence selection do different jobs. The sharp wording raises AUROC on the full evidence to \aurocSharpTwoZero{}, the best ranking of any relation form, while narrowing the evidence to three passages raises detection at the fixed threshold to \detSharpThree{} by moving the scale up, at some cost in ranking. Third, the framed criterion changes the outcome qualitatively: with the same twenty passages, AUROC is \aurocFramedTwoZero{}, detection at 0.7 is \detFramedTwoZero{} at \faFramedTwoZero{} false alarms over all pairs, and on the held-out motions \subHeldoutmotionsFramedTwoZeroDet{} at \subHeldoutmotionsFramedTwoZeroFa{} (AUROC \subHeldoutmotionsFramedTwoZeroAuroc{}). For this form more evidence is better (\aurocFramedTwoZero{} with twenty passages against \aurocFramedThree{} with three), the reverse of the relation form, where narrowing the evidence was the only way to push the scale up. Nothing in the framed question that the relation question lacks is information about the task; what it adds is the verdict definitions and a task sentence that tells the model what the two fields are for, which is the first row of the recommendations in \citet{rao2026jev}.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/offset.tex}}
+\caption{Offset correction. $\bar p$ is the mean \pc{} on the training motions; $\tau^\star$ the threshold that maximises Youden's $J$ (detection minus false alarm) there \citep{youden1950index}; the next columns apply it to the held-out motions, next to the same rates at the fixed 0.7.}
+\label{tab:offset}
+\end{table}
+
+\paragraph{Correcting the offset.} Where labelled pairs exist, \citet{rao2026jev} suggest correcting each criterion's offset. My labels are free, so I fit the threshold on the training motions and apply it to the held-out ones (Table~\ref{tab:offset}). Under the debate's wording the fitted threshold is \tauLooseTwoZero{}, which recovers \offDetLooseTwoZero{} detection at \offFaLooseTwoZero{} false alarms: the information was there, at a scale no one would have set by hand. The sharper wordings fit higher thresholds and keep more of their detection at fewer false alarms, so wording and offset are complements, not substitutes.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/subsets.tex}}
+\caption{Detection at 0.7 / false alarm at 0.7 / AUROC by split and by the kind of number altered.}
+\label{tab:subsets}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/models.tex}}
+\caption{By debater: how often its altered sentences are caught (detection at 0.7) and how often its unchanged ones are flagged, under the debate's wording and the sharp top-3 wording.}
+\label{tab:models}
+\end{table}
+
+\paragraph{Kinds and debaters.} Table~\ref{tab:subsets} splits by the number altered. Years are the easiest to catch and percentages the hardest under most wordings; the held-out motions behave like the training ones. Table~\ref{tab:models} splits by the model that wrote the sentence: the spread between debaters in how often an altered sentence is caught is wider than the spread in how often an unchanged one is flagged, which says that some models write sentences whose numbers are easier to check against a library (a date, a named study) and others write sentences whose numbers float free of any passage.
+
+\subsection{Learning the criterion text on held-out motions}
+\label{sec:optimise}
+
+Autorubric's \texttt{held\_out} strategy revises a criterion's wording from its grading errors on labelled data, but only for LLM judges; decision models are excluded. I implement the loop for \jev{} (Table~\ref{tab:optimize}): starting from the sharp wording over the top-3 passages, each round judges a fixed sample of 400 training pairs, builds an error report with the eight altered sentences the model missed most confidently and the eight unchanged ones it flagged most confidently, each with its passages, and asks a reviser model (\optReviser{}) for four alternative descriptions of the \emph{contradicts} option; the best by training AUROC is kept. Only the text of one option changes; the form, the other two options and the evidence stay fixed. After \optRounds{} rounds and \optCandidates{} candidates (\optJevCost{} of \jev{} time), the winner is measured once on the held-out motions.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/optimize.tex}}
+\caption{Held-out criterion optimisation. The training columns are on the 400-pair sample the loop saw; the held-out columns are on the \nTest{} pairs from motions it never saw.}
+\label{tab:optimize}
+\end{table}
+
+The optimised wording generalises: AUROC on the held-out motions goes from \optSeedTestAuroc{} to \optBestTestAuroc{}, detection at 0.7 from \optSeedTestDet{} to \optBestTestDet{}, false alarms from \optSeedTestFa{} to \optBestTestFa{}. The winning text is: \emph{``\input{tables/best-wording.tex}\unskip''}. The appendix lists every wording tried. The gain is real but smaller than the gain from changing the framing, which suggests that the loop should search over the form of the question as well as its words.
+
+\subsection{Framing through Autorubric}
+\label{sec:framing}
+
+To check that the framed result is a property of the question and not of my code, I exported the held-out split as an Autorubric \texttt{RubricDataset} (one item per sentence, the motion and the evidence in the item's prompt, one negative-weight criterion that is MET when the evidence contradicts the sentence, ground truth MET for altered and UNMET for unchanged) and graded it with the library's \texttt{DecisionModelConfig}, under both of its binary framings, and with its metrics (Table~\ref{tab:autorubric}). Nothing in the item names its label; the library sends only the prompt, the submission and the questions.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/autorubric.tex}}
+\caption{The held-out split graded with the Autorubric library as released. \texttt{noul\_framed} is a yes/no question with the MET/UNMET definitions; \texttt{choice} offers MET, UNMET and CANNOT\_ASSESS. Intervals are the library's bootstrap over items.}
+\label{tab:autorubric}
+\end{table}
+
+With all twenty passages, \jev{} reaches \arAllJevnoulframedAcc{} accuracy under the yes/no framing and \arAllJevchoiceAcc{} under the three-way choice ($\kappa$ = \arAllJevchoiceKappa{}), with recall \arAllJevnoulframedRec{} and \arAllJevchoiceRec{} on altered sentences. With only the three best-matching passages it drops to \arTopJevchoiceAcc{}, still above GPT-6 Luna graded by the same library on the same three passages (\arTopLlmopenaigptSixlunaAcc{}, $\kappa$ = \arTopLlmopenaigptSixlunaKappa{}). Under the three abstention rules of \citet{rao2026agreement} the choice framing's accuracy moves by less than a point, because it abstains on four items of 814. The same framing reproduced in my own client (\emph{framed} in Table~\ref{tab:variants}) gives detection \detFiftyFramedTwoZero{} at 0.5 on all pairs, so the effect is the question, not the harness. This is, as far as I can tell, the largest single lever in the study: the relation question that the arena ran for 180 debates and the framed criterion are the same model reading the same passages about the same sentence, and one of them catches a wrong number nine times in ten while the other catches it once in twenty.
+
+\subsection{Reasoning-model judges, correlated errors and cascades}
+\label{sec:llm}
+
+Two reasoning models of different families, GPT-6 Luna and DeepSeek V4 Flash, answered the sharp relation question over the same top-3 passages as \jev{}'s \emph{sharp, top-3} form, as JSON, at reasoning effort \emph{low} and temperature 0. Table~\ref{tab:judges} reports every judge as a binary detector under the protocol of \citet{rao2026agreement}: two items per pair, the altered one positive; an LLM answer that did not parse is an abstention, excluded and counted in coverage; both positive rates beside $\kappa$ and $\phi$; the 2$\times$2 counts; pairs as the resampling unit.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/judges.tex}}
+\caption{Every judge as a binary contradiction detector on the same items. Coverage is the share of items with a usable answer. $p_{\text{judge}}$ and $p_{\text{label}}$ are the positive rates; the label rate is 50\% by construction.}
+\label{tab:judges}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/correlated.tex}}
+\caption{Correlated errors. An error is a wrong binary decision on an item; \jev{} decides at 0.5 under the wording in the first column, and a confident \jev{} error has $p \le 0.2$ on an altered sentence or $p \ge 0.8$ on an unchanged one. The independence baseline for each conditional rate is the LLM's own error rate in the third column. $\kappa_{\text{err}}$ is Cohen's $\kappa$ between the two judges' error indicators.}
+\label{tab:correlated}
+\end{table}
+
+\paragraph{Correlated errors.} Table~\ref{tab:correlated} asks the question of \citet{rao2026jev} on construction-labelled items. A judge that errs more also errs on easier items, where the other judge is right, so the fair comparison matches evidence and error rate. Under the framed wording over the same three passages the LLMs read, \jev{} errs on \corrJevFramedThreeGptSixluna{} of items and GPT-6 Luna on \corrBaseFramedThreeGptSixluna{}. On the items \jev{} gets wrong, Luna is wrong on \corrGivenFramedThreeGptSixluna{}, \corrLiftFramedThreeGptSixluna{} times what independence predicts ($\kappa_{\text{err}}$ = \corrKappaFramedThreeGptSixluna{} between the two error indicators); DeepSeek V4 Flash is wrong on \corrGivenFramedThreeDeepseekvFourflash{} of them ($\kappa_{\text{err}}$ = \corrKappaFramedThreeDeepseekvFourflash{}). The two LLM judges, at the same error rates, fail on each other's items far more often: Flash is wrong on \corrLlmGiven{} of the items Luna is wrong on, \corrLlmLift{} times independence ($\kappa_{\text{err}}$ = \corrLlmKappa{}). Under the unmatched relation wording, where \jev{} errs on \corrJevSharpThreeGptSixluna{} of items, its overlap with Luna is \corrGivenSharpThreeGptSixluna{}, and on \jev{}'s \corrNSharpThreeGptSixluna{} confident errors \corrConfSharpThreeGptSixluna{}. So the dependence between \jev{} and an LLM is real, smaller than between two LLMs, and smaller than the 96\% repetition rate \citet{rao2026jev} report on rubric panels, where every judge placed essays one level too low together. Part of what the judges share here is plain difficulty: on the items DeepSeek V4 Flash gets wrong (\stratHardN{} items), \jev{} errs on \stratHardJev{} and Luna on \stratHardLlm{}, and Luna is wrong on \stratHardGiven{} of \jev{}'s errors; on the items Flash gets right (\stratEasyN{}), \jev{} errs on \stratEasyJev{}, Luna on \stratEasyLlm{}, and the overlap is \stratEasyGiven{}. A share of the pairs is hard for every judge, typically a figure quoted from an edition the pack does not hold or a passage about a neighbouring quantity; outside it, \jev{} and the LLMs fail on different sentences and for different reasons, \jev{}'s errors being misses on a compressed scale and the LLMs' being readings. Lower overlap is only worth something if a combination cashes it in, so I tried (held-out motions, \combN{} items with answers from every judge; rules fitted on the training motions). If one could pick the right judge for each item, \jev{} with GPT-6 Luna would reach \combOracleFramedThreeAndLuna{} against \combOracleLunaAndFlash{} for the two LLMs. No rule I fitted gets there: a weighted vote of \jev{} and Luna scores \combFitFramedThreeAndLuna{} where the better of the two alone scores \combSingleFramedThree{}, the two LLMs together \combFitLunaAndFlash{} against \combSingleFlash{}, and a majority of all three \combMajority{}. The items the judges disagree on are the hard ones, and a vote cannot tell who is right. Two different questions to the same \jev{} are, moreover, as complementary as \jev{} and an LLM (\combOracleFramedThreeAndDirectThree{} if one could pick), so what the lower overlap reflects is different questions, not a different kind of judge. On these items a second judge buys little accuracy; what buys accuracy is asking the first judge well: \jev{} alone with twenty passages scores \combSingleFramedTwoZero{} on the same items. A caveat on the comparison in Table~\ref{tab:judges}: the LLM judges read the three best-matching passages, the same evidence as \jev{}'s \emph{sharp, top-3} and \emph{framed, top-3} forms; on those three passages framed \jev{} ($\kappa$ = \kappaJevframedThreeZeroFive{}) is within noise of GPT-6 Luna (\kappaLLMgptSixluna{}) and DeepSeek V4 Flash (\kappaLLMdeepseekvFourflash{}) at a quarter and a twenty-fifth of their cost, and with the twenty passages the LLMs were not given it pulls ahead (\kappaJevframedTwoZeroZeroFive{}).
+
+\paragraph{Confidence and cascades.} \citet{li2026jevjudge} and \citet{rao2026autorubric} route uncertain items from \jev{} to an LLM. I simulate the cascade on these items: \jev{} decides when $|2p-1| \ge \tau$ and the LLM decides otherwise, with cost at list prices from the tokens each judge used (Table~\ref{tab:cascade}, Figure~\ref{fig:cascade}). The AUROC of \jev{}'s confidence for its own correctness is \confAurocSharpThree{} under the sharp wording and \confAurocFramedTwoZero{} under the framed one, in the range \citet{li2026jevjudge} report. Under the sharp wording \jev{} alone is at \jevAccSharpThree{} and GPT-6 Luna at \llmAccGptSixluna{}; the cascade that stays within one point of the LLM escalates \casEscSharpThreeGptSixluna{} of items at \casShareSharpThreeGptSixluna{} of the LLM's cost (\casEscSharpThreeDeepseekvFourflash{} and \casShareSharpThreeDeepseekvFourflash{} with DeepSeek V4 Flash as the fallback). Under the framed wording \jev{} alone (\jevAccFramedTwoZero{}) is above both LLM judges, so the best cascade escalates nothing. Autorubric's own calibration of a cascade on the held-out split with three passages, through its \texttt{calibrate\_escalation}, picks a threshold of \arCascadeThr{} that escalates \arCascadeEsc{} of items for \arCascadeAcc{} accuracy, against \arLlmAcc{} for the LLM alone and \arJevAcc{} for \jev{} alone. As in \citet{rao2026jev}, a cascade is a cost tool: it buys the LLM's accuracy at a fraction of its price and cannot add what both judges lack. One more caveat on price: a decision model that reads twenty passages (\jevCostItemFramedTwoZero{} per item at list price) costs about as much as GPT-6 Luna reading three (\llmCostGptSixluna{}), because that model is itself priced near the floor; against DeepSeek V4 Flash with reasoning (\llmCostDeepseekvFourflash{}) the gap is sevenfold.
+
+\begin{table}[t]
+\centering\small
+\adjustbox{max width=\linewidth}{\input{tables/cascade.tex}}
+\caption{Cascades at selected confidence thresholds: items with \jev{} confidence below $\tau$ go to the LLM. Cost per item at list prices; the last column is the cascade's cost as a share of the LLM's.}
+\label{tab:cascade}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.62\linewidth,height=0.46\linewidth,xlabel={Share of items escalated to the LLM},ylabel={Accuracy},xmin=0,xmax=1,grid=both,legend pos=south east,legend style={font=\scriptsize,cells={anchor=west}},tick label style={font=\scriptsize},label style={font=\small}]
+% pgfplots uses \to as a list delimiter, so a legend entry must never contain it; \rightarrow is safe.
+\addplot[thick,blue,mark=*,mark size=1pt] table[x=escalated,y=accuracy] {data/cascade-sharp3-gpt-6-luna.dat}; \addlegendentry{sharp top-3 $\rightarrow$ GPT-6 Luna}
+\addplot[thick,blue,dashed,mark=square*,mark size=1pt] table[x=escalated,y=accuracy] {data/cascade-sharp3-deepseek-v4-flash.dat}; \addlegendentry{sharp top-3 $\rightarrow$ DeepSeek V4 Flash}
+\addplot[thick,green!60!black,mark=*,mark size=1pt] table[x=escalated,y=accuracy] {data/cascade-framed20-gpt-6-luna.dat}; \addlegendentry{framed 20 $\rightarrow$ GPT-6 Luna}
+\addplot[thick,green!60!black,dashed,mark=square*,mark size=1pt] table[x=escalated,y=accuracy] {data/cascade-framed20-deepseek-v4-flash.dat}; \addlegendentry{framed 20 $\rightarrow$ DeepSeek V4 Flash}
+\end{axis}
+\end{tikzpicture}
+\caption{Cascade accuracy against the share of items escalated, sweeping the confidence threshold from 0 (\jev{} alone, left) to 1 (the LLM alone, right).}
+\label{fig:cascade}
+\end{figure}
+
+\paragraph{Ensembles of wordings.} Averaging \pc{} over four relation and direct wordings gives AUROC \aurocEnsembleFour{}, above any single relation wording, at four times the price; at a threshold of 0.5 it detects \detFiftyEnsembleFour{} at \faFiftyEnsembleFour{} false alarms. Adding the framed wording to the mean gives \aurocEnsembleFive{}, still below the framed criterion asked once (\aurocFramedTwoZero{}). A decision model's answer varies with the wording, so asking several ways is a cheap test-time ensemble, but averaging a good question with worse ones dilutes it.
+
+\input{study.tex}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{The criterion text determines the judge.} Holding everything else fixed, the way the question is posed moved \jev{} from catching one altered number in twenty to catching nine in ten. The components are separable: the \emph{wording} of the contradiction option moves both ordering and location; the \emph{evidence selection} moves location more than ordering; the \emph{threshold} is an offset that free labels can fit; and the \emph{framing} (a task sentence, a criterion stated as a proposition about the submission, verdict definitions as the outcomes) moves everything at once. \citet{rao2026jev} could only observe that judges share conventions the rubric does not state; here the convention is explicit (``a different number for the same thing counts''), the labels enforce it, and the gap closes.
+
+\paragraph{What this means for the arena.} The retraction rate the leaderboard was built on is not a property of the debaters; it is a property of a question. I reran the judge, not the debates: for \studyLbCost{} the same 180 debates give \studyLbContradictedConfident{} confident strikes instead of \studyLbPilotStruck{} and the leaderboard of \S\ref{sec:arena-v2}, because every sentence is stored with the passages it was judged against. The same change makes strict mode, which rewinds a turn when a sentence is struck, worth testing again. What the framed criterion does not fix is the convention problem I found on the sharp wording's false alarms in the pilot: a model that correctly quotes Lazard's 2024 cost ranges when the pack holds the 2026 edition is giving ``a different number for the same thing''. A fact-checking criterion needs a third verdict, not covered by this edition, and evidence that records the edition and year of each figure.
+
+\paragraph{What this means for decision-model evaluation.} Perturbation gives labelled items at no cost, in the register of the deployment, in any quantity, and with a known direction of error. It cannot replace human labels for the question whether an original sentence is true; it can replace them for the question whether a judge reacts to a change that must change the label. I suggest it as a standard check before any decision-model deployment: alter the thing the criterion is about, and see whether the probability moves.
+
+\section{Limitations}
+
+The positive labels are by construction; the negative labels are a judge's supported verdicts, reviewed by a language model on a sample, not by people. Only numbers were altered; a wrong name, a reversed causal claim or a fabricated study would need other perturbations, and the two-step and direct forms may rank differently on them. One \jev{} version was used; its answers drift by about 0.03 between calls, and the API is in early access. The LLM judges ran at low reasoning effort with one prompt. The sample reviews and the reviser in the optimisation loop are outputs of language models, that is, of judges of the kind under study; the released sheets are meant to be checked by a person. Six English-language policy motions and six debaters are a small world, and the held-out split, two motions, is small. Costs are list prices, not invoices. Study 2 adds its own limits: Claude Sonnet 5.5 judged a 400-pair sample, not every pair; DeepSeek V4 Pro has no panel results; the human validation of the new perturbation types was prepared but not yet collected, so the unit type, where every judge is near chance, may contain edits that are not contradictions (percent against percentage points, a figure per year against per month); and the panels hold 100 items each, so their intervals are wide.
+
+\section{Conclusion}
+
+A live arena in which a decision model retracts sentences during streaming is cheap and fast enough to run; its first tournament showed that the question it asked could not see a wrong number. The same debates, re-used as a source of contrastive pairs, let me hold the model and the evidence fixed and vary only the question, which turned out to be the hidden variable: wording, evidence selection, threshold and framing each move the judge, and the framing recommended by the authors of the tools I used moves it the most. The pairs, the judgments of three judges on them, the optimisation loop and the reports are released so that the experiment the earlier paper could not run can be run again on other criteria.
+
+The second study, pre-registered and reported with its two failed predictions, says what a second opinion is worth: two LLMs of different families share most of their errors on this task, partly because they share the evidence, while a decision model of a different maker is closer to an independent vote; the framing effect is a property of the question and the model together; and the decision model's blind spots have a shape (units, attributions) that tells a cascade where to spend. The pairs, every judge's answer on them, the panel gradings, the pre-registration with its deviations and the two blind sheets for the human check are released with the code. The next steps are set by the limits: the human labels; a sample of pairs built from sentences the judge had not approved, so that the judge does not select its own test; the open-weight decision models of \citet{duan2026jeval} as a third maker in the panel, which would test whether two decision models are close to independent votes or whether this pair was; and the criterion-optimisation loop run against the second decision model, since the question that suits one does not suit the other.
+
+\paragraph{Reproducibility and cost.} Building the pairs is free. Judging all \nPairs{} pairs under seven wordings with \jev{} cost \$1.10 (26 million input tokens); the optimisation loop \optJevCost{}; GPT-6 Luna and DeepSeek V4 Flash on all pairs about \$0.30 and \$2.50 (the latter almost entirely reasoning tokens); the Autorubric validation under \$0.70. The first study, pilot included, stayed under \$12 of API credit, about a third of it on the judge. Study 2 cost, at list prices from the tokens the output files carry, about \$3.20 on OpenAI (two Decisions runs on all pairs and the relation-question run, Luna chat on all pairs, the panels), \$0.52 on TypeSafe (\jev{} on 1,657 new pairs under two conditions and on both panels), \$1.67 on DeepSeek (whose prepaid balance of \$6.43 nevertheless ran out before the last 395 pairs, so its actual charges exceed the list estimate) and \$4.61 as charged for Claude Sonnet 5.5 (\$2.91 for the 400 pairs and \$1.70 for the CHARM-100 grading through Autorubric, whose prompt caching brought a \$5.28 list-price run down to that figure); HHEM ran on a laptop CPU. The two studies together stayed under \$30 of API credit, about a seventh of it on the decision model that did most of the judging.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\appendix
+\section{Wordings tried by the optimisation loop}
+\begin{table}[h]
+\centering\footnotesize
+\adjustbox{max width=\linewidth}{\input{tables/optimize-history.tex}}
+\caption{Every \emph{contradicts} description the loop evaluated on the 400-pair training sample, with its AUROC and its detection and false-alarm rates at 0.7. Round 0 is the seed.}
+\end{table}
+
+\section{Agreement between the two LLM judges}
+\input{tables/correlated-llm.tex}
+
+\section{The questions the arena asks}
+\footnotesize
+\begin{verbatim}
+is_claim:  Does `sentence` assert a checkable fact about the world (numbers, events, causes),
+           rather than an opinion, value judgment, question, or rhetorical framing?
+supported: Is `sentence` supported by the `evidence`?
+           true:  a passage states it or directly implies it
+           false: no passage addresses it, or a passage contradicts it
+relation:  How does the `evidence` relate to `sentence`?
+           supports:     a passage states the claim or directly implies it is true
+           contradicts:  a passage states or directly implies the claim is false
+           says_nothing: no passage addresses what the sentence asserts
+which:     Which evidence passage best supports `sentence`?  (one option per passage, and none)
+on_motion: Is `sentence` relevant to arguing for or against the `motion`?
+\end{verbatim}
+
+\end{document}

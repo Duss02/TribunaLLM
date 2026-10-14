@@ -233,3 +233,7 @@ pnpm spend
 
 Jev is not deterministic: the same question asked twice drifts by about 0.02 in probability, so counts at
 a threshold can differ by one or two between runs.
+
+## Follow-up
+
+The perturbation finding became a benchmark of the judge, DebateCheck (1,164 contrastive pairs from these 180 debates), on which the same Jev reaches 94% accuracy on held-out motions once the criterion is posed in Autorubric's binary framing. See `bench/debatecheck/REPORT.md` and the paper in `paper/`.

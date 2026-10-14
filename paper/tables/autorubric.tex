@@ -1,0 +1,11 @@
+\begin{tabular}{@{}llrrrrrrl@{}}
+\toprule
+Evidence & Judge (Autorubric) & Items & Acc.\ [95\% CI] & $\kappa$ [95\% CI] & $\phi$ & Prec. & Rec. & TP/FP/FN/TN \\
+\midrule
+top-3 & jev-noul\_framed & 814 & 85.9\% [0.83, 0.88] & 0.72 [0.67, 0.77] & 0.72 & 88\% & 83\% & 338/46/69/361 \\
+top-3 & jev-choice & 814 & 86.0\% [0.84, 0.88] & 0.73 [0.68, 0.77] & 0.74 & 91\% & 82\% & 335/35/72/372 \\
+top-3 & llm-openai/gpt-6-luna & 814 & 82.8\% [0.80, 0.85] & 0.66 [0.60, 0.71] & 0.66 & 83\% & 82\% & 334/67/73/340 \\
+20 passages & jev-noul\_framed & 814 & 93.9\% [0.92, 0.95] & 0.88 [0.84, 0.91] & 0.88 & 91\% & 97\% & 396/39/11/368 \\
+20 passages & jev-choice & 814 & 94.7\% [0.93, 0.96] & 0.89 [0.86, 0.92] & 0.90 & 95\% & 95\% & 386/21/21/386 \\
+\bottomrule
+\end{tabular}

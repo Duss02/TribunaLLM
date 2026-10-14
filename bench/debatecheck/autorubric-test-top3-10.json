@@ -1,0 +1,233 @@
+{
+ "name": "debatecheck-test-top3",
+ "prompt": null,
+ "rubric": [
+  {
+   "name": "contradicted_by_evidence",
+   "weight": -10,
+   "requirement": "A passage in the evidence gives a different number, date, name, place or outcome for the same thing the sentence describes, or states the opposite."
+  }
+ ],
+ "items": [
+  {
+   "submission": "Evidence from San Francisco shows why design matters: a 2019 study by Rebecca Diamond, Tim McQuade, and Franklin Qian found that the city’s rent-control expansion reduced tenant mobility, but landlords responded by converting some rental properties, contributing to a 15% reduction in the rental housing supply among affected properties.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|PRO-1-2|original|year|gpt-6-luna",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP02| Rebecca Diamond, Tim McQuade and Franklin Qian studied a 1994 San Francisco law that extended rent control to small multifamily buildings built before 1980. In the American Economic Review in 2019 they reported that rent control limited renters' mobility by 20 percent and lowered displacement from San Francisco.\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nP09| Kholodilin's August 2024 summary also reports that of 16 studies on rental supply, 12 found a negative effect, 3 found none and 1 found a positive effect. Of 17 studies on uncontrolled rents, 14 found that rent control raised them, and of 26 studies on mobility, 25 found that it reduced mobility.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "Evidence from San Francisco shows why design matters: a 2026 study by Rebecca Diamond, Tim McQuade, and Franklin Qian found that the city’s rent-control expansion reduced tenant mobility, but landlords responded by converting some rental properties, contributing to a 15% reduction in the rental housing supply among affected properties.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|PRO-1-2|perturbed|year|gpt-6-luna",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP02| Rebecca Diamond, Tim McQuade and Franklin Qian studied a 1994 San Francisco law that extended rent control to small multifamily buildings built before 1980. In the American Economic Review in 2019 they reported that rent control limited renters' mobility by 20 percent and lowered displacement from San Francisco.\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nP09| Kholodilin's August 2024 summary also reports that of 16 studies on rental supply, 12 found a negative effect, 3 found none and 1 found a positive effect. Of 17 studies on uncontrolled rents, 14 found that rent control raised them, and of 26 studies on mobility, 25 found that it reduced mobility.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 2019 -> 2026; the evidence has 2019"
+   ]
+  },
+  {
+   "submission": "PRO concedes San Francisco's expansion exempted new construction and allowed cost recovery, yet Diamond, McQuade, and Qian still found a 15% rental-supply reduction.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-1-1|original|percent|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0902| (Zoning) Cluster zoning permits residential uses to be clustered more closely together than normally allowed, thereby leaving substantial land area to be devoted to open space. Cluster zoning has been favored for its preservation of open space and reduction in construction and utility costs via consolidation, although existing residents may often disapprove due to a reduction in lot sizes.\nW0958| (Housing crisis) According to research, overly restrictive zoning drives up housing prices by limiting the number of areas where construction is allowed. Studies have found, for example, that restrictive zoning can make homes more than 50% more expensive than the actual cost to build them. Building codes have also been criticized for exacerbating the housing crisis by raising the cost of new housing.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "PRO concedes San Francisco's expansion exempted new construction and allowed cost recovery, yet Diamond, McQuade, and Qian still found a 31% rental-supply reduction.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-1-1|perturbed|percent|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0902| (Zoning) Cluster zoning permits residential uses to be clustered more closely together than normally allowed, thereby leaving substantial land area to be devoted to open space. Cluster zoning has been favored for its preservation of open space and reduction in construction and utility costs via consolidation, although existing residents may often disapprove due to a reduction in lot sizes.\nW0958| (Housing crisis) According to research, overly restrictive zoning drives up housing prices by limiting the number of areas where construction is allowed. Studies have found, for example, that restrictive zoning can make homes more than 50% more expensive than the actual cost to build them. Building codes have also been criticized for exacerbating the housing crisis by raising the cost of new housing.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 15 -> 31; the evidence has 15"
+   ]
+  },
+  {
+   "submission": "Cambridge's 1994 decontrol, studied by Autor, Palmer, and Pathak in 2014, raised property values and renovation, showing controls had suppressed maintenance.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-1-3|original|year|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP06| David Autor, Christopher Palmer and Parag Pathak studied the 1995 end of rent control in Cambridge, Massachusetts. In the Journal of Political Economy in 2014 they estimated that decontrol added about 1.8 billion dollars to the value of Cambridge's housing stock between 1994 and 2004, nearly a quarter of total residential price appreciation in that period.\nW0007| (Rent control in the United States) , and Oakland, California. Many smaller communities also have rent control — notably the California cities of Santa Monica, Berkeley, and West Hollywood — along with many small towns in New Jersey. In the early 1990s, rent control in some cities, such as Boston and Cambridge, Massachusetts, was ended by state referendums. When rent control ended in Cambridge, the city realized a 20% increase in new development and an increase in property values, according to a study by the MIT Center for Real Estate.\nW0112| (Rent regulation in New York) New York City rent stabilization qualifications changed over the years, purportedly to curb perceived abuses that allowed the wealthy to enjoy protection that was ostensibly intended for the working class. The apartment must be the tenant's primary residence to qualify for stabilization. Vacancy Decontrol and High-Income Deregulation were enacted in 1997 and abolished in 2019. Renovations are no longer a path to deregulation, nor is any level of rent increase, as there is no high-rent threshold. Apartments that were legally deregulated prior to 2019 remain market rate.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "Cambridge's 1999 decontrol, studied by Autor, Palmer, and Pathak in 2014, raised property values and renovation, showing controls had suppressed maintenance.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-1-3|perturbed|year|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP06| David Autor, Christopher Palmer and Parag Pathak studied the 1995 end of rent control in Cambridge, Massachusetts. In the Journal of Political Economy in 2014 they estimated that decontrol added about 1.8 billion dollars to the value of Cambridge's housing stock between 1994 and 2004, nearly a quarter of total residential price appreciation in that period.\nW0007| (Rent control in the United States) , and Oakland, California. Many smaller communities also have rent control — notably the California cities of Santa Monica, Berkeley, and West Hollywood — along with many small towns in New Jersey. In the early 1990s, rent control in some cities, such as Boston and Cambridge, Massachusetts, was ended by state referendums. When rent control ended in Cambridge, the city realized a 20% increase in new development and an increase in property values, according to a study by the MIT Center for Real Estate.\nW0112| (Rent regulation in New York) New York City rent stabilization qualifications changed over the years, purportedly to curb perceived abuses that allowed the wealthy to enjoy protection that was ostensibly intended for the working class. The apartment must be the tenant's primary residence to qualify for stabilization. Vacancy Decontrol and High-Income Deregulation were enacted in 1997 and abolished in 2019. Renovations are no longer a path to deregulation, nor is any level of rent increase, as there is no high-rent threshold. Apartments that were legally deregulated prior to 2019 remain market rate.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 1994 -> 1999; the evidence has 1994"
+   ]
+  },
+  {
+   "submission": "The 15% decline hit real rental units, and Diamond, McQuade, and Qian found landlords converted affected buildings, often to owner-occupied condos.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-2-2|original|percent|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0998| (Costa–Hawkins Rental Housing Act) The Act was amended in 2002 to close a loophole related to condominium conversions after the 1995 Act. Owners of an apartment building may obtain a new certificate of occupancy due to a condo conversion even without then selling any converted units. In such case, the rental units do not become exempt from rent control under the Act.\nW0032| (Rent control in the United States) Rent control laws define which rental units are affected, and may only cover larger complexes, or units older than a certain date. To attempt to not disincentivise investment in new housing stock, rent control laws often exempt new construction. For example, San Francisco's Rent Stabilization Ordinance exempts all units built after 1979. New York State generally exempts units built after 1974 anywhere in the state (although owners can agree to rent stabilization in exchange for tax benefits).",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "The 26% decline hit real rental units, and Diamond, McQuade, and Qian found landlords converted affected buildings, often to owner-occupied condos.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-2-2|perturbed|percent|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0998| (Costa–Hawkins Rental Housing Act) The Act was amended in 2002 to close a loophole related to condominium conversions after the 1995 Act. Owners of an apartment building may obtain a new certificate of occupancy due to a condo conversion even without then selling any converted units. In such case, the rental units do not become exempt from rent control under the Act.\nW0032| (Rent control in the United States) Rent control laws define which rental units are affected, and may only cover larger complexes, or units older than a certain date. To attempt to not disincentivise investment in new housing stock, rent control laws often exempt new construction. For example, San Francisco's Rent Stabilization Ordinance exempts all units built after 1979. New York State generally exempts units built after 1974 anywhere in the state (although owners can agree to rent stabilization in exchange for tax benefits).",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 15 -> 26; the evidence has 15"
+   ]
+  },
+  {
+   "submission": "San Francisco's 1994 expansion exempted new construction, yet Diamond, McQuade, and Qian found a 15% rental-supply reduction among affected properties as landlords converted units.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-3-2|original|year|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nP02| Rebecca Diamond, Tim McQuade and Franklin Qian studied a 1994 San Francisco law that extended rent control to small multifamily buildings built before 1980. In the American Economic Review in 2019 they reported that rent control limited renters' mobility by 20 percent and lowered displacement from San Francisco.\nP04| Diamond, McQuade and Qian compared tenants in San Francisco small multifamily buildings built before 1980, which gained rent control in 1994, with tenants in buildings built from 1980 to 1990, which did not. Their findings come from one city and one law change, so they may not carry over to rent control designed differently or in other markets.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "San Francisco's 1998 expansion exempted new construction, yet Diamond, McQuade, and Qian found a 15% rental-supply reduction among affected properties as landlords converted units.",
+   "description": "rent-control|gpt-6-luna|deepseek-v4-flash|1|CON-3-2|perturbed|year|deepseek-v4-flash",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW1025| (Costa–Hawkins Rental Housing Act) The Act additionally exempted from municipal rent control certain kinds of dwelling units, namely, \"separately alienable\" units, i. e. , single family houses and condominiums. The Act also exempted new construction, i. e. , dwelling units with a certificate of occupancy issued after February 1, 1995.\nW1037| (Costa–Hawkins Rental Housing Act) In Burien, LCC v. James A. Wiley the Landlord contended that this Costa–Hawkins exemption applies to buildings converted from apartments to condominiums (both residential uses), when a new certificate is issued for the latter. The court reasoned that the purpose of the statute's exemption is to promote construction and development that increase the supply of rental housing, not to promote token reclassification without such a result. \"We conclude that section 1954. 52, subdivision (a)(1), refers to certificates of occupancy issued prior to residential use of the unit.\"",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 1994 -> 1998; the evidence has 1994"
+   ]
+  },
+  {
+   "submission": "Diamond, McQuade, and Qian’s 2019 American Economic Review study of San Francisco’s 1994 expansion found that rent control reduced tenant displacement by 20 percent.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-1-2|original|year|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP02| Rebecca Diamond, Tim McQuade and Franklin Qian studied a 1994 San Francisco law that extended rent control to small multifamily buildings built before 1980. In the American Economic Review in 2019 they reported that rent control limited renters' mobility by 20 percent and lowered displacement from San Francisco.\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0608| (Homelessness) Rent regulation also has a small effect on shelter and street populations. This is largely due to rent control reducing the quality and quantity of housing. For example, a 2019 study found that San Francisco's rent control laws reduced tenant displacement from rent-controlled units in the short-term, but resulted in landlords removing thirty percent of the rent-controlled units from the rental market, (by conversion to condos or TICs) which led to a fifteen percent citywide decrease in total rental units, and a seven percent increase in citywide rents.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "Diamond, McQuade, and Qian’s 2026 American Economic Review study of San Francisco’s 1994 expansion found that rent control reduced tenant displacement by 20 percent.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-1-2|perturbed|year|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP02| Rebecca Diamond, Tim McQuade and Franklin Qian studied a 1994 San Francisco law that extended rent control to small multifamily buildings built before 1980. In the American Economic Review in 2019 they reported that rent control limited renters' mobility by 20 percent and lowered displacement from San Francisco.\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nP04| Diamond, McQuade and Qian compared tenants in San Francisco small multifamily buildings built before 1980, which gained rent control in 1994, with tenants in buildings built from 1980 to 1990, which did not. Their findings come from one city and one law change, so they may not carry over to rent control designed differently or in other markets.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 2019 -> 2026; the evidence has 2019"
+   ]
+  },
+  {
+   "submission": "The same study found affected landlords reduced rental housing supply by 15 percent, so design matters.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-1-4|original|percent|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW1062| (Costa–Hawkins Rental Housing Act) They found that while San Francisco's rent control laws benefited tenants who had rent controlled units, it also resulted in landlords removing 30% of the units in the study from the rental market, (by conversion to condos or TICs) which led to a 15% citywide decrease in total rental units, and a 7% increase in citywide rents.\nW0608| (Homelessness) Rent regulation also has a small effect on shelter and street populations. This is largely due to rent control reducing the quality and quantity of housing. For example, a 2019 study found that San Francisco's rent control laws reduced tenant displacement from rent-controlled units in the short-term, but resulted in landlords removing thirty percent of the rent-controlled units from the rental market, (by conversion to condos or TICs) which led to a fifteen percent citywide decrease in total rental units, and a seven percent increase in citywide rents.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "The same study found affected landlords reduced rental housing supply by 31 percent, so design matters.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-1-4|perturbed|percent|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP03| Diamond, McQuade and Qian's 2019 American Economic Review study of San Francisco also found that landlords whose buildings came under rent control reduced rental housing supply by 15 percent, by selling to owner-occupants and redeveloping buildings. The authors concluded that the lost supply likely drove up market rents in the long run.\nW0608| (Homelessness) Rent regulation also has a small effect on shelter and street populations. This is largely due to rent control reducing the quality and quantity of housing. For example, a 2019 study found that San Francisco's rent control laws reduced tenant displacement from rent-controlled units in the short-term, but resulted in landlords removing thirty percent of the rent-controlled units from the rental market, (by conversion to condos or TICs) which led to a fifteen percent citywide decrease in total rental units, and a seven percent increase in citywide rents.\nW0278| (Public housing) Houses are built far from the city centre to reduce housing costs which consequently reduces access to the labor market; a study of randomly selected houses of the MCMV project in Rio de Janeiro showed a reduced likelihood of being formally employed in job-seekers but income was not affected in those who were already employed.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 15 -> 31; the evidence has 15"
+   ]
+  },
+  {
+   "submission": "Oregon’s 2019 law illustrates a less restrictive approach: it initially capped annual increases at 7 percent plus inflation and exempted buildings less than 15 years old.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-2-5|original|year|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP07| Oregon became the first US state with statewide rent control when Governor Kate Brown signed Senate Bill 608 on 28 February 2019, limiting annual increases to 7 percent plus inflation and exempting buildings under 15 years old. California's AB 1482, signed on 8 October 2019 and effective 1 January 2020, caps increases at 5 percent plus inflation or 10 percent, whichever is lower, through 1 January 2030.\nW0101| (Rent control) In 2019 Oregon's legislature passed a bill which made the state the first in the nation to adopt a state-wide rent control policy. This law limits annual rent increases to inflation plus 7 percent, includes vacancy decontrol (market rate between tenancies), exempts new construction for 15 years, and maintains the state ban on local rent control policies (state level preemption).\nW0029| (Rent control in the United States) In 2019, Oregon's legislature passed a bill which made the state the first in the nation to adopt a state-wide rent control policy. This new law limits annual rent increases to inflation plus 7 percent, includes vacancy decontrol (market rate between tenancies), exempts new construction for 15 years, and keeps the current state ban on local rent control policies (state level preemption) intact.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "Oregon’s 2013 law illustrates a less restrictive approach: it initially capped annual increases at 7 percent plus inflation and exempted buildings less than 15 years old.",
+   "description": "rent-control|gpt-6.1-sol|deepseek-v4-pro|1|PRO-2-5|perturbed|year|gpt-6.1-sol",
+   "prompt": "Motion under debate: Cities should adopt rent control.\n\nEvidence passages (id| text):\nP07| Oregon became the first US state with statewide rent control when Governor Kate Brown signed Senate Bill 608 on 28 February 2019, limiting annual increases to 7 percent plus inflation and exempting buildings under 15 years old. California's AB 1482, signed on 8 October 2019 and effective 1 January 2020, caps increases at 5 percent plus inflation or 10 percent, whichever is lower, through 1 January 2030.\nW0101| (Rent control) In 2019 Oregon's legislature passed a bill which made the state the first in the nation to adopt a state-wide rent control policy. This law limits annual rent increases to inflation plus 7 percent, includes vacancy decontrol (market rate between tenancies), exempts new construction for 15 years, and maintains the state ban on local rent control policies (state level preemption).\nW0029| (Rent control in the United States) In 2019, Oregon's legislature passed a bill which made the state the first in the nation to adopt a state-wide rent control policy. This new law limits annual rent increases to inflation plus 7 percent, includes vacancy decontrol (market rate between tenancies), exempts new construction for 15 years, and keeps the current state ban on local rent control policies (state level preemption) intact.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 2019 -> 2013; the evidence has 2019"
+   ]
+  },
+  {
+   "submission": "NASA’s Space Shuttle astronauts serviced the Hubble Space Telescope five times from 1993 to 2009, installing corrective optics and new instruments; without crewed repair, Hubble would have been a costly failure.",
+   "description": "crewed-spaceflight|deepseek-v4-pro|claude-sonnet-5.5|1|PRO-1-2|original|year|deepseek-v4-pro",
+   "prompt": "Motion under debate: Governments should fund crewed space missions rather than only robotic ones.\n\nEvidence passages (id| text):\nP06| Hubble was launched on 24 April 1990 with a flawed primary mirror, and astronauts serviced it on five Space Shuttle missions between December 1993 and May 2009. The first mission installed corrective optics. Unlike Hubble, the James Webb Space Telescope does not orbit Earth; NASA places it about 1.5 million kilometers away at the L2 point.\nW1182| (James Webb Space Telescope) Webb is not intended to be serviced in space. A crewed mission to repair or upgrade the observatory, as was done for Hubble, would not be possible, and according to NASA Associate Administrator Thomas Zurbuchen, despite best efforts, an uncrewed remote mission was found to be beyond available technology at the time Webb was designed. During the long Webb testing period, NASA officials referred to the idea of a servicing mission, but no plans were announced. Since the successful launch, NASA has stated that nevertheless limited accommodation was made to facilitate future servicing missions.\nW1282| (Commercial Crew Program) In 2009, the Augustine Commission appointed by President Barack Obama found that the program's funding and resources were insufficient to execute its goals without delays and another US$3 billion, which prompted NASA to consider alternatives. The Constellation program was cancelled in 2010. NASA redirected Orion development to handle exploration beyond Earth. It also began hiring commercial companies to handle ISS crew rotation and other crewed missions in low Earth orbit after the Space Shuttle program ended in 2011. This arrangement would end NASA's dependency on Roscosmos' Soyuz program to deliver its astronauts to the ISS.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "NASA’s Space Shuttle astronauts serviced the Hubble Space Telescope five times from 1988 to 2009, installing corrective optics and new instruments; without crewed repair, Hubble would have been a costly failure.",
+   "description": "crewed-spaceflight|deepseek-v4-pro|claude-sonnet-5.5|1|PRO-1-2|perturbed|year|deepseek-v4-pro",
+   "prompt": "Motion under debate: Governments should fund crewed space missions rather than only robotic ones.\n\nEvidence passages (id| text):\nP06| Hubble was launched on 24 April 1990 with a flawed primary mirror, and astronauts serviced it on five Space Shuttle missions between December 1993 and May 2009. The first mission installed corrective optics. Unlike Hubble, the James Webb Space Telescope does not orbit Earth; NASA places it about 1.5 million kilometers away at the L2 point.\nW1182| (James Webb Space Telescope) Webb is not intended to be serviced in space. A crewed mission to repair or upgrade the observatory, as was done for Hubble, would not be possible, and according to NASA Associate Administrator Thomas Zurbuchen, despite best efforts, an uncrewed remote mission was found to be beyond available technology at the time Webb was designed. During the long Webb testing period, NASA officials referred to the idea of a servicing mission, but no plans were announced. Since the successful launch, NASA has stated that nevertheless limited accommodation was made to facilitate future servicing missions.\nW1282| (Commercial Crew Program) In 2009, the Augustine Commission appointed by President Barack Obama found that the program's funding and resources were insufficient to execute its goals without delays and another US$3 billion, which prompted NASA to consider alternatives. The Constellation program was cancelled in 2010. NASA redirected Orion development to handle exploration beyond Earth. It also began hiring commercial companies to handle ISS crew rotation and other crewed missions in low Earth orbit after the Space Shuttle program ended in 2011. This arrangement would end NASA's dependency on Roscosmos' Soyuz program to deliver its astronauts to the ISS.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 1993 -> 1988; the evidence has 1993"
+   ]
+  },
+  {
+   "submission": "Apollo astronauts returned 382 kilograms of lunar samples with geological context, selecting diverse rocks that transformed planetary science.",
+   "description": "crewed-spaceflight|deepseek-v4-pro|claude-sonnet-5.5|1|PRO-1-3|original|other|deepseek-v4-pro",
+   "prompt": "Motion under debate: Governments should fund crewed space missions rather than only robotic ones.\n\nEvidence passages (id| text):\nP04| Between 1969 and 1972 six Apollo missions brought back 382 kilograms of lunar material, about 2,200 separate samples from six sites, according to NASA's lunar sample curators. Three automated Soviet Luna spacecraft returned 300 grams from three other sites.\nW0222| (Apollo program) The Apollo program returned over 382 kg (842 lb) of lunar rocks and soil to the Lunar Receiving Laboratory in Houston. Today, 75% of the samples are stored at the Lunar Sample Laboratory Facility built in 1979.\nW0109| (Apollo program) Overall, the Apollo program returned 842 pounds (382 kg) of lunar rocks to Earth, greatly contributing to the understanding of the Moon's composition and geological history. The program laid the foundation for NASA's subsequent human spaceflight capability and funded construction of its Johnson Space Center and Kennedy Space Center. Apollo also spurred advances in many areas of technology incidental to rocketry and human spaceflight, including avionics, telecommunications, and computers.",
+   "ground_truth": [
+    "UNMET"
+   ],
+   "ground_truth_reasons": [
+    "unchanged sentence the debate judge called supported"
+   ]
+  },
+  {
+   "submission": "Apollo astronauts returned 1064 kilograms of lunar samples with geological context, selecting diverse rocks that transformed planetary science.",
+   "description": "crewed-spaceflight|deepseek-v4-pro|claude-sonnet-5.5|1|PRO-1-3|perturbed|other|deepseek-v4-pro",
+   "prompt": "Motion under debate: Governments should fund crewed space missions rather than only robotic ones.\n\nEvidence passages (id| text):\nP04| Between 1969 and 1972 six Apollo missions brought back 382 kilograms of lunar material, about 2,200 separate samples from six sites, according to NASA's lunar sample curators. Three automated Soviet Luna spacecraft returned 300 grams from three other sites.\nW0223| (Apollo program) The rocks collected from the Moon are extremely old compared to rocks found on Earth, as measured by radiometric dating techniques. They range in age from about 3. 2 billion years for the basaltic samples derived from the lunar maria, to about 4. 6 billion years for samples derived from the highlands crust. As such, they represent samples from a very early period in the development of the Solar System, that are largely absent on Earth. One important rock found during the Apollo Program is dubbed the Genesis Rock, retrieved by astronauts David Scott and James Irwin during the Apollo 15 mission.\nW0222| (Apollo program) The Apollo program returned over 382 kg (842 lb) of lunar rocks and soil to the Lunar Receiving Laboratory in Houston. Today, 75% of the samples are stored at the Lunar Sample Laboratory Facility built in 1979.",
+   "ground_truth": [
+    "MET"
+   ],
+   "ground_truth_reasons": [
+    "number altered 382 -> 1064; the evidence has 382"
+   ]
+  }
+ ]
+}

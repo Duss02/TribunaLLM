@@ -337,6 +337,7 @@ class DebateRun {
       isClaim: judgment.isClaim,
       supported: judgment.supported,
       contradicts: judgment.contradicts,
+      contradicted: judgment.contradicted,
     };
     const passage = judgment.passage ? this.passages.get(judgment.passage) : undefined;
     this.emit({
@@ -346,6 +347,7 @@ class DebateRun {
       isClaim: judgment.isClaim,
       supported: judgment.supported,
       contradicts: judgment.contradicts,
+      contradicted: judgment.contradicted,
       passage: passage ? { id: passage.id, text: passage.text } : null,
       evidenceIds: [...sentence.evidenceIds],
       latencyMs: judgment.latencyMs,
@@ -381,6 +383,7 @@ class DebateRun {
       isClaim: 0,
       supported: 0,
       contradicts: 0,
+      contradicted: 0,
       passage: null,
       evidenceIds: [...sentence.evidenceIds],
       latencyMs: 0,

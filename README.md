@@ -4,12 +4,16 @@ Two language models debate a motion while Jev, TypeSafe's typed decision model, 
 
 Jev never generates text. It answers typed questions (yes/no probability, choice, score) about a state, and TypeSafe documents roughly 110 to 270 ms per request and $0.042 per million input tokens, with output free. That is cheap and fast enough to judge every sentence at the speed of streaming.
 
-<!-- docs/retraction.gif: a screen recording of http://localhost:3000/?auto=1 with JEV_MOCK=1, to be added -->
+![The arena: two models debate while Jev marks each sentence as supported, contradicted or unverified](docs/arena.png)
+
+The paper is in [`paper/`](paper/) (`main.tex`, tables generated from the data; open the folder in Overleaf or use the zip). In short: the first tournament's judge question could not see a wrong number (20 strikes in 3,357 claims, none of 78 altered sentences caught); DebateCheck, 2,821 contrastive pairs labelled by construction, shows that the same model on the same passages catches nine altered numbers in ten under Autorubric's framing; a pre-registered study with six judges of three kinds finds that two LLMs of different families are worth 1.16 independent votes, that part of their shared error is shared evidence, and that the framing which helps Jev hurts a second decision model; judged again with the certified question, the same 180 debates give the leaderboard below.
+
+![Leaderboard: match outcomes and, below, the same claims judged again with the certified question](docs/leaderboard.png)
 
 ## Quickstart
 
 ```bash
-git clone <this repository> tribunallm
+git clone https://github.com/Duss02/tribunallm.git
 cd tribunallm
 pnpm install
 cp .env.example .env.local
@@ -48,7 +52,7 @@ The judge never sees a model name or vendor. Sides are `PRO` and `CON`. The orde
 
 ### The questions sent to Jev
 
-One request per sentence, five questions, over `{ motion, side, sentence, evidence }`:
+Two requests per sentence, in parallel. The first carries five questions over `{ motion, side, sentence, evidence }`:
 
 ```ts
 is_claim: noul(
@@ -68,6 +72,18 @@ which: choice("Which evidence passage best supports `sentence`?", {
   /* ... */ none: "No passage supports it",
 });
 on_motion: noul("Is `sentence` relevant to arguing for or against the `motion`?");
+```
+
+The second carries the contradiction criterion that decides a strike (rules v2), posed in Autorubric's binary framing over `{ input, submission }`, where `input` is the motion and the passages and `submission` is the sentence (`lib/jev/criterion.ts`):
+
+```ts
+met: noul(
+  "Determine whether this criterion is satisfied by the `submission`. Criterion: A passage in the evidence gives a different number, date, name, place or outcome for the same thing the sentence describes, or states the opposite.",
+  {
+    true: "The submission advocates, states, or recommends the problematic thing",
+    false: "The submission does NOT make this error, OR mentions it only to warn against it",
+  },
+);
 ```
 
 One request per turn, over `{ motion, side, turn, opponentTurn, evidence }` where `turn` is the text that survived:
@@ -99,7 +115,7 @@ The first row that matches wins. Thresholds are in `lib/scoring/rules.ts`; they 
 | Verdict      | Condition                                         | On screen                                        |
 | ------------ | ------------------------------------------------- | ------------------------------------------------ |
 | opinion      | `is_claim` < 0.5                                  | italic, never struck                             |
-| contradicted | `relation.probabilities.contradicts` ≥ 0.7        | red strike-through                               |
+| contradicted | framed criterion `met` ≥ 0.7 (rules v2; was `relation.probabilities.contradicts`) | red strike-through                               |
 | supported    | `supported` ≥ 0.7                                 | green underline, hover shows the `which` passage |
 | unsupported  | `supported` ≤ 0.35                                | amber strike-through                             |
 | uncertain    | anything else                                     | grey dotted underline                            |
@@ -107,13 +123,13 @@ The first row that matches wins. Thresholds are in `lib/scoring/rules.ts`; they 
 
 Opinions are never struck. The project makes a claim about unsupported facts, and a sentence that argues a value is not wrong for lacking a source; striking it would measure style.
 
-The band from 0.35 to 0.7 is left alone on purpose. A sentence there is one the judge cannot place, and a retraction needs confidence, so it is neither struck nor scored. This is the accept-when-confident, escalate-when-unsure idea from the JEV-as-a-Judge paper, with "escalate" meaning "do not punish".
+Since rules v2 (October 2026) the strike comes from a second question asked in parallel, the framed contradiction criterion of `lib/jev/criterion.ts`: Autorubric's task sentence, the criterion as a statement ("a passage in the evidence gives a different number, date, name, place or outcome for the same thing the sentence describes, or states the opposite") and the two verdicts as outcomes. DebateCheck certified it: over the twenty passages the arena reads it catches 90 percent of altered numbers at 4.6 percent false alarms at 0.7 on held-out motions, where the relation question caught 5 percent. The relation question still answers `supported` and the best passage. The band from 0.35 to 0.7 is left alone on purpose. A sentence there is one the judge cannot place, and a retraction needs confidence, so it is neither struck nor scored. This is the accept-when-confident, escalate-when-unsure idea from the JEV-as-a-Judge paper, with "escalate" meaning "do not punish".
 
 Strict mode (on in the arena, always off in the tournament, where a model that can correct itself mid-turn would be measured on its repairs and not on what it wrote first): when a retraction arrives for the turn that is still streaming, the generation is aborted, everything after the retracted sentence is dropped, and the turn restarts with a note quoting the retracted sentence. At most two restarts per turn, and each shows as a rewind in the judge panel.
 
 ## Scoring
 
-Jev assigns every point and every penalty. The formula is fixed (`rules-v1`) and can be recounted by hand from a transcript.
+Jev assigns every point and every penalty. The formula is fixed (`rules-v2` since October 2026; `rules-v1` differs only in the question behind the contradicted verdict) and can be recounted by hand from a transcript.
 
 | component    | rule                                              | points  |
 | ------------ | ------------------------------------------------- | ------- |
@@ -127,7 +143,7 @@ Jev assigns every point and every penalty. The formula is fixed (`rules-v1`) and
 | Judge `J`    | final verdict: `3 × (p_side − p_other)`, 0 on tie | −3 … +3 |
 | Total `T`    | `E + A + J`                                       |         |
 
-In blind mode (`rules-blind-v1`) an unverified claim is worth 0 instead of −1, and nothing else changes.
+In blind mode (`rules-blind-v2`) an unverified claim is worth 0 instead of −1, and nothing else changes.
 
 The winner has the higher `T`. A gap under 0.5 is a draw. "0 on tie" means `J` is 0 for both sides when `tie` is the most likely verdict. A probability-weighted `E` is also stored in every result but nothing is ranked on it.
 
@@ -149,9 +165,17 @@ Aggregation (`lib/bench/`): the rating is a Bradley-Terry fit to debate outcomes
 
 `/gui` shows the same debate as an isometric 3D courtroom with plush characters: the two models sit at their tables and take turns walking to the middle to speak, Jev rules from the bench beside the scales, and the camera pushes in on Jev for the verdict. It takes the same query parameters as the arena.
 
-`/leaderboard` renders `bench/leaderboard.json` and needs no keys.
+`/leaderboard` renders `bench/leaderboard.json` (match outcomes and ratings) and, below it, `bench/leaderboard-v2.json` (the same debates' claims judged again with the certified question); it needs no keys.
 
 Each result line carries the whole transcript (every sentence with its verdict, the judge's probabilities and the ids of the passages it read) and a provenance block (route and model id per side, hashes of the prompt and rules sources and of the pack, the library's build date), so a retraction can be audited and the judge asked again. `pnpm spend` prices the tokens in the result files at list price per model and vendor.
+
+## DebateCheck: the judge under test
+
+The pilot's failure became a benchmark of the judge. Every sentence the judge called supported that carries a number becomes a pair with a copy whose number was altered to one the evidence does not contain, so the altered copy is wrong by construction and the exact passages the judge read are kept with it: 1,164 pairs from 180 debates, split by motion. `scripts/debatecheck/` builds the pairs (`pnpm debatecheck:build`), judges them with Jev under seven ways of asking the same question (`debatecheck:jev`), with two reasoning models (`debatecheck:llm`), runs a held-out optimisation of the criterion text for Jev (`debatecheck:optimize`), exports the split in [Autorubric](https://autorubric.org)'s dataset format (`debatecheck:export`) and validates it with that library (`autorubric_validate.py`, Python), and writes the report and the LaTeX tables (`debatecheck:analyze`, `debatecheck:paper`). Findings in short: the debate's own question separates altered from unchanged sentences (AUROC 0.85) but at a scale where almost nothing crosses the threshold; naming what a contradiction looks like, narrowing the evidence, fitting the threshold and, above all, posing the criterion in Autorubric's binary framing with its verdict definitions take the same Jev on the same passages to 94 percent accuracy on held-out motions. The write-up is `paper/main.tex` (open the `paper/` folder in Overleaf); the data and reports are in `bench/debatecheck/`.
+
+### Study 2: where judges err together
+
+A pre-registered follow-up (`docs/preregistration-judge-correlation.md`, written before any API call, with its deviations listed) asks whether two judges err in the same places because of the task or because of the kind of judge. `debatecheck:build-types` adds 1,657 pairs of four new perturbation types (polarity, entity, attribution, unit) to the numeric ones; six judges of three kinds answer the same framed criterion over the same passages: Jev and GPT-6 Luna through OpenAI's Decisions API (`debatecheck:decisions`), GPT-6 Luna, DeepSeek V4 Pro and Claude Sonnet 5.5 as chat judges (`debatecheck:llm --framing framed`), and Vectara's HHEM-2.1-Open on the CPU (`judge_hhem.py`). The same judges grade two rubric panels with human labels, CHARM-100 and HealthBench-100, through the Autorubric library (`autorubric_validate.py`, `judge_decisions_dataset.py`, `panel_items.py`; data in `bench/subjective/`). `debatecheck:study --heldout` writes `bench/debatecheck/STUDY.md` (per-judge accuracy by type, error correlation between every pair of judges, effective votes, difficulty strata, the framing test for the second decision model, coverage at guaranteed risk, the subjective panels and the verdict on each pre-registered hypothesis), `debatecheck:study-tables` the paper's tables, `debatecheck:study-spend` the cost per provider, and `debatecheck:human-sheet` the two blind sheets for the human validation in `bench/debatecheck/human/`. Finally `pnpm leaderboard:v2` judges every claim of the stored blind debates again with the certified question (the framed criterion over all passages, about 0.40 USD of Jev for 3,357 claims) and writes `bench/leaderboard-v2.json` and `bench/analysis/leaderboard-v2.md`: 755 claims contradicted at 0.5 and 90 at the confident rule, against 20 under the arena's original question, with the two Claude models and GPT-6.1 Sol struck least and the two DeepSeek models and GPT-6 Luna most (the bottom three are not distinguishable under the confident rule).
 
 ## Checking the judge
 
@@ -160,7 +184,7 @@ The scripts in `scripts/analysis/` test the judge rather than the debaters, from
 ## Caveats
 
 - The judge can be wrong. Jev is calibrated, not infallible, and Rao and Callison-Burch find it fails in the same places as LLM judges. A retraction means Jev found no support in the pack, not that the sentence is false.
-- As the questions are written today, the judge almost never strikes anything. In the first blind pilot (180 debates, 6 models) it struck 20 of 3,357 claims, and when one number was altered in 78 sentences it had called supported, it struck none of them. The committed leaderboard is that pilot; read its retraction column as a floor, not a measurement. What was tested and what would change it is in [bench/analysis/REPORT.md](bench/analysis/REPORT.md).
+- As the questions are written today, the judge almost never strikes anything. In the first blind pilot (180 debates, 6 models) it struck 20 of 3,357 claims, and when one number was altered in 78 sentences it had called supported, it struck none of them. The committed leaderboard is that pilot; read its retraction column as a floor, not a measurement. What was tested and what would change it is in [bench/analysis/REPORT.md](bench/analysis/REPORT.md). The certified question (DebateCheck, Study 2) changes this: judged again with it, the same 180 debates give 90 confident strikes and 755 at the 0.5 rule (`pnpm leaderboard:v2`, `bench/analysis/leaderboard-v2.md`).
 - Whether a sentence is a factual claim at all is itself a Jev call, so opinion detection moves the denominators of every rate.
 - In blind mode a false claim about something the library does not cover goes unpunished, and the library is only as accurate as the Wikipedia revisions it was built from. The curated packs are short, there are ten of them, they are written in English, and their figures were checked against web sources, not by a domain expert. The weakest sourcing is listed in `DECISIONS.md`.
 - A model that writes fewer factual sentences has fewer chances to be retracted. Read the retraction rate next to the rating and the win rate.
@@ -187,6 +211,21 @@ Papers:
 - Elasky et al., [Debate Helps Weak Judges Reward Stronger Models](https://arxiv.org/abs/2605.27483), 2026.
 - Li, Miao, Krishnan, Padman, [JEV-as-a-Judge: Accept When Confident, Escalate When Unsure](https://arxiv.org/abs/2609.26550), 2026.
 - Rao and Callison-Burch, [Jev vs LLMs as Rubric Judges: Cheaper, Faster, and Wrong in the Same Places](https://arxiv.org/abs/2609.29769), 2026.
+- Kohli, [Nine Judges, Two Effective Votes: Correlated Errors Undermine LLM Evaluation Panels](https://arxiv.org/abs/2605.29800), 2026.
+- Hossain, Yousefi, Lim, [Agreement Overstates Evidence: Error Dependence in LLM Judge Consensus](https://arxiv.org/abs/2609.22512), 2026.
+- Liu, [Adversarial Cues in Decision Models Used as Judges: The Role of Request Presentation](https://arxiv.org/abs/2610.11436), 2026.
+- Duan et al., [General Decision Models: Benchmarking and Insights Beyond Jev](https://arxiv.org/abs/2610.03935), 2026.
+
+## Citation
+
+```bibtex
+@misc{dussin2026tribunallm,
+  author = {Michele Dussin},
+  title  = {What a Cheap Judge Sees Depends on How You Ask: Perturbation-Grounded Evidence Verification from Live LLM Debates},
+  year   = {2026},
+  note   = {Draft. Code and data: https://github.com/Duss02/tribunallm}
+}
+```
 
 ## License
 

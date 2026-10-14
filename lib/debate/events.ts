@@ -49,6 +49,8 @@ export const debateEvent = z.discriminatedUnion("type", [
     isClaim: z.number(),
     supported: z.number(),
     contradicts: z.number(),
+    /** p(MET) of the framed contradiction criterion; 0 in transcripts recorded under rules v1. */
+    contradicted: z.number().default(0),
     passage: z.object({ id: z.string(), text: z.string() }).nullable(),
     /** The passage ids the judge read for this sentence, in the order it read them. */
     evidenceIds: z.array(z.string()).default([]),

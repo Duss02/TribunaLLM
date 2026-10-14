@@ -1,0 +1,76 @@
+{
+ "jev-noul_framed": {
+  "judge": "jev-noul_framed",
+  "n_items": 20,
+  "n_samples": 20,
+  "accuracy": 0.9,
+  "kappa_micro": 0.8,
+  "kappa_mean": 0.8,
+  "phi": 0.8,
+  "precision_met": 0.9,
+  "recall_met": 0.9,
+  "bias": "mean_bias=0.0 std_bias=0.3244428422615251 is_significant=False p_value=1.0 direction='none' effect_size=0.0 ci=ConfidenceInterval(lower=-0.15184392423821927, upper=0.15184392423821927, confidence=0.95, method='t') n_samples=20",
+  "coverage": "n_total=20 n_covered=20 coverage=1.0 judge_abstain_rate=0.0 gt_abstain_rate=0.0 union_exclusion_rate=0.0 n_errored=0 error_rate=0.0",
+  "confusion": {
+   "tp": 9,
+   "fp": 1,
+   "fn": 1,
+   "tn": 9,
+   "true_positive": null,
+   "false_positive": null,
+   "false_negative": null,
+   "true_negative": null
+  },
+  "bootstrap": "accuracy_ci=(0.75, 1.0) kappa_ci=(0.49464285714285716, 1.0) rmse_ci=(0.0, 0.5) n_bootstrap=100 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 20,
+  "total_items": 20,
+  "warnings": [
+   "Ground-truth scores take <=2 distinct values; score-level correlations (Spearman/Kendall/Pearson) are uninformative on a collapsed score range."
+  ]
+ },
+ "jev-choice": {
+  "judge": "jev-choice",
+  "n_items": 20,
+  "n_samples": 20,
+  "accuracy": 0.95,
+  "kappa_micro": 0.9,
+  "kappa_mean": 0.9,
+  "phi": 0.9045340337332909,
+  "precision_met": 1.0,
+  "recall_met": 0.9,
+  "bias": "mean_bias=0.05 std_bias=0.22360679774997894 is_significant=False p_value=0.3298768009211252 direction='positive' effect_size=0.22360679774997902 ci=ConfidenceInterval(lower=-0.05465120272041542, upper=0.15465120272041544, confidence=0.95, method='t') n_samples=20",
+  "coverage": null,
+  "confusion": {
+   "tp": 9,
+   "fp": 0,
+   "fn": 1,
+   "tn": 10,
+   "true_positive": null,
+   "false_positive": null,
+   "false_negative": null,
+   "true_negative": null
+  },
+  "bootstrap": "accuracy_ci=(0.85, 1.0) kappa_ci=(0.6875, 1.0) rmse_ci=(0.0, 0.4472135954999579) n_bootstrap=100 confidence_level=0.95",
+  "cost_usd": null,
+  "successful_items": 20,
+  "total_items": 20,
+  "warnings": [
+   "Ground-truth scores take <=2 distinct values; score-level correlations (Spearman/Kendall/Pearson) are uninformative on a collapsed score range."
+  ]
+ },
+ "jev-choice-exclude": {
+  "accuracy": 0.95,
+  "kappa_micro": 0.9,
+  "phi": 0.9045340337332909,
+  "n_samples": 20,
+  "coverage": "n_total=20 n_covered=20 coverage=1.0 judge_abstain_rate=0.0 gt_abstain_rate=0.0 union_exclusion_rate=0.0 n_errored=0 error_rate=0.0"
+ },
+ "jev-choice-as_unmet": {
+  "accuracy": 0.95,
+  "kappa_micro": 0.9,
+  "phi": 0.9045340337332909,
+  "n_samples": 20,
+  "coverage": "None"
+ }
+}

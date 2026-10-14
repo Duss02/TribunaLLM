@@ -48,6 +48,8 @@ function jevAnswer(questions: Record<string, unknown>) {
     if ("rebuts" in questions) answers.rebuts = noul(0.8);
   }
   if ("verdict" in questions) answers.verdict = choice("PRO", { PRO: 0.6, CON: 0.3, tie: 0.1 });
+  // the framed contradiction criterion (rules v2) travels in its own request
+  if ("met" in questions) answers.met = noul(0.05);
   return { model: "jev-1.13.0", answers, usage: { input_tokens: 500, output_tokens: 0 } };
 }
 
@@ -83,10 +85,12 @@ function serveEverything(): Seen {
     }
     if (url === "https://api.typesafe.ai/v1/systemone") {
       const body = JSON.parse(String(init?.body)) as {
-        state: { motion: string };
+        state: { motion?: string; input?: string };
         questions: Record<string, unknown>;
       };
-      seen.jev.push({ authorization, motion: body.state.motion });
+      // the framed request carries the motion inside `input` ("Motion under debate: ...")
+      const motion = body.state.motion ?? /Motion under debate: (.*)/.exec(body.state.input ?? "")?.[1] ?? "";
+      seen.jev.push({ authorization, motion });
       await new Promise((resolve) => setTimeout(resolve, 2));
       return Response.json(jevAnswer(body.questions));
     }

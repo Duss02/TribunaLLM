@@ -9,6 +9,8 @@ export interface JudgedSentence {
   isClaim: number;
   supported: number;
   contradicts: number;
+  /** p(MET) of the framed contradiction criterion (rules v2); absent in pilot data. */
+  contradicted?: number;
 }
 
 export interface JudgedTurn {

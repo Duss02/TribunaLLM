@@ -19,3 +19,43 @@ export async function readLeaderboard(): Promise<Leaderboard | null> {
   }
   return parsed.data;
 }
+
+export const LEADERBOARD_V2_FILE = path.join("bench", "leaderboard-v2.json");
+
+export interface CertifiedModelRow {
+  key: string;
+  label: string;
+  vendor: string;
+  claims: number;
+  pilotContradicted: number;
+  contradicted: number;
+  rate: number | null;
+  low: number;
+  high: number;
+  contradictedConfident: number;
+  rateConfident: number | null;
+  lowConfident: number;
+  highConfident: number;
+  winRate: number | null;
+}
+export interface CertifiedBoard {
+  generatedAt: string;
+  judge: string;
+  thresholds: { decision: number; confident: number };
+  debates: number;
+  claims: number;
+  contradicted: number;
+  contradictedConfident: number;
+  pilotContradicted: number;
+  models: CertifiedModelRow[];
+}
+
+/** The same debates' claims judged again with the certified question (scripts/leaderboard-v2.ts), or null. */
+export async function readCertifiedBoard(): Promise<CertifiedBoard | null> {
+  try {
+    return JSON.parse(await readFile(path.join(process.cwd(), LEADERBOARD_V2_FILE), "utf8")) as CertifiedBoard;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+}

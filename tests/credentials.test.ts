@@ -53,8 +53,14 @@ describe("keys across concurrent requests", () => {
   it("never lends one request's key to another, even when calls queue behind the limiter", async () => {
     const seen: { sentence: string; authorization: string | null }[] = [];
     vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
-      const { state } = JSON.parse(String(init.body)) as { state: { sentence: string } };
-      seen.push({ sentence: state.sentence, authorization: new Headers(init.headers).get("authorization") });
+      const { state } = JSON.parse(String(init.body)) as {
+        state: { sentence?: string; submission?: string };
+      };
+      // the framed request (rules v2) carries the sentence as `submission`
+      seen.push({
+        sentence: state.sentence ?? state.submission ?? "",
+        authorization: new Headers(init.headers).get("authorization"),
+      });
       await new Promise((resolve) => setTimeout(resolve, 3));
       return Response.json({
         model: "jev-1.13.0",
@@ -62,6 +68,7 @@ describe("keys across concurrent requests", () => {
           is_claim: noul(0.9),
           supported: noul(0.9),
           relation: choice("supports", { supports: 0.9, contradicts: 0.05, says_nothing: 0.05 }),
+          met: noul(0.05),
           which: choice("P01", { P01: 0.9, none: 0.1 }),
           on_motion: noul(0.9),
         },
@@ -79,7 +86,8 @@ describe("keys across concurrent requests", () => {
       );
     await Promise.all([callsFor("alice"), callsFor("bob")]);
 
-    expect(seen).toHaveLength(40);
+    // two Jev requests per sentence since rules v2 (relation set + framed criterion)
+    expect(seen).toHaveLength(80);
     for (const call of seen) expect(call.authorization).toBe(`Bearer key-${call.sentence.split("-")[0]}`);
   });
 });

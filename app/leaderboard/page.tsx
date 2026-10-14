@@ -4,7 +4,8 @@ import { day, percent, plural } from "@/components/leaderboard/format";
 import { Method } from "@/components/leaderboard/method";
 import { RetractionChart } from "@/components/leaderboard/retraction-chart";
 import { LeaderboardTable } from "@/components/leaderboard/table";
-import { readLeaderboard } from "@/lib/bench/load";
+import { readCertifiedBoard, readLeaderboard } from "@/lib/bench/load";
+import { CertifiedTable } from "@/components/leaderboard/certified";
 
 export const metadata: Metadata = { title: "TribunaLLM: leaderboard" };
 
@@ -12,6 +13,7 @@ const heading = "mb-4 text-lg font-semibold";
 
 export default async function Page() {
   const board = await readLeaderboard();
+  const certified = await readCertifiedBoard();
 
   if (!board) {
     return (
@@ -53,6 +55,15 @@ export default async function Page() {
           </h2>
           <LeaderboardTable models={board.models} />
         </section>
+
+        {certified && (
+          <section aria-labelledby="certified">
+            <h2 id="certified" className={heading}>
+              The same claims under the certified question
+            </h2>
+            <CertifiedTable board={certified} />
+          </section>
+        )}
 
         <section aria-labelledby="chart">
           <h2 id="chart" className={heading}>
