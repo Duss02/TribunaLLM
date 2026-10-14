@@ -19,7 +19,7 @@ The paper is in [`paper/`](paper/) (LaTeX, every table generated from the data; 
 ## Run it
 
 ```bash
-git clone https://github.com/Duss02/tribunallm.git
+git clone https://github.com/Duss02/TribunaLLM.git
 cd tribunallm
 pnpm install
 cp .env.example .env.local   # TYPESAFE_API_KEY for the judge, plus a key for the debaters
@@ -72,7 +72,7 @@ HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `a
   author = {Michele Dussin},
   title  = {What a Cheap Judge Sees Depends on How You Ask: Perturbation-Grounded Evidence Verification from Live LLM Debates},
   year   = {2026},
-  note   = {Draft. Code and data: https://github.com/Duss02/tribunallm}
+  note   = {Draft. Code and data: https://github.com/Duss02/TribunaLLM}
 }
 ```
 
