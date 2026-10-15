@@ -4,6 +4,8 @@ Two language models debate a motion. A third model, TypeSafe's decision model Je
 
 ![The arena after a debate: the judge panel counts the sentences judged and retracted, and quotes the struck sentence](docs/arena.png)
 
+[Watch the courtroom demo](https://github.com/Duss02/TribunaLLM/releases/download/demo-v1/demo.mp4) (47 seconds: a sentence is struck while the next one streams). The compiled paper is [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf).
+
 ## What this repository shows
 
 The arena's first tournament failed as a measurement: in 180 blind debates between six frontier models the judge struck 20 of 3,357 claims, and when one number was altered in 78 sentences it had approved, it caught none. The failure became the instrument.

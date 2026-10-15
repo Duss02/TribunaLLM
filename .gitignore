@@ -7,3 +7,5 @@ next-env.d.ts
 *.tsbuildinfo
 bench/results-mock
 .claude/
+docs/*.mov
+docs/*.mp4
