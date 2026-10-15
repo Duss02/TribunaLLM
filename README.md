@@ -3,14 +3,13 @@
 Two language models debate a motion. A third model, TypeSafe's decision model Jev, checks every finished sentence against a reference library the debaters never see and strikes it through while the next sentence is still arriving. The same engine, run headless over many models, produces a leaderboard of which model is contradicted least.
 
 <p align="center">
-  <a href="https://github.com/Duss02/TribunaLLM/releases/download/demo-v1/demo.mp4">
+  <a">
     <img src="docs/arena.png" alt="The arena after a debate: the judge panel counts the sentences judged and retracted and quotes the struck sentence" width="820">
   </a>
   <br>
-  <sub>The arena after a debate. Click the image for the 47-second courtroom recording, in which a sentence is struck while the next one is still streaming.</sub>
 </p>
 
-Paper: [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf) (sources and generated tables in [`paper/`](paper/)).
+Paper: [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf)
 
 ## What this repository shows
 
@@ -31,7 +30,7 @@ git clone https://github.com/Duss02/TribunaLLM.git
 cd tribunallm
 pnpm install
 cp .env.example .env.local   # TYPESAFE_API_KEY for the judge, plus a key for the debaters
-pnpm dev                     # http://localhost:3000
+pnpm dev                     
 ```
 
 Keys can also be pasted on the Settings page; they stay in the browser and are used for that visitor's requests only. `JEV_MOCK=1 pnpm dev` runs a complete debate with a fake judge and scripted debaters, for trying the interface without keys. `/gui` is the same debate as a 3D courtroom, `/leaderboard` the ranking, and `/?auto=1&pack=sugar-tax&pro=gpt-6-luna&con=gpt-6.1-sol` starts a debate on load.
@@ -73,16 +72,7 @@ HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `a
 - Only sentences the judge had approved were perturbed, so the benchmark's sample is selected by the judge; a sample from sentences it had not approved is the next step.
 - Six English-language motions, six debaters, two held-out motions: a small world. Costs are list prices.
 
-## Citation
 
-```bibtex
-@misc{dussin2026tribunallm,
-  author = {Michele Dussin},
-  title  = {What a Cheap Judge Sees Depends on How You Ask: Perturbation-Grounded Evidence Verification from Live LLM Debates},
-  year   = {2026},
-  note   = {Draft. Code and data: https://github.com/Duss02/TribunaLLM}
-}
-```
 
 ## License
 

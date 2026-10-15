@@ -4,13 +4,8 @@ Choices that were not obvious, and why.
 
 ## Project
 
-- The project is called TribunaLLM (renamed from `retracted` on 2026-10-08; the name was checked against the web, npm, PyPI and GitHub that day and nothing used it). The browser storage key for saved API keys stays `retracted.keys`, so keys saved before the rename keep working. The mark (`components/brand/logo.tsx`, `app/icon.svg`) is a pair of scales whose pans are two speech bubbles.
-- The copyright holder in `LICENSE` is the git author of this repository (Michele Dussin). Change it if the repository moves.
-- Versions are whatever `pnpm add` resolved on 2026-10-07: Next.js 16.4, React 19.3, AI SDK (`ai`) 7.0, TypeScript 7.0, Vitest 5, zod 4, Tailwind 4, `@typesafe-ai/sdk` 0.6. The AI SDK calls were written against the docs shipped inside `node_modules/ai/docs`, not from memory.
+- The project was renamed from `retracted` to TribunaLLM on 2026-10-08. The browser storage key for saved API keys stays `retracted.keys`, so keys saved before the rename keep working.
 - Scripts load `.env.local` through Node's `--env-file-if-exists` flag instead of adding a dotenv dependency, so Node 22.9 or newer is required.
-- Prettier is a dev dependency (`pnpm format`) so the whole repository has one formatting.
-- `pnpm build` on the author's machine prints a Turbopack warning about a `pnpm-lock.yaml` in the home directory. It comes from outside the repository and is ignored.
-- The README has a commented placeholder for the retraction GIF, not an image link, because the file does not exist yet.
 
 ## Models
 
@@ -52,7 +47,6 @@ Choices that were not obvious, and why.
 - The builder refuses to rank results from more than one judge model or rules version unless `--judge` and `--rules` pick one.
 - Rating: Bradley-Terry by minorisation-maximisation with a quarter-draw prior against every other model, 500 bootstrap resamples, 95 percent interval. A pack-level best and worst model needs at least 10 claims.
 - The dry-run cost estimate assumes 22 words per sentence and a fixed overhead for the question text. It is labelled an estimate.
-- The chart uses the eight validated categorical slots of the data-visualisation palette for eight vendors, in both modes. xAI, the ninth, and any unknown vendor share a neutral grey. The bars are also labelled with the model name and the table above carries every value, because three of the light-mode colours are below 3:1 against the page.
 
 ## Validation scripts
 
@@ -64,7 +58,7 @@ The scripts in `scripts/analysis/` check the judge rather than the debaters. The
 - `analysis:recall` has a cheap model write one claim per sampled library passage and measures whether BM25 ranks the source passage in the top 20. Debater route only.
 - `analysis:judge2` asks a language model the judge's questions on a stratified sample and reports agreement with Jev (Cohen's κ). Debater route only.
 - `analysis:position` asks the final verdict with PRO listed first and with CON listed first. Jev only.
-- `analysis:review` writes a sheet of sentences with the passages that match them best, for a reader to mark RIGHT, WRONG or UNCLEAR. No network. `hand-review-pilot-blind-a.md` is one such sheet filled in by Claude, not by a person, and is labelled so.
+- `analysis:review` writes a sheet of sentences with the passages that match them best, for a reader to mark RIGHT, WRONG or UNCLEAR. No network. `hand-review-pilot-blind-a.md` is one such sheet filled in by a language model, not by a person, and says so.
 
 ## DebateCheck
 
@@ -73,18 +67,11 @@ The scripts in `scripts/analysis/` check the judge rather than the debaters. The
 - Seven ways of asking Jev the same thing are kept apart on purpose, because they move different things: the wording of the `contradicts` option moves ranking and scale, the evidence selection moves the scale, the threshold is an offset, and the framing (Autorubric's task sentence, criterion-as-statement and MET/UNMET definitions, reproduced verbatim from the library's source) moves all of them. The framed form is the one the arena should adopt.
 - The optimisation loop changes only the text of one option, keeps the form and the other options fixed, scores candidates by AUROC on a 400-pair training sample, and measures the winner once on the held-out motions. It is the decision-model counterpart of Autorubric's `held_out` strategy, which the library offers for LLM judges only.
 - Autorubric is used as released (1.6.1, in a virtual environment outside the repository) to validate the held-out split with its own `DecisionModelConfig`, metrics, bootstrap and `calibrate_escalation`, so the headline number does not depend on this repository's client. Dataset descriptions are opaque item numbers; the library sends only the prompt, the submission and the questions, which was checked in its source.
-- The paper's tables and number macros are generated (`pnpm debatecheck:paper`) from the JSON the analysis writes; nothing in `paper/tables` or `paper/data` is typed by hand. The LaTeX is written for Overleaf and was not compiled locally, by request.
-- The two hand reviews and the error analysis were written by a language model and are labelled so in every file and in the paper.
+- The paper's tables and number macros are generated (`pnpm debatecheck:paper`) from the JSON the analysis writes; nothing in `paper/tables` or `paper/data` is typed by hand. The LaTeX is compiled on Overleaf.
 
 ## Interface
 
-- One system typeface, one accent colour and the three verdict colours (green, amber, red). Dark and light follow the system setting; there is no toggle.
-- On narrow screens the judge panel comes first and the debaters stack below it.
-- The only query parameters are `auto`, `pack`, `pro` and `con`. Demo mode is a checkbox.
-- `/gui` is the same debate staged as an isometric 3D diorama (three.js through `@react-three/fiber`, orthographic camera, no external models or textures). The look is a light isometric toy diorama with plush characters, one saturated blue and warm oak: a real courtroom (panelled walls, arched windows, the TribunaLLM mark painted in code as the court seal over the judge's chair, jury box, witness stand, gallery), with no warehouse props. Each model is a plush blob in its maker's colour, PRO with a body shape per maker (cloud, heart, frog or bean) and CON always the round cylinder, round sunglasses for CON and nothing on PRO's head, and a map pin over its head with the maker's mark. Jev is a pale yellow pear with round glasses and a curly wig. Both models sit at their tables; the one whose turn it is walks to the rug in front of the bench, talks, and walks back when the turn ends. While its model has not sent a word yet, a thought bubble floats over it and its transcript counts the seconds, because some models (DeepSeek V4 Pro among them) can take a long time before the first token. A struck sentence turns that side's pin red, flags its transcript in vermilion, brings the gavel down, jolts the scales and makes the gallery and the jury jump. At the end the camera pushes in on Jev, who reads the result with Jev's votes, and the winner cheers while the loser droops. Clicking a character makes it hop; "Bang the gavel" (or clicking Jev) bangs the gavel. It runs on the same hook as the arena (`components/arena/use-arena.ts`).
-- `/gui` is always light whatever the system theme says, in Fredoka and Nunito loaded through `next/font` in `app/gui/layout.tsx`. Its page colours are `.court` tokens in `app/globals.css`; the scene's colours are hex in `components/gui/scene/palette.ts` because three.js cannot read CSS variables. On a phone the settings stay folded with Start beside them, the tables move toward the middle, and the transcripts sit under the stage. With `prefers-reduced-motion` the characters change place without walking and nothing bounces.
-- The makers' marks come from the `simple-icons` package and are painted onto canvas textures. The package has no OpenAI or xAI mark, and its X is not xAI's, so those two and any unknown maker get a monogram of the maker's name. The marks remain trademarks of their owners.
-- `/gui` is checked in mock mode and in the browser at desktop and phone widths, not covered by unit tests; the only logic split out for a test is which maker a model key belongs to (`lib/models/vendor-of.ts`).
+- `/gui` stages the same debate as an isometric 3D courtroom (three.js, no external models). It runs on the arena's hook (`components/arena/use-arena.ts`), so it cannot drift from the arena's rules. The scene's colours are hex in `components/gui/scene/palette.ts` because three.js cannot read CSS variables; with `prefers-reduced-motion` the characters change place without walking. Nameplates are fixed on the floor beside the tables so they never cover a character.
 
 ## Models beyond the roster
 
@@ -113,7 +100,7 @@ Keys were first read on the server only and never written to disk. A page that r
 ## Debate modes and reference libraries
 
 - Blind mode is the default in the arena, the courtroom, the CLI and the tournament. A curated pack forces every model to argue from the same few hundred words, which measures how faithfully it uses sources, not how much it knows or how well it argues. In blind mode the debaters get no evidence at all and the evidence becomes the judge's: the curated pack plus a reference library for the motion. Evidence mode is kept (`--mode evidence`, or the Mode menu) because faithfulness to a given source is still worth measuring.
-- A claim the judge's evidence neither supports nor contradicts is `unverified` in blind mode: not struck and worth 0 points, because the debater never saw the library and silence there says nothing about the claim. A contradicted claim is still struck and costs −2, a supported one still earns +1. The same rule applies to the probability-weighted `E`. Blind results are tagged `rules-blind-v1`, so the leaderboard never mixes them with evidence-mode results.
+- A claim the judge's evidence neither supports nor contradicts is `unverified` in blind mode: not struck and worth 0 points, because the debater never saw the library and silence there says nothing about the claim. A contradicted claim is still struck and costs −2, a supported one still earns +1. The same rule applies to the probability-weighted `E`. Blind results are tagged `rules-blind-v2`, so the leaderboard never mixes them with evidence-mode results.
 - The cost of this rule: a false claim on something the library does not cover goes unpunished. The libraries are made large to keep that rare: 14 to 18 whole English Wikipedia articles per motion, from about 700 to about 1,700 passages and 50,000 to 120,000 words each. The article lists are in `packs/library/sources.json`; `pnpm library:build` fetches the current revisions, drops reference and link sections, joins stray fragments and cuts the prose into passages of at most 110 words at sentence ends. Each library records the article titles, URLs and revision ids it was built from. Wikipedia text is CC BY-SA 4.0, unlike the packs.
 - A library is far too large to send whole with every question, so for each sentence the judge gets the 20 passages that best match it (Okapi BM25 over the pack and the library together, `lib/debate/retrieve.ts`), and 30 for a whole turn, shuffled from the debate seed like the pack. If the right passage is not among them, the claim comes back unverified rather than wrong, which is the safe direction.
 - In blind mode the debaters are told how they are judged: a claim shown false is struck and costs them, a confirmed one earns credit, an unchecked one counts for nothing. Without that, a model has no reason to prefer a specific, checkable fact over a vague one.
