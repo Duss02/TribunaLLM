@@ -418,7 +418,7 @@ export function Toy({
       </group>
       <Pin medal={medal} height={f.top + 1.15} bob={atSpot && talking && !calm} alertUntil={alertUntil} />
       {thinking && <ThoughtDots height={f.top + 0.15} calm={calm} />}
-      <group ref={labelAnchor} position={[0, f.top + 2.05, 0]} />
+      <group ref={labelAnchor} position={[0, f.top + 2.6, 0]} />
     </group>
   );
 }

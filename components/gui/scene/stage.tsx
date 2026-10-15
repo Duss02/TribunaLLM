@@ -65,7 +65,7 @@ function Rig({ zoom, calm, narrow }: { zoom: boolean; calm: boolean; narrow: boo
 function Pins({
   pins,
 }: {
-  pins: { ref: RefObject<HTMLElement | null>; at: (out: THREE.Vector3) => THREE.Vector3 }[];
+  pins: { ref: RefObject<HTMLElement | null>; at: (out: THREE.Vector3) => THREE.Vector3; bottom?: boolean }[];
 }) {
   const point = useRef(new THREE.Vector3());
   useFrame(({ camera, size }) => {
@@ -76,7 +76,8 @@ function Pins({
       const half = el.offsetWidth / 2 + 6;
       const x = Math.min(Math.max((point.current.x * 0.5 + 0.5) * size.width, half), size.width - half);
       const y = (-point.current.y * 0.5 + 0.5) * size.height;
-      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      // A plate hangs from its anchor with its bottom edge there; a total is centred on it.
+      el.style.transform = `translate(${x}px, ${y}px) translate(-50%, ${pin.bottom ? "-100%" : "-50%"})`;
       el.style.opacity = "1";
     }
   });
@@ -186,6 +187,7 @@ export function Stage(props: StageProps) {
       (["PRO", "CON"] as const).flatMap((side) => [
         {
           ref: plateRefs[side] as RefObject<HTMLElement | null>,
+          bottom: true,
           // Above the mascot's head, wherever it is: at its table or at the bay while it speaks.
           at: (out: THREE.Vector3) => {
             const anchor = anchors[side].current;
