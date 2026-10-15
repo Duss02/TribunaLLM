@@ -178,6 +178,7 @@ export function Stage(props: StageProps) {
 
   const pans = { PRO: useRef<THREE.Group>(null), CON: useRef<THREE.Group>(null) };
   const plateRefs = { PRO: useRef<HTMLDivElement>(null), CON: useRef<HTMLDivElement>(null) };
+  const anchors = { PRO: useRef<THREE.Group>(null), CON: useRef<THREE.Group>(null) };
   const totalRefs = { PRO: useRef<HTMLSpanElement>(null), CON: useRef<HTMLSpanElement>(null) };
 
   const pins = useMemo(
@@ -185,7 +186,12 @@ export function Stage(props: StageProps) {
       (["PRO", "CON"] as const).flatMap((side) => [
         {
           ref: plateRefs[side] as RefObject<HTMLElement | null>,
-          at: (out: THREE.Vector3) => out.set(seatOf(side, narrow)[0], 0.4, seatOf(side, narrow)[1] + 1.9),
+          // Above the mascot's head, wherever it is: at its table or at the bay while it speaks.
+          at: (out: THREE.Vector3) => {
+            const anchor = anchors[side].current;
+            if (!anchor) return out.set(seatOf(side, narrow)[0], 2.6, seatOf(side, narrow)[1]);
+            return anchor.getWorldPosition(out);
+          },
         },
         {
           ref: totalRefs[side] as RefObject<HTMLElement | null>,
@@ -247,6 +253,7 @@ export function Stage(props: StageProps) {
             hitKey={hits[side]}
             narrow={narrow}
             calm={calm}
+            labelAnchor={anchors[side]}
           />
         ))}
       </Canvas>

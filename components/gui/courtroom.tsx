@@ -346,13 +346,6 @@ export function Courtroom(props: ArenaProps) {
                     {state.latencies.length > 0 &&
                       `, ${Math.round(median)} ms median, ${(state.costUsd * 100).toFixed(2)}¢`}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => setGavelPokes((n) => n + 1)}
-                    className={`${pillQuiet} ml-auto`}
-                  >
-                    Bang the gavel
-                  </button>
                   {state.rewind && (
                     <p key={state.rewind.count} className="basis-full truncate text-sm" role="status">
                       <span className="font-bold text-[var(--court-signal)]">Rewound after retracting:</span>{" "}
