@@ -2,9 +2,15 @@
 
 Two language models debate a motion. A third model, TypeSafe's decision model Jev, checks every finished sentence against a reference library the debaters never see and strikes it through while the next sentence is still arriving. The same engine, run headless over many models, produces a leaderboard of which model is contradicted least.
 
-![The arena after a debate: the judge panel counts the sentences judged and retracted, and quotes the struck sentence](docs/arena.png)
+<p align="center">
+  <a href="https://github.com/Duss02/TribunaLLM/releases/download/demo-v1/demo.mp4">
+    <img src="docs/arena.png" alt="The arena after a debate: the judge panel counts the sentences judged and retracted and quotes the struck sentence" width="820">
+  </a>
+  <br>
+  <sub>The arena after a debate. Click the image for the 47-second courtroom recording, in which a sentence is struck while the next one is still streaming.</sub>
+</p>
 
-[Watch the courtroom demo](https://github.com/Duss02/TribunaLLM/releases/download/demo-v1/demo.mp4) (47 seconds: a sentence is struck while the next one streams). The compiled paper is [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf).
+Paper: [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf) (sources and generated tables in [`paper/`](paper/)).
 
 ## What this repository shows
 
@@ -16,7 +22,7 @@ The arena's first tournament failed as a measurement: in 180 blind debates betwe
 
 ![The leaderboard page: match outcomes above, the same claims under the certified question below](docs/leaderboard.png)
 
-The paper is in [`paper/`](paper/) (LaTeX, every table generated from the data; open the folder in Overleaf or use the zip). The pre-registration, with its deviations and verdicts, is [`docs/preregistration-judge-correlation.md`](docs/preregistration-judge-correlation.md); the held-out report is [`bench/debatecheck/STUDY.md`](bench/debatecheck/STUDY.md).
+The pre-registration, with its deviations and verdicts, is [`docs/preregistration-judge-correlation.md`](docs/preregistration-judge-correlation.md); the held-out report is [`bench/debatecheck/STUDY.md`](bench/debatecheck/STUDY.md).
 
 ## Run it
 
