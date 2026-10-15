@@ -76,4 +76,4 @@ HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `a
 
 ## License
 
-MIT, see [LICENSE](LICENSE). The reference libraries in `packs/library/` are text from English Wikipedia under CC BY-SA 4.0; each file lists the articles, URLs and revisions it was built from. See [CONTRIBUTING.md](CONTRIBUTING.md) to add a pack or a model and [DECISIONS.md](DECISIONS.md) for the choices that were not obvious.
+MIT, see [LICENSE](LICENSE). The reference libraries in `packs/library/` are text from Wikipedia under CC BY-SA 4.0; each file lists the articles, URLs and revisions it was built from. See [CONTRIBUTING.md](CONTRIBUTING.md) to add a pack or a model and [DECISIONS.md](DECISIONS.md) for the choices that were not obvious.
