@@ -23,7 +23,7 @@ The arena's first tournament failed as a measurement: in 180 blind debates betwe
 
 The pre-registration, with its deviations and verdicts, is [`docs/preregistration-judge-correlation.md`](docs/preregistration-judge-correlation.md); the held-out report is [`bench/debatecheck/STUDY.md`](bench/debatecheck/STUDY.md).
 
-## Run it
+## How to run it
 
 ```bash
 git clone https://github.com/Duss02/TribunaLLM.git
