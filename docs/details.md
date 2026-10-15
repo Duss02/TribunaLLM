@@ -209,7 +209,7 @@ Papers:
 - Kenton et al., [On scalable oversight with weak LLMs judging strong LLMs](https://arxiv.org/abs/2407.04622), 2024.
 - Elasky et al., [Debate Helps Weak Judges Reward Stronger Models](https://arxiv.org/abs/2605.27483), 2026.
 - Li, Miao, Krishnan, Padman, [JEV-as-a-Judge: Accept When Confident, Escalate When Unsure](https://arxiv.org/abs/2609.26550), 2026.
-- Rao and Callison-Burch, [Jev vs LLMs as Rubric Judges: Cheaper, Faster, and Wrong in the Same Places](https://arxiv.org/abs/2609.29769), 2026.
+- Rao and Callison-Burch, [Decision Models vs. LLMs as Rubric Judges: Cheaper, Faster, and Wrong in the Same Places](https://arxiv.org/abs/2609.29769), 2026.
 - Kohli, [Nine Judges, Two Effective Votes: Correlated Errors Undermine LLM Evaluation Panels](https://arxiv.org/abs/2605.29800), 2026.
 - Hossain, Yousefi, Lim, [Agreement Overstates Evidence: Error Dependence in LLM Judge Consensus](https://arxiv.org/abs/2609.22512), 2026.
 - Liu, [Adversarial Cues in Decision Models Used as Judges: The Role of Request Presentation](https://arxiv.org/abs/2610.11436), 2026.
