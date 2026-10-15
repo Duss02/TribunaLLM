@@ -2,7 +2,7 @@
 
 import { Billboard, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { type RefObject, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Side } from "@/lib/side";
 import { C, type Shape } from "./palette";
@@ -307,7 +307,6 @@ export function Toy({
   hitKey,
   narrow,
   calm,
-  labelAnchor,
 }: {
   side: Side;
   shape: Shape;
@@ -321,8 +320,6 @@ export function Toy({
   hitKey: number;
   narrow: boolean;
   calm: boolean;
-  /** A point above the head that follows the toy wherever it walks; the nameplate is pinned to it. */
-  labelAnchor?: RefObject<THREE.Group | null>;
 }) {
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
@@ -418,7 +415,6 @@ export function Toy({
       </group>
       <Pin medal={medal} height={f.top + 1.15} bob={atSpot && talking && !calm} alertUntil={alertUntil} />
       {thinking && <ThoughtDots height={f.top + 0.15} calm={calm} />}
-      <group ref={labelAnchor} position={[0, f.top + 2.6, 0]} />
     </group>
   );
 }
