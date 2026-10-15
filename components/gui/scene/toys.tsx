@@ -2,7 +2,7 @@
 
 import { Billboard, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { type RefObject, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Side } from "@/lib/side";
 import { C, type Shape } from "./palette";
