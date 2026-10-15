@@ -1,15 +1,20 @@
 # TribunaLLM
 
-Two language models debate a motion. A third model, TypeSafe's decision model Jev, checks every finished sentence against a reference library the debaters never see and strikes it through while the next sentence is still arriving. The same engine, run headless over many models, produces a leaderboard of which model is contradicted least.
+Two AI models argue for and against a motion, like a debate. A third model listens and, for every sentence, checks whether a library of documents says the opposite. If it does, the sentence is struck through on screen within a fraction of a second. The project started as a game. It turned into a study of how reliable that referee is, and of when several AI referees are worth more than one.
 
-<p align="center">
-  <a">
-    <img src="docs/arena.png" alt="The arena after a debate: the judge panel counts the sentences judged and retracted and quotes the struck sentence" width="820">
-  </a>
-  <br>
-</p>
+## Short version
 
-Paper: [`paper/TribunaLLM.pdf`](paper/TribunaLLM.pdf)
+- **The referee is not a chatbot.** It is Jev, a "decision model" made by TypeSafe: given a text and a yes/no question, it returns a probability instead of writing prose. It answers in about 200 ms and costs almost nothing, which is why it can judge every sentence as it streams.
+- **The first version did not work.** In 180 debates the referee struck 20 sentences out of 3,357. When I secretly changed a number in 78 sentences it had approved, it noticed none of them.
+- **The fault was the question, not the model.** I kept the model, the documents and the sentences fixed and changed only the wording of the question. Under the original wording Jev caught 1 altered number in 20; under the wording recommended by the authors of the Autorubric library it caught 9 in 10.
+- **Changing a number gives free test data.** Every approved sentence with a number becomes a pair: the original and a copy with the number changed, which is wrong by construction. That is DebateCheck, 2,821 such pairs. No human labelling needed.
+- **Then I asked whether several referees are better than one.** Six referees of three kinds judged the same pairs. Two chatbots of different companies make the same mistakes so often that together they are worth 1.16 votes, not 2. A chatbot plus a decision model, or two decision models of different makers, are more independent. Part of the shared mistakes comes from the documents they read: when the relevant passage is missing, they all fail together.
+- **The study was pre-registered**: five predictions written down before spending a dollar. Two were wrong, and the paper says which. One of the wrong ones is interesting: the question wording that helps Jev makes OpenAI's decision model worse.
+- **With the good question, the game works**: the same 180 debates give a leaderboard of which model's claims the documents contradict least.
+
+![The arena after a debate: the judge panel counts the sentences judged and retracted and quotes the struck sentence](docs/arena.png)
+
+Paper: `[paper/TribunaLLM.pdf](paper/TribunaLLM.pdf)`
 
 ## What this repository shows
 
@@ -21,7 +26,21 @@ The arena's first tournament failed as a measurement: in 180 blind debates betwe
 
 ![The leaderboard page: match outcomes above, the same claims under the certified question below](docs/leaderboard.png)
 
-The pre-registration, with its deviations and verdicts, is [`docs/preregistration-judge-correlation.md`](docs/preregistration-judge-correlation.md); the held-out report is [`bench/debatecheck/STUDY.md`](bench/debatecheck/STUDY.md).
+The pre-registration, with its deviations and verdicts, is `[docs/preregistration-judge-correlation.md](docs/preregistration-judge-correlation.md)`; the held-out report is `[bench/debatecheck/STUDY.md](bench/debatecheck/STUDY.md)`.
+
+## Words used here
+
+- **LLM / chat model**: a model that writes text (GPT, Claude, DeepSeek). They are the debaters and, separately, three of the referees.
+- **Decision model**: a model that answers typed questions with probabilities and writes no text. Two here: TypeSafe's Jev and GPT-6 Luna through OpenAI's Decisions API.
+- **LLM-as-a-judge**: using a model as a referee of another model's output. The referee's question is a "criterion", one sentence saying what counts as pass or fail.
+- **Autorubric**: a Python library by Rao and Callison-Burch (University of Pennsylvania) that standardises how such criteria are posed. Its phrasing is the one that fixed the referee here, and the paper is in dialogue with their paper.
+- **Evidence pack and library**: the documents the referee reads: a short curated pack per motion plus whole Wikipedia articles. The debaters never see them.
+- **Strike / retraction**: the referee says the documents contradict a sentence and the arena crosses it out. It means "the library says otherwise", not "false": the library can be out of date.
+- **Pair / perturbation**: an approved sentence and a copy with one detail changed (a number, a country, a source, a direction word, a unit).
+- **HHEM**: a small open model from Vectara that only checks whether one text contradicts another; the third kind of referee.
+- **CHARM-100, HealthBench-100**: two sets of chatbot answers already graded by people, used to check whether the referees also agree with humans on matters of opinion.
+
+
 
 ## How to run it
 
@@ -41,7 +60,7 @@ In blind mode, the default, the debaters argue from what they know. The judge ho
 
 > Determine whether this criterion is satisfied by the `submission`. Criterion: A passage in the evidence gives a different number, date, name, place or outcome for the same thing the sentence describes, or states the opposite.
 
-A sentence is contradicted at p >= 0.7, supported at p >= 0.7, an opinion when p(claim) < 0.5, and otherwise unverified, which costs nothing because silence in a library the debater never saw says nothing about the claim. A contradicted sentence is struck and costs two points, a supported one earns one; a turn-level request scores rebuttal and relevance; a final request picks the stronger case. In strict mode a strike also rewinds the turn that is still streaming. The thresholds were set before any data was collected. The exact questions, the scoring table, the tournament flags and the caveats are in [`docs/details.md`](docs/details.md).
+A sentence is contradicted at p >= 0.7, supported at p >= 0.7, an opinion when p(claim) < 0.5, and otherwise unverified, which costs nothing because silence in a library the debater never saw says nothing about the claim. A contradicted sentence is struck and costs two points, a supported one earns one; a turn-level request scores rebuttal and relevance; a final request picks the stronger case. In strict mode a strike also rewinds the turn that is still streaming. The thresholds were set before any data was collected. The exact questions, the scoring table, the tournament flags and the caveats are in `[docs/details.md](docs/details.md)`.
 
 ## Reproduce the benchmark and the study
 
@@ -57,7 +76,7 @@ pnpm debatecheck:study-tables                 # the paper's tables and macros
 pnpm leaderboard:v2                           # the stored claims under the certified question
 ```
 
-HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `autorubric_validate.py`). The whole study, pilot included, cost under 30 USD of API credit at list prices; `pnpm debatecheck:study-spend` recounts it. The human validation of the construction labels is prepared in [`bench/debatecheck/human/`](bench/debatecheck/human/) and not yet collected.
+HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `autorubric_validate.py`). The whole study, pilot included, cost under 30 USD of API credit at list prices; `pnpm debatecheck:study-spend` recounts it. The human validation of the construction labels is prepared in `[bench/debatecheck/human/](bench/debatecheck/human/)` and not yet collected.
 
 ## Layout
 
@@ -65,6 +84,8 @@ HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `a
 - `lib/debate/`: the orchestrator, retrieval, events; `lib/jev/`: the judge, its questions and the criterion; `lib/scoring/`: the rules.
 - `packs/`: evidence packs and the Wikipedia libraries; `bench/`: results, DebateCheck, panels, reports.
 - `scripts/`: tournament, leaderboard, DebateCheck and study scripts; `paper/`: the manuscript.
+
+
 
 ## Caveats
 
