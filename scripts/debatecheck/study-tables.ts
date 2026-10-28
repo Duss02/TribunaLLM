@@ -373,6 +373,89 @@ if (existsSync("bench/leaderboard-v2.json")) {
   macro("lb best", mname(first.key));
   macro("lb worst", mname(last.key));
 }
+// Follow-ups (analyze-extra.ts): version drift, the evidence gate, the unapproved sample.
+if (existsSync("bench/debatecheck/extra.json")) {
+  const ex = JSON.parse(await readFile("bench/debatecheck/extra.json", "utf8")) as any;
+  if (ex.drift && Object.keys(ex.drift).length > 0) {
+    const rows: string[] = [];
+    for (const cond of ["20", "3"]) {
+      const d = ex.drift[cond];
+      if (!d) continue;
+      for (const v of ["1.13.0", "1.14.0"]) {
+        const m = d[v].all,
+          m7 = d[v].at07;
+        rows.push(
+          `${cond === "20" ? "20 passages" : "top-3"} & ${v} & ${ci(m.accuracy, pct)} & ${ci(m.recall, pct)} & ${ci(m.falseAlarm, pct)} & ${ci(m.auroc)} & ${pct(m7.recall.point)} & ${pct(m7.falseAlarm.point)}`,
+        );
+      }
+      macro(`drift kappa ${cond}`, f3(d.decisionKappa.point));
+      macro(`drift delta ${cond}`, f3(d.meanAbsDelta));
+      macro(`drift auroc old ${cond}`, f3(d["1.13.0"].all.auroc?.point));
+      macro(`drift auroc new ${cond}`, f3(d["1.14.0"].all.auroc?.point));
+      macro(`drift recall old ${cond}`, pct(d["1.13.0"].all.recall.point));
+      macro(`drift recall new ${cond}`, pct(d["1.14.0"].all.recall.point));
+      macro(`drift fa old ${cond}`, pct(d["1.13.0"].all.falseAlarm.point));
+      macro(`drift fa new ${cond}`, pct(d["1.14.0"].all.falseAlarm.point));
+    }
+    files["study-drift.tex"] = tabular(
+      "llrrrrrr",
+      "evidence & version & accuracy (0.5) & recall (0.5) & false alarm (0.5) & AUROC & recall (0.7) & false alarm (0.7)",
+      rows,
+    );
+  }
+  if (ex.gate) {
+    const g = ex.gate;
+    macro("gate share", pct(g.share));
+    macro("gate auroc", f3(g.gateAuroc));
+    macro("gate n", num(g.n));
+    files["study-gate.tex"] = tabular(
+      "lrrrrrr",
+      "judge & accuracy, gate passes & accuracy, gate rejects & recall pass & recall reject & FA pass & FA reject",
+      Object.entries(g.judges as Record<string, any>).map(
+        ([id, m]) =>
+          `${label(id)} & ${ci(m.pass.accuracy, pct)} & ${ci(m.reject.accuracy, pct)} & ${pct(m.pass.recall.point)} & ${pct(m.reject.recall.point)} & ${pct(m.pass.falseAlarm.point)} & ${pct(m.reject.falseAlarm.point)}`,
+      ),
+    );
+    files["study-gate-corr.tex"] = tabular(
+      "lrr",
+      "pair & $\\phi$, gate passes & $\\phi$, gate rejects",
+      Object.entries(g.correlations as Record<string, any>).map(([key, c]) => {
+        const [a, b] = key.split("|") as [string, string];
+        return `${label(a)} $\\times$ ${label(b)} & ${ci(c.pass.phi)} ($n$ ${num(c.pass.n)}) & ${ci(c.reject.phi)} ($n$ ${num(c.reject.n)})`;
+      }),
+    );
+    for (const [key, c] of Object.entries(g.correlations as Record<string, any>)) {
+      macro(`gate phi pass ${key}`, f3(c.pass.phi.point));
+      macro(`gate phi reject ${key}`, f3(c.reject.phi.point));
+    }
+    for (const [id, m] of Object.entries(g.judges as Record<string, any>)) {
+      macro(`gate acc pass ${id}`, pct(m.pass.accuracy.point));
+      macro(`gate acc reject ${id}`, pct(m.reject.accuracy.point));
+      macro(`gate recall reject ${id}`, pct(m.reject.recall.point));
+    }
+  }
+  if (ex.unapproved) {
+    const rows: string[] = [];
+    for (const cond of ["20", "3"]) {
+      const u = ex.unapproved[cond];
+      if (!u) continue;
+      rows.push(
+        `${cond === "20" ? "20 passages" : "top-3"} & ${num(u.unapproved.n)} & ${ci(u.unapproved.recall, pct)} & ${ci(u.approvedNumeric.recall, pct)} & ${ci(u.unapproved.auroc)} & ${ci(u.approvedNumeric.auroc)} & ${pct(u.unapproved.falseAlarm.point)} & ${pct(u.approvedNumeric.falseAlarm.point)}`,
+      );
+      macro(`unapproved recall ${cond}`, pct(u.unapproved.recall.point));
+      macro(`unapproved recall benchmark ${cond}`, pct(u.approvedNumeric.recall.point));
+      macro(`unapproved auroc ${cond}`, f3(u.unapproved.auroc?.point));
+      macro(`unapproved auroc benchmark ${cond}`, f3(u.approvedNumeric.auroc?.point));
+      macro(`unapproved n ${cond}`, num(u.unapproved.n));
+      macro(`unapproved separation ${cond}`, pct(u.separation));
+    }
+    files["study-unapproved.tex"] = tabular(
+      "lrrrrrrr",
+      "evidence & $n$ & recall, unapproved & recall, benchmark & AUROC, unapproved & AUROC, benchmark & FA, unapproved & FA, benchmark",
+      rows,
+    );
+  }
+}
 files["study-macros.tex"] = macros.join("\n") + "\n";
 for (const [name, content] of Object.entries(files)) {
   if (/[^\x00-\x7f]/.test(content)) throw new Error(`non-ASCII in ${name}`);

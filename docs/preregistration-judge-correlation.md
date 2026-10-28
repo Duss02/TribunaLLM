@@ -245,3 +245,23 @@ sentences contradicted (polarity 22/25, entity 22/25, attribution 24/25, unit 19
 ones contradicted. By the pre-registered 10 percent rule the unit type would be flagged (6 of 25 altered
 units not called contradicted, mostly percent against percentage points); polarity and entity sit at the
 threshold. The human labels decide.
+
+## Follow-ups (post hoc, 2026-10-28, not pre-registered)
+
+Three analyses run after the study, each labelled exploratory in the paper; thresholds fixed in advance at
+0.5 and 0.7, no fitting. Report: bench/debatecheck/EXTRA.md.
+
+1. Version drift. jev-1.14.0 (released 2026-10-14) on all pairs under the framed criterion: the effect holds
+   (held-out AUROC 0.907 against 0.916 over twenty passages, recall 82.8% against 82.3%), but false alarms
+   rise from 10.2% to 14.7% at 0.5; decision agreement between versions kappa 0.90, mean |delta p| 0.05.
+   Unit recall rises (36% to 42%), attribution falls (66% to 62%).
+2. Evidence gate. Jev's two-step first question ("does a passage describe the same fact?"), top-3 passages,
+   gate at 0.5: passes 74.9% of held-out items. On rejected items the LLM pairs' error correlation rises
+   (Luna chat x DeepSeek 0.68 to 0.84, Luna chat x Claude 0.58 to 0.85, DeepSeek x Claude 0.67 to 0.89) and
+   so does Jev's with each LLM (0.39 to 0.74 with Luna chat). The gate predicts the presence of the fact
+   passage only weakly (AUROC 0.58), so what it detects is anchorability, not retrieval alone.
+3. Pairs from sentences the judge had not approved (711 pairs, 244 held-out). Recall of altered sentences
+   under the framed criterion over twenty passages: 74.2% against 96.8% on the benchmark's numeric pairs
+   (AUROC 0.785 against 0.980); over three passages 49.6% against 83.8%. The benchmark's sample, selected
+   by the judge's approval, is easier for the judge than an unselected one; the headline detection rate
+   is specific to judge-approved sentences.

@@ -76,6 +76,8 @@ pnpm debatecheck:study-tables                 # the paper's tables and macros
 pnpm leaderboard:v2                           # the stored claims under the certified question
 ```
 
+Three follow-ups, not pre-registered, are in [`bench/debatecheck/EXTRA.md`](bench/debatecheck/EXTRA.md) (`pnpm debatecheck:extra`): Jev 1.14 keeps the framing effect but raises false alarms from 10% to 15%; Jev's cheap "does a passage describe the same fact?" question predicts where the chat judges fail together (their error correlation rises from 0.68 to 0.84 on the items it rejects); and on sentences the judge had not approved, detection falls from 97% to 74%, so the benchmark's headline rate is specific to judge-approved sentences.
+
 HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `autorubric_validate.py`). The whole study, pilot included, cost under 30 USD of API credit at list prices; `pnpm debatecheck:study-spend` recounts it. The human validation of the construction labels is prepared in `[bench/debatecheck/human/](bench/debatecheck/human/)` and not yet collected.
 
 ## Layout

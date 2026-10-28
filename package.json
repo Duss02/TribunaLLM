@@ -41,6 +41,7 @@
     "debatecheck:study": "tsx scripts/debatecheck/analyze-study.ts",
     "debatecheck:study-tables": "tsx scripts/debatecheck/study-tables.ts",
     "debatecheck:study-spend": "tsx scripts/debatecheck/study-spend.ts",
+    "debatecheck:extra": "tsx scripts/debatecheck/analyze-extra.ts",
     "leaderboard:v2": "tsx --env-file-if-exists=.env.local scripts/leaderboard-v2.ts"
   },
   "dependencies": {
