@@ -12,11 +12,13 @@ const { values } = parseArgs({
     input: { type: "string", default: "bench/results" },
     seed: { type: "string", default: "2026" },
     out: { type: "string", default: "bench/debatecheck/pairs.jsonl" },
+    /** Which of the debate's verdicts to draw sentences from: `supported` (the benchmark) or `unverified` (a sample the judge did not select). */
+    verdict: { type: "string", default: "supported" },
   },
 });
 
 const results = await loadBlindResults(values.input);
-const records = (await sentencesOf(results)).filter((r) => r.verdict === "supported");
+const records = (await sentencesOf(results)).filter((r) => r.verdict === values.verdict);
 const pairs: Pair[] = [];
 let i = 0;
 for (const r of records) {
@@ -49,7 +51,7 @@ const count = (pick: (p: Pair) => string) => {
   return [...out].map(([k, v]) => `${k} ${v}`).join(", ");
 };
 console.log(
-  `${pairs.length} pairs from ${records.length} supported sentences in ${results.length} debates -> ${values.out}`,
+  `${pairs.length} pairs from ${records.length} ${values.verdict} sentences in ${results.length} debates -> ${values.out}`,
 );
 console.log(`split: ${count((p) => p.split)}`);
 console.log(`kind: ${count((p) => p.kind)}`);

@@ -235,3 +235,13 @@ labelled analysis was added after the pre-registered ones: splitting held-out it
 passage is among the three passages read.
 
 After the study, the framed criterion text was moved from `scripts/debatecheck/lib.ts` to `lib/jev/criterion.ts` (the arena's judge now asks it, rules v2); `lib.ts` re-exports it unchanged, so its fingerprint differs from the one recorded above while the question text does not.
+
+## Model pre-screen of the validation sheet (2026-10-28, not a human annotation)
+
+Before the two human labellers, the 300 items of the sheet were labelled by a language model reading each
+sentence against its passages (`bench/debatecheck/human/sheet-model.csv`, script `model_review.py`). It is a
+pre-screen for the human pass, not the validation the pre-registration asks for. It calls 87 of 100 altered
+sentences contradicted (polarity 22/25, entity 22/25, attribution 24/25, unit 19/25) and 11 of 200 unchanged
+ones contradicted. By the pre-registered 10 percent rule the unit type would be flagged (6 of 25 altered
+units not called contradicted, mostly percent against percentage points); polarity and entity sit at the
+threshold. The human labels decide.
