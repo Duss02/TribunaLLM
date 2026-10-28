@@ -36,6 +36,8 @@ Decision agreement between versions at 0.5: kappa 0.899 [0.877, 0.922]; mean |de
 | attribution | 59.4% | 58.5% | 16.0% | 19.8% | 0.828 | 0.797 |
 | unit | 24.7% | 34.0% | 18.6% | 21.6% | 0.575 | 0.578 |
 
+Leaderboard v2 under jev-1.14.0 (`bench/leaderboard-v2-114.json`): 90 confident strikes as under 1.13.0, same order of the six models under the confident rule (Sonnet, Opus, Sol, Flash, Pro, Luna), 918 strikes at 0.5 against 755.
+
 ## 2. Evidence gate: Jev's same-fact question as a predictor of shared LLM errors
 
 Two-step form over the top-3 passages: the first question asks whether a passage describes the same fact as the sentence. Its probability is used as a gate, fixed at 0.5, with no fitting. Items the gate rejects are where the fact is probably not in the passages; the prediction is that the LLM judges' errors concentrate and correlate there.
