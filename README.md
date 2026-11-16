@@ -20,7 +20,7 @@ Paper: `[paper/TribunaLLM.pdf](paper/TribunaLLM.pdf)`
 
 The arena's first tournament failed as a measurement: in 180 blind debates between six frontier models the judge struck 20 of 3,357 claims, and when one number was altered in 78 sentences it had approved, it caught none. The failure became the instrument.
 
-- **DebateCheck.** Every approved sentence with a number becomes a pair, the original and a copy with the number changed, so the altered copy is wrong by construction. 1,164 numeric pairs plus 1,657 pairs with a changed country, source, direction word or unit. Holding the model and the passages fixed and changing only the question, the same Jev goes from catching one altered number in twenty to nine in ten when the criterion is posed in Autorubric's binary framing.
+- **DebateCheck.** Every approved sentence with a number becomes a pair, the original and a copy with the number changed, so the altered copy is wrong by construction. 1,164 numeric pairs plus 1,657 pairs with a changed country, source, direction word or unit. Holding the model and the passages fixed and changing only the question, the same Jev goes from catching one altered number in twenty to nine in ten when the criterion is posed in Autorubric's binary framing. That rate is measured on sentences the judge had itself approved; on sentences it had not approved the same question catches three in four, so the benchmark measures the judge on the half it finds easier.
 - **A pre-registered study of six judges.** Two decision models of different makers, three chat models and an NLI classifier answer the same criterion over the same passages, and grade two rubric panels with human labels. Two chat models of different families share most of their errors and are worth 1.16 independent votes; a decision model with a chat model, or two decision models, are closer to independent. Part of the shared error is shared evidence. The framing that helps Jev makes the second decision model worse, so a criterion has to be tuned to the judge that answers it. Two of five predictions failed and are reported.
 - **The leaderboard the arena promised.** The same 180 debates judged again with the certified question: 90 confident strikes instead of 20, with the two Claude models and GPT-6.1 Sol struck least.
 
@@ -78,7 +78,7 @@ pnpm leaderboard:v2                           # the stored claims under the cert
 
 Three follow-ups, not pre-registered, are in [`bench/debatecheck/EXTRA.md`](bench/debatecheck/EXTRA.md) (`pnpm debatecheck:extra`): Jev 1.14 keeps the framing effect but raises false alarms from 10% to 15%; Jev's cheap "does a passage describe the same fact?" question predicts where the chat judges fail together (their error correlation rises from 0.68 to 0.84 on the items it rejects); and on sentences the judge had not approved, detection falls from 97% to 74%, so the benchmark's headline rate is specific to judge-approved sentences.
 
-HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `autorubric_validate.py`). The whole study, pilot included, cost under 30 USD of API credit at list prices; `pnpm debatecheck:study-spend` recounts it. The human validation of the construction labels is prepared in `[bench/debatecheck/human/](bench/debatecheck/human/)` and not yet collected.
+HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `autorubric_validate.py`). The whole study, pilot included, cost under 30 USD of API credit at list prices; `pnpm debatecheck:study-spend` recounts it. The human validation of the construction labels is prepared in [`bench/debatecheck/human/`](bench/debatecheck/human/) and not yet collected; a model pre-screen of the same 300 items (`sheet-model.csv`, a language model's reading, not an annotation) agrees with the construction label on 87 of the 100 altered sentences and 189 of the 200 unchanged ones, with the unit type weakest (19 of 25). Until the human labels are in, treat the unit and attribution rows as provisional.
 
 ## Layout
 
@@ -92,7 +92,8 @@ HHEM and the Autorubric runs are Python (`scripts/debatecheck/judge_hhem.py`, `a
 ## Caveats
 
 - A strike means the library gives a different figure, not that the claim is false; the pilot's review found edition conflicts (a 2024 cost range against the pack's 2026 edition) among them.
-- Only sentences the judge had approved were perturbed, so the benchmark's sample is selected by the judge; a sample from sentences it had not approved is the next step.
+- Only sentences the judge had approved were perturbed, so the benchmark's sample is selected by the judge. On 711 pairs built from sentences it had not approved, recall under the same question falls from 97% to 74% over twenty passages (`bench/debatecheck/EXTRA.md`); every detection rate here should be read with that in mind.
+- The judge is pinned to `jev-1.13.0` (`lib/jev/judge.ts`); every result file without a version suffix was produced with it, and the files ending in `-114` repeat the same measurement on `jev-1.14.0`, released on 14 October 2026. TypeSafe has announced the deprecation of 1.13.0 with 60 days' notice, so from mid-December the pinned model must change and the benchmark rerun (`pnpm debatecheck:jev`, about 1 USD): the 1.14 files show what to expect, the same ranking with false alarms up from 10% to 15% at the same threshold.
 - Six English-language motions, six debaters, two held-out motions: a small world. Costs are list prices.
 
 
